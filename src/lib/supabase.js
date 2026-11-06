@@ -112,4 +112,31 @@ export const supabase = {
       headers: { Prefer: 'return=minimal' },
     }, session?.access_token)
   },
+  async uploadVideoCover(file) {
+    const session = await getValidSession()
+    if (!session?.access_token) throw new Error('برای آپلود کاور باید دوباره وارد حساب مدیر شوید.')
+
+    const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[file.type]
+    if (!extension) throw new Error('فرمت تصویر پشتیبانی نمی‌شود.')
+    if (file.size > 5 * 1024 * 1024) throw new Error('حجم تصویر بیشتر از ۵ مگابایت است.')
+
+    const path = `covers/${crypto.randomUUID()}.${extension}`
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/video-covers/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': file.type,
+        'Cache-Control': 'max-age=31536000',
+        'x-upsert': 'false',
+      },
+      body: file,
+    })
+    const result = await response.json().catch(() => null)
+    if (!response.ok) {
+      throw new Error(result?.message || result?.error || 'آپلود تصویر انجام نشد. دسترسی Storage را بررسی کنید.')
+    }
+
+    return `${SUPABASE_URL}/storage/v1/object/public/video-covers/${path}`
+  },
 }

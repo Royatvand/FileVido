@@ -20,6 +20,8 @@ function AdminDashboard() {
   const [categories, setCategories] = useState([])
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState(null)
+  const [selectedCover, setSelectedCover] = useState(null)
+  const [coverPreview, setCoverPreview] = useState('')
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('videos')
   const [newCategory, setNewCategory] = useState('')
@@ -44,6 +46,11 @@ function AdminDashboard() {
   }, [])
 
   useEffect(() => { loadData() }, [loadData])
+  useEffect(() => {
+    return () => {
+      if (coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
+    }
+  }, [coverPreview])
 
   const filteredVideos = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -56,13 +63,35 @@ function AdminDashboard() {
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
   }
 
+  function handleCoverChange(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setNotice({ type: 'error', text: 'فقط تصاویر JPG، PNG یا WEBP قابل آپلود هستند.' })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setNotice({ type: 'error', text: 'حجم تصویر باید حداکثر ۵ مگابایت باشد.' })
+      return
+    }
+    setSelectedCover(file)
+    setCoverPreview(URL.createObjectURL(file))
+    setNotice({ type: '', text: '' })
+  }
+
   function resetForm() {
     setForm(emptyForm)
     setEditingId(null)
+    setSelectedCover(null)
+    setCoverPreview('')
   }
 
   function startEdit(video) {
     setEditingId(video.id)
+    setSelectedCover(null)
+    setCoverPreview(video.cover_url || '')
     setForm({
       title: video.title || '', slug: video.slug || '', description: video.description || '',
       aparat_id: video.aparat_id || '', cover_url: video.cover_url || '',
@@ -80,12 +109,18 @@ function AdminDashboard() {
     setSaving(true)
     setNotice({ type: '', text: '' })
     try {
+      let coverUrl = form.cover_url.trim()
+      if (selectedCover) {
+        setNotice({ type: '', text: 'در حال آپلود تصویر کاور...' })
+        coverUrl = await supabase.uploadVideoCover(selectedCover)
+      }
+
       const payload = {
         title: form.title.trim(),
         slug: (form.slug.trim() || slugify(form.title) || `video-${Date.now()}`),
         description: form.description.trim(),
         aparat_id: form.aparat_id.trim(),
-        cover_url: form.cover_url.trim(),
+        cover_url: coverUrl,
         category_id: form.category_id || null,
         duration: form.duration.trim(),
         level: form.level,
@@ -159,7 +194,7 @@ function AdminDashboard() {
           <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
         </header>
 
-        {notice.text && <div className={`admin-alert ${notice.type}`}>{notice.text}<button onClick={() => setNotice({ type: '', text: '' })}>×</button></div>}
+        {notice.text && <div className={`admin-alert ${notice.type || ''}`}>{notice.text}<button onClick={() => setNotice({ type: '', text: '' })}>×</button></div>}
 
         {activeTab === 'videos' && (
           <>
@@ -188,7 +223,15 @@ function AdminDashboard() {
               <label>عنوان ویدیو *<input name="title" value={form.title} onChange={updateField} required placeholder="مثلاً آموزش تحلیل تکنیکال" /></label>
               <label>شناسه یکتای صفحه (Slug)<input name="slug" value={form.slug} onChange={updateField} placeholder="اگر خالی باشد خودکار ساخته می‌شود" /></label>
               <label>شناسه یا هش آپارات *<input name="aparat_id" value={form.aparat_id} onChange={updateField} required placeholder="مثلاً gvtvv7m" /></label>
-              <label>آدرس تصویر کاور<input name="cover_url" value={form.cover_url} onChange={updateField} placeholder="https://..." /></label>
+              <div className="admin-cover-field">
+                <span>تصویر کاور ویدیو</span>
+                <label className="admin-cover-picker">
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverChange} />
+                  <span>＋ انتخاب تصویر از دستگاه</span>
+                </label>
+                <small>JPG، PNG یا WEBP — حداکثر ۵ مگابایت</small>
+                {coverPreview && <img className="admin-cover-preview" src={coverPreview} alt="پیش‌نمایش کاور ویدیو" />}
+              </div>
               <label>دسته‌بندی<select name="category_id" value={form.category_id} onChange={updateField}><option value="">بدون دسته‌بندی</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
               <label>مدت ویدیو<input name="duration" value={form.duration} onChange={updateField} placeholder="مثلاً 18:45" /></label>
               <label>مدرس<input name="instructor" value={form.instructor} onChange={updateField} placeholder="نام مدرس" /></label>
@@ -198,7 +241,7 @@ function AdminDashboard() {
               <label>وضعیت انتشار<select name="status" value={form.status} onChange={updateField}><option value="draft">پیش‌نویس</option><option value="published">انتشار عمومی</option></select></label>
               <label className="admin-checkbox"><input type="checkbox" name="is_featured" checked={form.is_featured} onChange={updateField} /> نمایش به‌عنوان ویدیوی ویژه</label>
             </div>
-            <div className="admin-form-actions"><button type="button" className="admin-secondary-button" onClick={() => { resetForm(); setActiveTab('videos') }}>انصراف</button><button type="submit" className="admin-primary-button" disabled={saving}>{saving ? 'در حال ذخیره...' : editingId ? 'ذخیره تغییرات' : 'ثبت ویدیو'}</button></div>
+            <div className="admin-form-actions"><button type="button" className="admin-secondary-button" onClick={() => { resetForm(); setActiveTab('videos') }}>انصراف</button><button type="submit" className="admin-primary-button" disabled={saving}>{saving ? (selectedCover ? 'در حال آپلود و ذخیره...' : 'در حال ذخیره...') : editingId ? 'ذخیره تغییرات' : 'ثبت ویدیو'}</button></div>
           </form>
         )}
 

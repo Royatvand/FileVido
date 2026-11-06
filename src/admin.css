@@ -2,7 +2,7 @@
 .admin-auth-page { min-height:100vh; display:grid; place-items:center; position:relative; padding:32px 18px; background:radial-gradient(ellipse at 50% 10%,rgba(39,105,75,.18),transparent 45%),#080d0c; }
 .admin-back-link { position:absolute; top:28px; right:32px; color:#93a198; font-size:12px; }
 .admin-auth-card { width:min(100%,420px); display:flex; flex-direction:column; padding:38px; border:1px solid rgba(140,242,177,.16); border-radius:18px; background:linear-gradient(145deg,#142019,#0d1511); box-shadow:0 28px 90px #0008; }
-.admin-brand-mark { width:48px; height:48px; display:grid; place-items:center; margin-bottom:24px; border:1px solid #8cf2b155; border-radius:14px; color:var(--accent); font-size:27px; font-weight:900; }
+.admin-brand-mark { width:48px; height:48px; display:block; line-height:46px; text-align:center; margin-bottom:24px; border:1px solid #8cf2b155; border-radius:14px; color:var(--accent); font-size:27px; font-weight:900; }
 .admin-brand-mark span { color:#fff; }
 .admin-kicker { color:var(--accent); font:9px Arial,sans-serif; letter-spacing:1.5px; }
 .admin-auth-card h1 { margin:12px 0 6px; color:#f0f6f2; font-size:26px; }
@@ -26,7 +26,7 @@
 .admin-sidebar-brand>span:last-child { direction:ltr; }
 .admin-sidebar-brand>span:last-child>span { color:var(--accent); }
 .admin-sidebar-brand small { display:block; margin-top:5px; color:#819087; font-size:9px; font-weight:400; text-align:right; }
-.admin-sidebar .admin-brand-mark { width:38px; height:38px; margin:0; border-radius:10px; font-size:21px; }
+.admin-sidebar .admin-brand-mark { width:38px; height:38px; line-height:36px; margin:0; border-radius:10px; font-size:21px; }
 .admin-side-label { padding:12px 10px; color:#65736a; font-size:9px; }
 .admin-sidebar>button,.admin-sidebar-bottom button { width:100%; display:flex; align-items:center; gap:12px; padding:12px 13px; border:1px solid transparent; border-radius:8px; color:#98a69d; background:transparent; text-align:right; font:11px Vazirmatn,sans-serif; cursor:pointer; }
 .admin-sidebar>button.active,.admin-sidebar>button:hover { color:var(--accent); border-color:#8cf2b122; background:#8cf2b10d; }
@@ -85,3 +85,34 @@
 .admin-cover-picker input { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; }
 .admin-cover-field small { color:#7e8d83; font-size:9px; }
 .admin-cover-preview { display:block; width:min(100%,320px); aspect-ratio:16/9; object-fit:cover; border:1px solid var(--line); border-radius:9px; background:#101a14; }
+
+/* Login form spacing: labels sit outside inputs, so space them explicitly */
+.admin-auth-card label { display:block; margin:0 0 9px; }
+.admin-auth-card input { margin-bottom:17px; }
+.admin-auth-page { min-height:100dvh; }
+.admin-brand-mark { direction:ltr; }
+
+/* Mobile refinements */
+@media(max-width:650px) {
+  .admin-page { min-height:100dvh; }
+  .admin-sidebar { flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; }
+  .admin-sidebar-brand { flex:1 0 100%; }
+  .admin-sidebar>button { flex:0 0 auto; margin:0; }
+  .admin-auth-card input, .admin-form-grid input, .admin-form-grid textarea, .admin-form-grid select, .admin-category-form input, .admin-search input { font-size:16px; }
+  .admin-panel-heading { flex-wrap:wrap; }
+  .admin-search { max-width:none; }
+  .admin-table, .admin-table tbody { display:block; white-space:normal; }
+  .admin-table thead { display:none; }
+  .admin-table tr { display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; padding:15px 0; border-bottom:1px solid #ffffff0b; }
+  .admin-table tr:last-child { border-bottom:0; }
+  .admin-table td { padding:0; border:0; }
+  .admin-table td:first-child { flex:1 0 100%; }
+  .admin-table td:last-child { margin-inline-start:auto; }
+  .admin-video-cell { min-width:0; }
+  .admin-video-cell strong { max-width:none; overflow:visible; white-space:normal; line-height:1.8; }
+  .admin-row-actions { gap:4px; }
+  .admin-row-actions button, .admin-row-actions a { padding:8px 7px; font-size:11px; }
+  .admin-form-actions { flex-wrap:wrap; }
+  .admin-form-actions button { flex:1 1 130px; }
+  .admin-cover-preview { width:100%; }
+}

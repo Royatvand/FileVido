@@ -1,0 +1,73 @@
+function About() {
+  return (
+    <main className="page-content about-page">
+      <section className="about-hero">
+        <span className="eyebrow"><span className="status-dot" /> داستان TradeFarsi</span>
+        <h1>یادگیری نباید<br /><span>مرز زبانی</span> داشته باشد.</h1>
+        <p className="about-lead">
+          TradeFarsi با یک ایده ساده شکل گرفت: دسترسی به آموزش‌های باکیفیت بازارهای مالی
+          نباید به دانستن زبان انگلیسی محدود باشد.
+        </p>
+      </section>
+
+      <section className="about-story">
+        <div className="about-story-copy">
+          <span className="section-kicker">چرا TradeFarsi؟</span>
+          <h2>دانش جهانی،<br />به زبان فارسی.</h2>
+          <p>
+            هر روز محتوای آموزشی ارزشمندی در دنیای بازارهای مالی منتشر می‌شود؛
+            اما پیدا کردن، فهمیدن و دنبال کردن این منابع برای همه آسان نیست.
+          </p>
+          <p>
+            ما می‌خواهیم این مسیر را ساده‌تر کنیم؛ با گردآوری و ارائه ویدیوهای
+            آموزشی منتخب، همراه با ترجمه فارسی و تجربه‌ای مرتب و قابل استفاده.
+          </p>
+        </div>
+        <div className="about-quote-card">
+          <span className="quote-mark">“</span>
+          <p>هدف ما فقط ترجمه کلمات نیست؛ می‌خواهیم مسیر یادگیری را قابل‌دسترس‌تر کنیم.</p>
+          <span className="quote-caption">TRADEFARSI — OUR PURPOSE</span>
+        </div>
+      </section>
+
+      <section className="about-values">
+        <div className="values-heading">
+          <span className="section-kicker">اصول ما</span>
+          <h2>چیزی که به آن پایبندیم</h2>
+        </div>
+        <div className="values-grid">
+          <article className="value-card">
+            <span className="value-number">01</span>
+            <h3>یادگیری در دسترس</h3>
+            <p>کمک به برداشتن مانع زبان برای علاقه‌مندان یادگیری بازارهای مالی.</p>
+          </article>
+          <article className="value-card">
+            <span className="value-number">02</span>
+            <h3>کیفیت محتوا</h3>
+            <p>توجه به انتخاب منابع آموزشی مفید و ارائه ترجمه‌ای روشن و قابل فهم.</p>
+          </article>
+          <article className="value-card">
+            <span className="value-number">03</span>
+            <h3>شفافیت</h3>
+            <p>تأکید بر آموزش و آگاهی، بدون وعده سود قطعی یا موفقیت یک‌شبه.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="about-cta">
+        <div>
+          <span className="section-kicker">قدم بعدی</span>
+          <h2>آماده‌ای یادگیری رو شروع کنی؟</h2>
+          <p>به کتابخانه آموزشی TradeFarsi سر بزن و مسیرت رو آغاز کن.</p>
+        </div>
+        <a className="primary-button" href="/#videos">مشاهده ویدیوها <span>←</span></a>
+      </section>
+
+      <p className="about-disclaimer">
+        محتوای TradeFarsi با هدف آموزش و افزایش آگاهی ارائه می‌شود و توصیه مالی یا سیگنال معاملاتی نیست.
+      </p>
+    </main>
+  )
+}
+
+export default About

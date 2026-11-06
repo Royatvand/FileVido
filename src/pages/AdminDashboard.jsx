@@ -125,7 +125,7 @@ function AdminDashboard() {
     const name = newCategory.trim()
     if (!name) return
     try {
-      await supabase.insert('categories', { name, slug: slugify(name) })
+      await supabase.insert('categories', { name, slug: slugify(name) || `category-${Date.now()}` })
       setNewCategory('')
       setNotice({ type: 'success', text: 'دسته‌بندی اضافه شد.' })
       await loadData()

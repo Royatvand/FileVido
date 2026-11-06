@@ -2,11 +2,15 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
+import VideosSection from './components/VideosSection'
+import VideoPage from './pages/VideoPage'
 
 function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isHome = path === '/'
   const isAbout = path === '/about'
+  const videoMatch = path.match(/^\/video\/([^/]+)$/)
+  const videoId = videoMatch ? decodeURIComponent(videoMatch[1]) : null
 
   return (
     <div className="app-shell">
@@ -52,14 +56,12 @@ function App() {
             </div>
           </section>
 
-          <section className="coming-section" id="videos">
-            <span className="section-kicker">به‌زودی</span>
-            <h2>اینجا قراره چیزهای بزرگی یاد بگیری.</h2>
-            <p>کتابخانه ویدیوهای آموزشی TradeFarsi در حال آماده‌سازیه.</p>
-          </section>
+          <VideosSection />
         </main>
       ) : isAbout ? (
         <About />
+      ) : videoId ? (
+        <VideoPage videoId={videoId} />
       ) : (
         <NotFound />
       )}

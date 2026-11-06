@@ -4,13 +4,30 @@ import About from './pages/About'
 import NotFound from './pages/NotFound'
 import VideosSection from './components/VideosSection'
 import VideoPage from './pages/VideoPage'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboard from './pages/AdminDashboard'
+import { supabase } from './lib/supabase'
+import './admin.css'
 
 function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isHome = path === '/'
   const isAbout = path === '/about'
+  const isAdminLogin = path === '/admin/login'
+  const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
   const videoId = videoMatch ? decodeURIComponent(videoMatch[1]) : null
+
+  if (isAdminLogin) return <AdminLogin />
+  if (isAdmin) {
+    const session = supabase.getSession()
+    const isAdminUser = session?.user?.app_metadata?.role === 'admin'
+    if (!isAdminUser) {
+      window.location.replace('/admin/login')
+      return null
+    }
+    return <AdminDashboard />
+  }
 
   return (
     <div className="app-shell">
@@ -36,7 +53,6 @@ function App() {
                 <span><i /> یادگیری باکیفیت</span>
               </div>
             </div>
-
             <div className="hero-visual" aria-hidden="true">
               <div className="visual-orbit orbit-one" />
               <div className="visual-orbit orbit-two" />
@@ -55,16 +71,9 @@ function App() {
               <div className="floating-chip chip-bottom"><span className="status-dot" /> فارسی و روان</div>
             </div>
           </section>
-
           <VideosSection />
         </main>
-      ) : isAbout ? (
-        <About />
-      ) : videoId ? (
-        <VideoPage videoId={videoId} />
-      ) : (
-        <NotFound />
-      )}
+      ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       <Footer />
     </div>
   )

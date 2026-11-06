@@ -19,6 +19,9 @@ function MarketChart() {
   const [price, setPrice] = useState(null)
   const [changePct, setChangePct] = useState(null)
   const [connection, setConnection] = useState('connecting')
+  const [historyStatus, setHistoryStatus] = useState('loading')
+  const [socketStatus, setSocketStatus] = useState('connecting')
+  const [dataError, setDataError] = useState('')
 
   useEffect(() => {
     let disposed = false
@@ -47,7 +50,10 @@ function MarketChart() {
           .filter((point) => Number.isFinite(point.time) && Number.isFinite(point.value))
           .slice(-MAX_POINTS)
 
+        if (!history.length) throw new Error('Kraken returned no OHLC candles')
+
         if (!disposed && history.length) {
+          setHistoryStatus('ready')
           const latestHistoryPoint = history[history.length - 1]
 
           setData((current) => {
@@ -59,6 +65,8 @@ function MarketChart() {
         }
       } catch (error) {
         if (!disposed) {
+          setHistoryStatus('error')
+          setDataError(error.name === 'AbortError' ? 'دریافت تاریخچه از Kraken بیش از ۱۰ ثانیه طول کشید.' : `خطای تاریخچه: ${error.message}`)
           console.warn('Kraken historical data unavailable:', error)
         }
       } finally {
@@ -79,12 +87,14 @@ function MarketChart() {
       } catch (error) {
         console.warn('Could not create Kraken WebSocket:', error)
         setConnection('reconnecting')
+        setSocketStatus('reconnecting')
         reconnectTimer = window.setTimeout(connect, 3000)
         return
       }
 
       currentSocket.onopen = () => {
         if (disposed) return
+        setSocketStatus('open')
         currentSocket.send(JSON.stringify({
           method: 'subscribe',
           params: {
@@ -103,8 +113,16 @@ function MarketChart() {
           const message = JSON.parse(event.data)
 
           if (message.success === false || message.error) {
-            console.warn('Kraken ticker subscription error:', message.error || message)
-            setConnection('reconnecting')
+            const reason = message.error || 'Kraken subscription was rejected'
+            console.warn('Kraken ticker subscription error:', reason)
+            setSocketStatus('error')
+            setDataError(`خطای اتصال زنده: ${typeof reason === 'string' ? reason : JSON.stringify(reason)}`)
+            currentSocket.close()
+            return
+          }
+
+          if (message.method === 'subscribe' && message.success === true) {
+            setSocketStatus('subscribed')
             return
           }
 
@@ -118,6 +136,8 @@ function MarketChart() {
           setPrice(nextPrice)
           if (Number.isFinite(nextChange)) setChangePct(nextChange)
           setConnection('live')
+          setSocketStatus('live')
+          setDataError('')
 
           setData((current) => {
             const nextPoint = { time: Date.now() / 1000, value: nextPrice }
@@ -128,7 +148,13 @@ function MarketChart() {
         }
       }
 
-      currentSocket.onerror = () => currentSocket.close()
+      currentSocket.onerror = () => {
+        if (!disposed) {
+          setSocketStatus('error')
+          setDataError('ارتباط WebSocket با Kraken برقرار نشد.')
+        }
+        currentSocket.close()
+      }
       currentSocket.onclose = () => {
         if (disposed || socket !== currentSocket) return
         setConnection('reconnecting')
@@ -196,6 +222,12 @@ function MarketChart() {
           lineWidth={2}
         />
       </div>
+
+      <div className="market-debug" aria-live="polite">
+        <span>History: {historyStatus}</span>
+        <span>Socket: {socketStatus}</span>
+      </div>
+      {dataError && <div className="market-error" role="status">{dataError}</div>}
 
       <div className="chart-footer">
         <span>MARKET DATA · SPOT</span>

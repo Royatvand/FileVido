@@ -43,8 +43,9 @@ async function refreshSession(session) {
     method: 'POST',
     body: JSON.stringify({ refresh_token: session.refresh_token }),
   })
-  saveSession(refreshed)
-  return refreshed
+  const nextSession = { ...refreshed, expires_at: Math.floor(Date.now() / 1000) + (refreshed.expires_in || 3600) }
+  saveSession(nextSession)
+  return nextSession
 }
 
 async function getValidSession() {

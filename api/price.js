@@ -27,8 +27,16 @@ async function getJson(url) {
 
 // data-api.binance.vision نسخه فقط‌خواندنیِ داده‌های عمومی Binance است و از سرورهای آمریکا هم در دسترس است.
 async function fromBinance() {
+  // کندل‌های ۱ ثانیه‌ای؛ اگر در دسترس نبود به کندل ۱ دقیقه‌ای برمی‌گردیم
+  const getKlines = async () => {
+    try {
+      return await getJson(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1s&limit=${MAX_POINTS}`)
+    } catch {
+      return getJson(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=${MAX_POINTS}`)
+    }
+  }
   const [klines, ticker] = await Promise.all([
-    getJson(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=${MAX_POINTS}`),
+    getKlines(),
     getJson('https://data-api.binance.vision/api/v3/ticker/24hr?symbol=BTCUSDT'),
   ])
   const history = klines.map((k) => ({ time: Math.floor(Number(k[0]) / 1000), value: Number(k[4]) }))
@@ -89,8 +97,8 @@ export async function loadPrice() {
 export default async function handler(request, response) {
   try {
     const data = await loadPrice()
-    // کش کوتاه روی CDN تا با تعداد زیاد بازدیدکننده به منابع بیرونی فشار نیاید
-    response.setHeader('Cache-Control', 'public, s-maxage=3, stale-while-revalidate=15')
+    // کش ۱ ثانیه‌ای روی CDN تا با تعداد زیاد بازدیدکننده به منابع بیرونی فشار نیاید
+    response.setHeader('Cache-Control', 'public, s-maxage=1, stale-while-revalidate=5')
     response.status(200).json(data)
   } catch (error) {
     response.setHeader('Cache-Control', 'no-store')

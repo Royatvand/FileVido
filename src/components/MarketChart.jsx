@@ -4,9 +4,9 @@ import './MarketChart.css'
 
 // قیمت از تابع سرورلس خود سایت (/api/price) خوانده می‌شود؛ مرورگر مستقیم به صرافی‌ها وصل نمی‌شود.
 const PRICE_URL = '/api/price'
-const POLL_MS = 3000
-const MAX_POINTS = 400
-const WINDOW_SECS = 2 * 60 * 60 // تاریخچه ۱۲۰ کندل یک‌دقیقه‌ای = ۲ ساعت
+const POLL_MS = 1000 // تایم‌فریم ۱ ثانیه‌ای: هر ثانیه یک نقطهٔ جدید
+const MAX_POINTS = 300
+const WINDOW_SECS = 60 // بازهٔ قابل مشاهده روی نمودار
 
 function formatPrice(value) {
   return new Intl.NumberFormat('en-US', {
@@ -29,6 +29,7 @@ function MarketChart() {
     let controller
 
     async function poll() {
+      const startedAt = Date.now()
       controller = new AbortController()
       const timeout = window.setTimeout(() => controller.abort(), 8000)
       try {
@@ -51,7 +52,7 @@ function MarketChart() {
           const base = current.length ? current : history
           const now = Date.now() / 1000
           const last = base[base.length - 1]
-          const next = last && now - last.time < 1 ? base : [...base, { time: now, value: nextPrice }]
+          const next = last && now - last.time < 0.5 ? base : [...base, { time: now, value: nextPrice }]
           return next.slice(-MAX_POINTS)
         })
       } catch (error) {
@@ -61,7 +62,7 @@ function MarketChart() {
         }
       } finally {
         window.clearTimeout(timeout)
-        if (!disposed) timer = window.setTimeout(poll, POLL_MS)
+        if (!disposed) timer = window.setTimeout(poll, Math.max(0, POLL_MS - (Date.now() - startedAt)))
       }
     }
 

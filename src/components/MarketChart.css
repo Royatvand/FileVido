@@ -17,3 +17,6 @@
   .market-price { font-size:22px; }
   .market-chart-canvas { height:112px; }
 }
+
+.market-debug { display:flex; justify-content:space-between; gap:10px; margin-top:8px; color:#829188; font:9px Arial,sans-serif; }
+.market-error { margin-top:7px; color:#ffb4a9; font-size:9px; line-height:1.7; overflow-wrap:anywhere; }

@@ -158,6 +158,7 @@ function MarketChart() {
       currentSocket.onclose = () => {
         if (disposed || socket !== currentSocket) return
         setConnection('reconnecting')
+        setSocketStatus('reconnecting')
         reconnectTimer = window.setTimeout(connect, 3000)
       }
     }

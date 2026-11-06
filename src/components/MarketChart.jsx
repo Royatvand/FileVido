@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Liveline } from 'liveline'
 import './MarketChart.css'
 
-const REST_URL = 'https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=1'
-const SOCKET_URL = 'wss://ws.kraken.com/v2'
-const MAX_POINTS = 180
+// قیمت از تابع سرورلس خود سایت (/api/price) خوانده می‌شود؛ مرورگر مستقیم به صرافی‌ها وصل نمی‌شود.
+const PRICE_URL = '/api/price'
+const POLL_MS = 3000
+const MAX_POINTS = 400
+const WINDOW_SECS = 2 * 60 * 60 // تاریخچه ۱۲۰ کندل یک‌دقیقه‌ای = ۲ ساعت
 
 function formatPrice(value) {
   return new Intl.NumberFormat('en-US', {
@@ -18,161 +20,57 @@ function MarketChart() {
   const [data, setData] = useState([])
   const [price, setPrice] = useState(null)
   const [changePct, setChangePct] = useState(null)
+  const [meta, setMeta] = useState({ source: 'Binance', symbol: 'BTC/USDT' })
   const [connection, setConnection] = useState('connecting')
-  const [historyStatus, setHistoryStatus] = useState('loading')
-  const [socketStatus, setSocketStatus] = useState('connecting')
-  const [dataError, setDataError] = useState('')
 
   useEffect(() => {
     let disposed = false
-    let socket
-    let reconnectTimer
-    let historyController
+    let timer
+    let controller
 
-    async function loadHistory() {
-      historyController = new AbortController()
-      const timeout = window.setTimeout(() => historyController.abort(), 10000)
-
+    async function poll() {
+      controller = new AbortController()
+      const timeout = window.setTimeout(() => controller.abort(), 8000)
       try {
-        const response = await fetch(REST_URL, { signal: historyController.signal })
-        if (!response.ok) throw new Error(`Kraken history request failed: ${response.status}`)
-
+        const response = await fetch(PRICE_URL, { signal: controller.signal, cache: 'no-store' })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const payload = await response.json()
-        if (payload.error?.length) throw new Error(payload.error.join(', '))
+        if (disposed) return
 
-        const pairKey = Object.keys(payload.result || {}).find((key) => key !== 'last')
-        const candles = pairKey ? payload.result[pairKey] : []
-        const history = candles
-          .map((candle) => ({
-            time: Number(candle[0]),
-            value: Number(candle[4]),
-          }))
-          .filter((point) => Number.isFinite(point.time) && Number.isFinite(point.value))
-          .slice(-MAX_POINTS)
+        const nextPrice = Number(payload.price)
+        if (!Number.isFinite(nextPrice) || nextPrice <= 0) throw new Error('invalid price')
 
-        if (!history.length) throw new Error('Kraken returned no OHLC candles')
+        setPrice(nextPrice)
+        setChangePct(payload.changePct !== null && Number.isFinite(Number(payload.changePct)) ? Number(payload.changePct) : null)
+        setMeta({ source: payload.source, symbol: payload.symbol })
+        setConnection('live')
 
-        if (!disposed && history.length) {
-          setHistoryStatus('ready')
-          const latestHistoryPoint = history[history.length - 1]
-
-          setData((current) => {
-            // Keep live ticks that may have arrived while the REST request was running.
-            const livePoints = current.filter((point) => point.time > latestHistoryPoint.time)
-            return [...history, ...livePoints].slice(-MAX_POINTS)
-          })
-          setPrice((current) => current ?? latestHistoryPoint.value)
-        }
+        setData((current) => {
+          const history = Array.isArray(payload.history) ? payload.history : []
+          // اولین بار تاریخچه را می‌گیریم؛ بعد از آن فقط نقطه‌های زنده اضافه می‌شوند.
+          const base = current.length ? current : history
+          const now = Date.now() / 1000
+          const last = base[base.length - 1]
+          const next = last && now - last.time < 1 ? base : [...base, { time: now, value: nextPrice }]
+          return next.slice(-MAX_POINTS)
+        })
       } catch (error) {
         if (!disposed) {
-          setHistoryStatus('error')
-          setDataError(error.name === 'AbortError' ? 'دریافت تاریخچه از Kraken بیش از ۱۰ ثانیه طول کشید.' : `خطای تاریخچه: ${error.message}`)
-          console.warn('Kraken historical data unavailable:', error)
+          setConnection('reconnecting')
+          console.warn('Price request failed:', error)
         }
       } finally {
         window.clearTimeout(timeout)
+        if (!disposed) timer = window.setTimeout(poll, POLL_MS)
       }
     }
 
-    function connect() {
-      if (disposed) return
-
-      window.clearTimeout(reconnectTimer)
-      setConnection('connecting')
-
-      let currentSocket
-      try {
-        currentSocket = new WebSocket(SOCKET_URL)
-        socket = currentSocket
-      } catch (error) {
-        console.warn('Could not create Kraken WebSocket:', error)
-        setConnection('reconnecting')
-        setSocketStatus('reconnecting')
-        reconnectTimer = window.setTimeout(connect, 3000)
-        return
-      }
-
-      currentSocket.onopen = () => {
-        if (disposed) return
-        setSocketStatus('open')
-        currentSocket.send(JSON.stringify({
-          method: 'subscribe',
-          params: {
-            channel: 'ticker',
-            symbol: ['BTC/USD'],
-            event_trigger: 'trades',
-            snapshot: true,
-          },
-        }))
-      }
-
-      currentSocket.onmessage = (event) => {
-        if (disposed) return
-
-        try {
-          const message = JSON.parse(event.data)
-
-          if (message.success === false || message.error) {
-            const reason = message.error || 'Kraken subscription was rejected'
-            console.warn('Kraken ticker subscription error:', reason)
-            setSocketStatus('error')
-            setDataError(`خطای اتصال زنده: ${typeof reason === 'string' ? reason : JSON.stringify(reason)}`)
-            currentSocket.close()
-            return
-          }
-
-          if (message.method === 'subscribe' && message.success === true) {
-            setSocketStatus('subscribed')
-            return
-          }
-
-          if (message.channel !== 'ticker' || !Array.isArray(message.data)) return
-          const ticker = message.data.find((item) => item.symbol === 'BTC/USD')
-          const nextPrice = Number(ticker?.last)
-          const nextChange = Number(ticker?.change_pct)
-
-          if (!Number.isFinite(nextPrice) || nextPrice <= 0) return
-
-          setPrice(nextPrice)
-          if (Number.isFinite(nextChange)) setChangePct(nextChange)
-          setConnection('live')
-          setSocketStatus('live')
-          setDataError('')
-
-          setData((current) => {
-            const nextPoint = { time: Date.now() / 1000, value: nextPrice }
-            return [...current, nextPoint].slice(-MAX_POINTS)
-          })
-        } catch (error) {
-          console.warn('Could not parse Kraken ticker message:', error)
-        }
-      }
-
-      currentSocket.onerror = () => {
-        if (!disposed) {
-          setSocketStatus('error')
-          setDataError('ارتباط WebSocket با Kraken برقرار نشد.')
-        }
-        currentSocket.close()
-      }
-      currentSocket.onclose = () => {
-        if (disposed || socket !== currentSocket) return
-        setConnection('reconnecting')
-        setSocketStatus('reconnecting')
-        reconnectTimer = window.setTimeout(connect, 3000)
-      }
-    }
-
-    // Start both sources independently: a slow REST request must not block live prices.
-    connect()
-    loadHistory()
+    poll()
 
     return () => {
       disposed = true
-      window.clearTimeout(reconnectTimer)
-      window.clearTimeout(historyController?.timeout)
-      historyController?.abort()
-      socket?.close()
+      window.clearTimeout(timer)
+      controller?.abort()
     }
   }, [])
 
@@ -192,7 +90,7 @@ function MarketChart() {
   return (
     <div className="visual-card market-card">
       <div className="visual-card-top">
-        <span>BTC / USD · KRAKEN</span>
+        <span>{meta.symbol} · {meta.source?.toUpperCase()}</span>
         <span className={`live-pill ${connection === 'live' ? 'is-live' : 'is-waiting'}`}>
           <i /> {connectionLabel}
         </span>
@@ -214,6 +112,7 @@ function MarketChart() {
           value={chartValue}
           color={chartColor}
           theme="dark"
+          window={WINDOW_SECS}
           loading={data.length === 0}
           emptyText="داده‌ای برای نمایش وجود ندارد"
           grid={false}
@@ -224,15 +123,13 @@ function MarketChart() {
         />
       </div>
 
-      <div className="market-debug" aria-live="polite">
-        <span>History: {historyStatus}</span>
-        <span>Socket: {socketStatus}</span>
-      </div>
-      {dataError && <div className="market-error" role="status">{dataError}</div>}
+      {connection === 'reconnecting' && (
+        <div className="market-error" role="status">اتصال قیمت برقرار نشد؛ دوباره تلاش می‌کنیم…</div>
+      )}
 
       <div className="chart-footer">
         <span>MARKET DATA · SPOT</span>
-        <span>BTC/USD</span>
+        <span>{meta.symbol}</span>
       </div>
     </div>
   )

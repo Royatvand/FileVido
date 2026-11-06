@@ -319,3 +319,28 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .footer-socials { margin-top: 17px; }
   .footer-social-icon { width: 37px; height: 37px; }
 }
+
+/* Video filters */
+.videos-filters { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.02); }
+.videos-search { display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; color: #829087; background: rgba(8,13,12,.6); transition: border-color .2s; }
+.videos-search:focus-within { border-color: rgba(140,242,177,.45); }
+.videos-search input { width: 100%; min-width: 0; padding: 13px 0; border: 0; outline: 0; color: #eaf2ec; background: transparent; font: 12px Vazirmatn, sans-serif; }
+.videos-search input::placeholder { color: #66746b; }
+.filter-group { display: flex; align-items: center; gap: 14px; }
+.filter-label { flex: 0 0 auto; min-width: 64px; color: #8b9990; font-size: 11px; }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-chip { padding: 7px 14px; border: 1px solid var(--line); border-radius: 20px; color: #a9b6ae; background: rgba(255,255,255,.025); font: 11px Vazirmatn, sans-serif; cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+.filter-chip:hover { color: #eaf2ec; border-color: rgba(140,242,177,.3); }
+.filter-chip.active { color: #07110b; border-color: var(--accent); background: var(--accent); font-weight: 700; }
+.filters-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); color: #738179; font-size: 11px; }
+.filter-reset { padding: 4px 0; border: 0; color: var(--accent); background: none; font: 11px Vazirmatn, sans-serif; cursor: pointer; }
+.videos-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 54px 20px; border: 1px dashed var(--line); border-radius: 14px; text-align: center; }
+.videos-empty strong { color: #e4ede7; font-size: 15px; }
+.videos-empty p { margin: 0 0 14px; color: #829088; font-size: 12px; }
+.videos-empty .secondary-button { min-height: 42px; border: 1px solid var(--line); background: rgba(255,255,255,.025); color: #c0cbc4; font-family: inherit; cursor: pointer; }
+@media (max-width: 600px) {
+  .videos-filters { padding: 14px; gap: 14px; }
+  .videos-search input { font-size: 16px; }
+  .filter-group { flex-direction: column; align-items: flex-start; gap: 9px; }
+  .filter-chip { padding: 9px 14px; }
+}

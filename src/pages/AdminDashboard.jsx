@@ -82,7 +82,7 @@ function AdminDashboard() {
     try {
       const payload = {
         title: form.title.trim(),
-        slug: (form.slug.trim() || slugify(form.title)),
+        slug: (form.slug.trim() || slugify(form.title) || `video-${Date.now()}`),
         description: form.description.trim(),
         aparat_id: form.aparat_id.trim(),
         cover_url: form.cover_url.trim(),

@@ -1,6 +1,6 @@
 function Footer() {
   return (
-    <footer className="site-footer" id="about">
+    <footer className="site-footer">
       <div className="footer-top">
         <div className="footer-brand">
           <a className="brand" href="/" aria-label="TradeFarsi home">
@@ -12,9 +12,10 @@ function Footer() {
 
         <div className="footer-links">
           <span className="footer-heading">دسترسی سریع</span>
-          <a href="#home">صفحه اصلی</a>
-          <a href="#videos">ویدیوهای آموزشی</a>
-          <a href="#categories">دسته‌بندی‌ها</a>
+          <a href="/">صفحه اصلی</a>
+          <a href="/#videos">ویدیوهای آموزشی</a>
+          <a href="/#categories">دسته‌بندی‌ها</a>
+          <a href="/about">درباره ما</a>
         </div>
 
         <div className="footer-note">

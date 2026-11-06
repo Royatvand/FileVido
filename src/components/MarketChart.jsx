@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Liveline } from 'liveline'
 import './MarketChart.css'
 
@@ -24,11 +24,15 @@ function MarketChart() {
     let disposed = false
     let socket
     let reconnectTimer
+    let historyController
 
     async function loadHistory() {
+      historyController = new AbortController()
+      const timeout = window.setTimeout(() => historyController.abort(), 10000)
+
       try {
-        const response = await fetch(REST_URL)
-        if (!response.ok) throw new Error('Historical market data request failed')
+        const response = await fetch(REST_URL, { signal: historyController.signal })
+        if (!response.ok) throw new Error(`Kraken history request failed: ${response.status}`)
 
         const payload = await response.json()
         if (payload.error?.length) throw new Error(payload.error.join(', '))
@@ -41,22 +45,47 @@ function MarketChart() {
             value: Number(candle[4]),
           }))
           .filter((point) => Number.isFinite(point.time) && Number.isFinite(point.value))
+          .slice(-MAX_POINTS)
 
-        if (!disposed && history.length) setData(history.slice(-MAX_POINTS))
+        if (!disposed && history.length) {
+          const latestHistoryPoint = history[history.length - 1]
+
+          setData((current) => {
+            // Keep live ticks that may have arrived while the REST request was running.
+            const livePoints = current.filter((point) => point.time > latestHistoryPoint.time)
+            return [...history, ...livePoints].slice(-MAX_POINTS)
+          })
+          setPrice((current) => current ?? latestHistoryPoint.value)
+        }
       } catch (error) {
-        // The live feed can still populate the chart if historical data is unavailable.
-        console.warn('Kraken historical data unavailable:', error)
+        if (!disposed) {
+          console.warn('Kraken historical data unavailable:', error)
+        }
+      } finally {
+        window.clearTimeout(timeout)
       }
     }
 
     function connect() {
       if (disposed) return
 
-      setConnection((current) => current === 'live' ? 'connecting' : current)
-      socket = new WebSocket(SOCKET_URL)
+      window.clearTimeout(reconnectTimer)
+      setConnection('connecting')
 
-      socket.onopen = () => {
-        socket.send(JSON.stringify({
+      let currentSocket
+      try {
+        currentSocket = new WebSocket(SOCKET_URL)
+        socket = currentSocket
+      } catch (error) {
+        console.warn('Could not create Kraken WebSocket:', error)
+        setConnection('reconnecting')
+        reconnectTimer = window.setTimeout(connect, 3000)
+        return
+      }
+
+      currentSocket.onopen = () => {
+        if (disposed) return
+        currentSocket.send(JSON.stringify({
           method: 'subscribe',
           params: {
             channel: 'ticker',
@@ -67,10 +96,14 @@ function MarketChart() {
         }))
       }
 
-      socket.onmessage = (event) => {
+      currentSocket.onmessage = (event) => {
+        if (disposed) return
+
         try {
           const message = JSON.parse(event.data)
+
           if (message.success === false || message.error) {
+            console.warn('Kraken ticker subscription error:', message.error || message)
             setConnection('reconnecting')
             return
           }
@@ -80,7 +113,7 @@ function MarketChart() {
           const nextPrice = Number(ticker?.last)
           const nextChange = Number(ticker?.change_pct)
 
-          if (!Number.isFinite(nextPrice)) return
+          if (!Number.isFinite(nextPrice) || nextPrice <= 0) return
 
           setPrice(nextPrice)
           if (Number.isFinite(nextChange)) setChangePct(nextChange)
@@ -95,21 +128,23 @@ function MarketChart() {
         }
       }
 
-      socket.onerror = () => socket.close()
-      socket.onclose = () => {
-        if (disposed) return
+      currentSocket.onerror = () => currentSocket.close()
+      currentSocket.onclose = () => {
+        if (disposed || socket !== currentSocket) return
         setConnection('reconnecting')
         reconnectTimer = window.setTimeout(connect, 3000)
       }
     }
 
-    loadHistory().finally(() => {
-      if (!disposed) connect()
-    })
+    // Start both sources independently: a slow REST request must not block live prices.
+    connect()
+    loadHistory()
 
     return () => {
       disposed = true
       window.clearTimeout(reconnectTimer)
+      window.clearTimeout(historyController?.timeout)
+      historyController?.abort()
       socket?.close()
     }
   }, [])
@@ -126,7 +161,6 @@ function MarketChart() {
   }[connection] || 'CONNECTING'
 
   const chartColor = isNegative ? '#fb7185' : '#8CF2B1'
-  const chartData = useMemo(() => data, [data])
 
   return (
     <div className="visual-card market-card">
@@ -149,7 +183,7 @@ function MarketChart() {
 
       <div className="market-chart-canvas">
         <Liveline
-          data={chartData}
+          data={data}
           value={chartValue}
           color={chartColor}
           theme="dark"

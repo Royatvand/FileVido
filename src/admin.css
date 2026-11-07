@@ -161,3 +161,31 @@
   .admin-playlist-list article { align-items:flex-start; flex-direction:column; }
   .admin-playlist-lessons>div { gap:8px; }
 }
+
+/* Playlist management */
+.admin-playlist-select { display:flex; flex-direction:column; gap:10px; margin:4px 0 18px; padding:16px; border:1px solid var(--line); border-radius:10px; background:#ffffff04; }
+.admin-playlist-select>strong { color:#dce8df; font-size:11px; }
+.admin-playlist-select>small,.admin-playlist-select>span { color:#829087; font-size:9px; line-height:1.9; }
+.admin-playlist-select>a { color:var(--accent); font-size:10px; }
+.admin-playlist-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.admin-playlist-options label { display:flex; flex-direction:row; align-items:center; gap:8px; margin:0; padding:10px; border:1px solid var(--line); border-radius:8px; color:#d5e0d8; background:#ffffff04; }
+.admin-playlist-options input { width:15px; height:15px; accent-color:var(--accent); }
+.admin-playlist-options label small { margin-inline-start:auto; color:#829087; font-size:8px; }
+.admin-playlists-layout { display:grid; gap:18px; max-width:980px; }
+.admin-playlist-list { display:flex; flex-direction:column; gap:9px; }
+.admin-playlist-list article { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px; border:1px solid var(--line); border-radius:9px; background:#ffffff04; }
+.admin-playlist-list article.selected { border-color:#8cf2b155; background:#8cf2b10a; }
+.admin-playlist-info { display:flex; min-width:0; flex-direction:column; gap:6px; }
+.admin-playlist-info strong { color:#e4ede6; font-size:11px; }
+.admin-playlist-info small { color:#839188; font-size:9px; }
+.admin-playlist-lessons { display:flex; flex-direction:column; gap:8px; }
+.admin-playlist-lessons>div { display:flex; align-items:center; gap:12px; padding:11px; border:1px solid var(--line); border-radius:8px; }
+.admin-playlist-lessons>div>strong { flex:1; color:#dce6df; font-size:10px; }
+.admin-playlist-position { color:var(--accent); font:11px Arial,sans-serif; }
+.admin-playlist-lessons .admin-row-actions button { min-width:28px; min-height:28px; border:1px solid var(--line); border-radius:6px; }
+.admin-playlist-lessons .admin-row-actions button:disabled { opacity:.3; cursor:not-allowed; }
+@media(max-width:650px) {
+  .admin-playlist-options { grid-template-columns:1fr; }
+  .admin-playlist-list article { align-items:flex-start; flex-direction:column; }
+  .admin-playlist-lessons>div { gap:8px; }
+}

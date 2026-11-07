@@ -15,7 +15,7 @@ function normalize(value = '') {
 
 const LEVEL_ORDER = ['مقدماتی', 'متوسط', 'پیشرفته']
 
-function VideosSection() {
+function VideosSection({ archive = false }) {
   const [videos, setVideos] = useState(demoVideos)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
@@ -82,10 +82,10 @@ function VideosSection() {
   }
 
   return (
-    <section className="videos-section" id="videos">
+    <section className={`videos-section ${archive ? 'videos-archive' : ''}`} id="videos">
       <div className="videos-heading">
-        <span className="section-kicker">کتابخانه آموزشی</span>
-        <h2>ویدیوهای آموزشی</h2>
+        <span className="section-kicker">{archive ? 'آرشیو ویدیوها' : 'کتابخانه آموزشی'}</span>
+        {archive ? <h1>همه ویدیوهای آموزشی</h1> : <h2>ویدیوهای آموزشی</h2>}
         <p>آموزش‌های منتخب بازارهای مالی با ترجمه فارسی.</p>
       </div>
 

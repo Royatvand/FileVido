@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import AdminBanners from '../components/AdminBanners'
+import AdminPlaylists from '../components/AdminPlaylists'
 
 const emptyForm = {
   title: '', slug: '', description: '', aparat_id: '', cover_url: '',
   category_id: '', duration: '', level: 'مقدماتی', instructor: '',
-  tags: '', is_featured: false, status: 'draft',
+  tags: '', is_featured: false, status: 'draft', playlist_ids: [],
 }
 
 function slugify(value) {
@@ -19,6 +20,7 @@ function slugify(value) {
 function AdminDashboard() {
   const [videos, setVideos] = useState([])
   const [categories, setCategories] = useState([])
+  const [playlists, setPlaylists] = useState([])
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState(null)
   const [selectedCover, setSelectedCover] = useState(null)
@@ -36,9 +38,11 @@ function AdminDashboard() {
       const [videoRows, categoryRows] = await Promise.all([
         supabase.select('videos', '&order=created_at.desc'),
         supabase.select('categories', '&order=name.asc'),
+        supabase.select('playlists', '&order=title.asc'),
       ])
       setVideos(videoRows || [])
       setCategories(categoryRows || [])
+      setPlaylists(playlistRows || [])
     } catch (error) {
       setNotice({ type: 'error', text: error.message })
     } finally {
@@ -89,7 +93,8 @@ function AdminDashboard() {
     setCoverPreview('')
   }
 
-  function startEdit(video) {
+  async function startEdit(video) {
+    const memberships = await supabase.select('playlist_videos', '&video_id=eq.' + video.id)
     setEditingId(video.id)
     setSelectedCover(null)
     setCoverPreview(video.cover_url || '')
@@ -100,6 +105,7 @@ function AdminDashboard() {
       level: video.level || 'مقدماتی', instructor: video.instructor || '',
       tags: (video.tags || []).join(', '), is_featured: Boolean(video.is_featured),
       status: video.status || 'draft',
+      playlist_ids: (memberships || []).map((item) => item.playlist_id),
     })
     setActiveTab('form')
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -132,8 +138,14 @@ function AdminDashboard() {
         published_at: form.status === 'published' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
       }
+      let videoId = editingId
       if (editingId) await supabase.update('videos', editingId, payload)
-      else await supabase.insert('videos', payload)
+      else {
+        const insertedRows = await supabase.insert('videos', payload)
+        videoId = insertedRows?.[0]?.id
+      }
+      if (!videoId) throw new Error('شناسه ویدیو دریافت نشد.')
+      await supabase.replaceVideoPlaylists(videoId, form.playlist_ids)
       setNotice({ type: 'success', text: editingId ? 'تغییرات ویدیو ذخیره شد.' : 'ویدیو با موفقیت ثبت شد.' })
       resetForm()
       setActiveTab('videos')
@@ -183,6 +195,7 @@ function AdminDashboard() {
         <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('videos') }}>▤ <span>ویدیوها</span></button>
         <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form') }}>＋ <span>افزودن ویدیو</span></button>
         <button className={activeTab === 'categories' ? 'active' : ''} onClick={() => setActiveTab('categories')}>◫ <span>دسته‌بندی‌ها</span></button>
+        <button className={activeTab === 'playlists' ? 'active' : ''} onClick={() => setActiveTab('playlists')}>▤ <span>پلی‌لیست‌ها</span></button>
         <button className={activeTab === 'banners' ? 'active' : ''} onClick={() => setActiveTab('banners')}>▣ <span>اسلایدر</span></button>
         <div className="admin-sidebar-bottom">
           <a href="/" target="_blank" rel="noreferrer">مشاهده سایت ↗</a>
@@ -192,7 +205,7 @@ function AdminDashboard() {
 
       <section className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-kicker">TRADEFARSI / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : 'دسته‌بندی‌ها'}</h1></div>
+          <div><span className="admin-kicker">TRADEFARSI / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : 'دسته‌بندی‌ها'}</h1></div>
           <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
         </header>
 
@@ -235,6 +248,18 @@ function AdminDashboard() {
                 {coverPreview && <img className="admin-cover-preview" src={coverPreview} alt="پیش‌نمایش کاور ویدیو" />}
               </div>
               <label>دسته‌بندی<select name="category_id" value={form.category_id} onChange={updateField}><option value="">بدون دسته‌بندی</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+              <div className="admin-playlist-select full">
+                <strong>افزودن به پلی‌لیست</strong>
+                <small>یک یا چند مجموعه انتخاب کن؛ بدون انتخاب، ویدیو مستقل می‌ماند.</small>
+                {playlists.length === 0 ? <span>هنوز پلی‌لیستی ساخته نشده است.</span> : <div className="admin-playlist-options">
+                  {playlists.map((playlist) => <label key={playlist.id}>
+                    <input type="checkbox" checked={form.playlist_ids.includes(playlist.id)} onChange={(event) => setForm((current) => ({ ...current, playlist_ids: event.target.checked ? [...current.playlist_ids, playlist.id] : current.playlist_ids.filter((id) => id !== playlist.id) }))} />
+                    <span>{playlist.title}</span>
+                    <small>{playlist.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</small>
+                  </label>)}
+                </div>}
+                <a href="#playlists" onClick={(event) => { event.preventDefault(); setActiveTab('playlists') }}>ساخت پلی‌لیست جدید ↗</a>
+              </div>
               <label>مدت ویدیو<input name="duration" value={form.duration} onChange={updateField} placeholder="مثلاً 18:45" /></label>
               <label>مدرس<input name="instructor" value={form.instructor} onChange={updateField} placeholder="نام مدرس" /></label>
               <label>سطح آموزش<select name="level" value={form.level} onChange={updateField}><option>مقدماتی</option><option>متوسط</option><option>پیشرفته</option></select></label>
@@ -247,6 +272,7 @@ function AdminDashboard() {
           </form>
         )}
 
+        {activeTab === 'playlists' && <AdminPlaylists onNotice={setNotice} />}
         {activeTab === 'banners' && <AdminBanners videos={videos} onNotice={setNotice} />}
 
         {activeTab === 'categories' && (

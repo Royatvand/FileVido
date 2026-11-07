@@ -4,9 +4,9 @@ function Header() {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <a className="brand" href="/" aria-label="TradeFarsi home">
-          <span className="brand-mark">T<span>.</span></span>
-          <span className="brand-name">Trade<span>Farsi</span></span>
+        <a className="brand" href="/" aria-label="چارت مسترز - ChartMasters home">
+          <span className="brand-mark" aria-hidden="true">C<span>.</span></span>
+          <span className="brand-name">Chart<span>Masters</span></span>
         </a>
 
         <nav className="main-nav" aria-label="منوی اصلی">

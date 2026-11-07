@@ -344,3 +344,34 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .filter-group { flex-direction: column; align-items: flex-start; gap: 9px; }
   .filter-chip { padding: 9px 14px; }
 }
+
+/* Telegram invitation (top of footer) */
+.telegram-cta { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-bottom: 46px; padding: 30px 38px; overflow: hidden; border: 1px solid rgba(78,181,236,.26); border-radius: 18px; background: radial-gradient(circle at 12% 50%, rgba(42,171,238,.2), transparent 46%), linear-gradient(115deg, rgba(20,40,32,.95), rgba(11,19,16,.95)); box-shadow: 0 22px 60px rgba(0,0,0,.28); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.telegram-cta:hover { transform: translateY(-3px); border-color: rgba(78,181,236,.5); box-shadow: 0 28px 70px rgba(0,0,0,.36), 0 0 40px rgba(42,171,238,.1); }
+.telegram-cta-copy { position: relative; z-index: 1; display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: 8px; text-align: right; }
+.telegram-cta-copy strong { color: #f1f7f3; font-size: clamp(17px, 2.4vw, 24px); line-height: 1.7; font-weight: 800; }
+.telegram-cta-copy > span:not(.telegram-cta-button) { max-width: 520px; color: #98a79d; font-size: 12px; line-height: 2.1; }
+.telegram-cta-button { margin-top: 8px; display: inline-flex; align-items: center; gap: 14px; padding: 11px 20px; border-radius: 9px; color: #fff; background: linear-gradient(135deg, #37b4ee, #1d8fd0); font-size: 12px; font-weight: 700; box-shadow: 0 8px 24px rgba(42,171,238,.28); transition: transform .2s, box-shadow .2s; }
+.telegram-cta:hover .telegram-cta-button { transform: translateX(-3px); box-shadow: 0 10px 30px rgba(42,171,238,.4); }
+.telegram-cta-art { position: relative; flex: 0 0 auto; width: 150px; height: 150px; display: grid; place-items: center; }
+.telegram-ring { position: absolute; border: 1px solid rgba(78,181,236,.28); border-radius: 50%; }
+.telegram-ring.ring-one { width: 150px; height: 150px; border-style: dashed; animation: telegram-spin 28s linear infinite; }
+.telegram-ring.ring-two { width: 112px; height: 112px; border-color: rgba(78,181,236,.45); }
+.telegram-badge { position: relative; width: 80px; height: 80px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #3fbcf2, #1b86c6); box-shadow: 0 14px 40px rgba(42,171,238,.4), inset 0 2px rgba(255,255,255,.3); transition: transform .3s ease; }
+.telegram-cta:hover .telegram-badge { transform: rotate(-8deg) scale(1.06); }
+.telegram-badge svg { width: 38px; height: 38px; fill: #fff; margin-right: 4px; }
+@keyframes telegram-spin { to { transform: rotate(360deg); } }
+@media (max-width: 700px) {
+  .telegram-cta { gap: 14px; margin-bottom: 36px; padding: 22px 20px; }
+  .telegram-cta-art { width: 92px; height: 92px; }
+  .telegram-ring.ring-one { width: 92px; height: 92px; }
+  .telegram-ring.ring-two { width: 70px; height: 70px; }
+  .telegram-badge { width: 52px; height: 52px; }
+  .telegram-badge svg { width: 25px; height: 25px; }
+  .telegram-cta-copy > span:not(.telegram-cta-button) { font-size: 11px; line-height: 2; }
+  .telegram-cta-button { padding: 9px 14px; font-size: 11px; }
+}
+@media (max-width: 420px) {
+  .telegram-cta-art { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .telegram-ring.ring-one { animation: none; } }

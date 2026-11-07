@@ -116,3 +116,19 @@
   .admin-form-actions button { flex:1 1 130px; }
   .admin-cover-preview { width:100%; }
 }
+
+/* Banner management */
+.admin-banner-list { display:flex; flex-direction:column; gap:12px; }
+.admin-banner-item { display:flex; align-items:center; gap:16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#ffffff05; }
+.admin-banner-item.inactive { opacity:.6; }
+.admin-banner-item img { flex:0 0 auto; width:170px; aspect-ratio:8/3; object-fit:cover; border-radius:8px; background:#101a14; }
+.admin-banner-info { display:flex; flex:1; min-width:0; flex-direction:column; align-items:flex-start; gap:6px; }
+.admin-banner-info strong { color:#e9f0eb; font-size:13px; line-height:1.8; }
+.admin-banner-info small { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#7f8d84; font-size:10px; }
+.admin-row-actions button:disabled { opacity:.35; cursor:not-allowed; }
+@media(max-width:650px) {
+  .admin-banner-item { flex-wrap:wrap; }
+  .admin-banner-item img { width:100%; }
+  .admin-banner-info { flex:1 0 100%; }
+  .admin-banner-item .admin-row-actions { flex-wrap:wrap; }
+}

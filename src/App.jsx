@@ -15,6 +15,7 @@ function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isHome = path === '/'
   const isAbout = path === '/about'
+  const isVideos = path === '/videos'
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
@@ -65,6 +66,10 @@ function App() {
           </section>
           <BannerSlider />
           <VideosSection />
+        </main>
+      ) : isVideos ? (
+        <main className="main-content">
+          <VideosSection archive />
         </main>
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       <Footer />

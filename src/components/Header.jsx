@@ -11,7 +11,7 @@ function Header() {
 
         <nav className="main-nav" aria-label="منوی اصلی">
           <a className={`nav-link ${!isAbout ? 'active' : ''}`} href="/">خانه</a>
-          <a className="nav-link" href="/#videos">ویدیوها</a>
+          <a className="nav-link" href="/videos">ویدیوها</a>
           <a className="nav-link" href="/#categories">دسته‌بندی‌ها</a>
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>

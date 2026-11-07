@@ -203,7 +203,7 @@ function AdminDashboard() {
   return (
     <main className="admin-page" dir="rtl">
       <aside className="admin-sidebar">
-        <a className="admin-sidebar-brand" href="/"><span className="admin-brand-mark">T<span>.</span></span><span>Trade<span>Farsi</span><small>مدیریت محتوا</small></span></a>
+        <a className="admin-sidebar-brand" href="/"><span className="admin-brand-mark">C<span>.</span></span><span>Chart<span>Masters</span><small>مدیریت محتوا</small></span></a>
         <div className="admin-side-label">مدیریت</div>
         <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('videos') }}>▤ <span>ویدیوها</span></button>
         <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form'); loadData() }}>＋ <span>افزودن ویدیو</span></button>
@@ -218,7 +218,7 @@ function AdminDashboard() {
 
       <section className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-kicker">TRADEFARSI / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : 'دسته‌بندی‌ها'}</h1></div>
+          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : 'دسته‌بندی‌ها'}</h1></div>
           <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
         </header>
 

@@ -2,17 +2,17 @@ function About() {
   return (
     <main className="page-content about-page">
       <section className="about-hero">
-        <span className="eyebrow"><span className="status-dot" /> داستان TradeFarsi</span>
+        <span className="eyebrow"><span className="status-dot" /> داستان چارت مسترز</span>
         <h1>یادگیری نباید<br /><span>مرز زبانی</span> داشته باشد.</h1>
         <p className="about-lead">
-          TradeFarsi با یک ایده ساده شکل گرفت: دسترسی به آموزش‌های باکیفیت بازارهای مالی
+          چارت مسترز با یک ایده ساده شکل گرفت: دسترسی به آموزش‌های باکیفیت بازارهای مالی
           نباید به دانستن زبان انگلیسی محدود باشد.
         </p>
       </section>
 
       <section className="about-story">
         <div className="about-story-copy">
-          <span className="section-kicker">چرا TradeFarsi؟</span>
+          <span className="section-kicker">چرا چارت مسترز؟</span>
           <h2>دانش جهانی،<br />به زبان فارسی.</h2>
           <p>
             هر روز محتوای آموزشی ارزشمندی در دنیای بازارهای مالی منتشر می‌شود؛
@@ -26,7 +26,7 @@ function About() {
         <div className="about-quote-card">
           <span className="quote-mark">“</span>
           <p>هدف ما فقط ترجمه کلمات نیست؛ می‌خواهیم مسیر یادگیری را قابل‌دسترس‌تر کنیم.</p>
-          <span className="quote-caption">TRADEFARSI — OUR PURPOSE</span>
+          <span className="quote-caption">CHARTMASTERS — OUR PURPOSE</span>
         </div>
       </section>
 
@@ -58,13 +58,13 @@ function About() {
         <div>
           <span className="section-kicker">قدم بعدی</span>
           <h2>آماده‌ای یادگیری رو شروع کنی؟</h2>
-          <p>به کتابخانه آموزشی TradeFarsi سر بزن و مسیرت رو آغاز کن.</p>
+          <p>به کتابخانه آموزشی چارت مسترز سر بزن و مسیرت رو آغاز کن.</p>
         </div>
         <a className="primary-button" href="/#videos">مشاهده ویدیوها <span>←</span></a>
       </section>
 
       <p className="about-disclaimer">
-        محتوای TradeFarsi با هدف آموزش و افزایش آگاهی ارائه می‌شود و توصیه مالی یا سیگنال معاملاتی نیست.
+        محتوای چارت مسترز با هدف آموزش و افزایش آگاهی ارائه می‌شود و توصیه مالی یا سیگنال معاملاتی نیست.
       </p>
     </main>
   )

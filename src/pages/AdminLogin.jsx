@@ -30,8 +30,8 @@ function AdminLogin() {
     <main className="admin-auth-page" dir="rtl">
       <a className="admin-back-link" href="/">← بازگشت به سایت</a>
       <form className="admin-auth-card" onSubmit={handleSubmit}>
-        <span className="admin-brand-mark">T<span>.</span></span>
-        <span className="admin-kicker">TRADEFARSI CONTROL ROOM</span>
+        <span className="admin-brand-mark">C<span>.</span></span>
+        <span className="admin-kicker">CHARTMASTERS CONTROL ROOM</span>
         <h1>ورود مدیر</h1>
         <p>برای مدیریت ویدیوها وارد حساب مدیر شوید.</p>
         <label htmlFor="admin-email">ایمیل</label>

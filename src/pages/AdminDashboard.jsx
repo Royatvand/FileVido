@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import AdminBanners from '../components/AdminBanners'
 import AdminPlaylists from '../components/AdminPlaylists'
+import { extractAparatId } from '../lib/aparat'
 
 const emptyForm = {
   title: '', slug: '', description: '', aparat_id: '', cover_url: '',
@@ -25,6 +26,7 @@ function AdminDashboard() {
   const [editingId, setEditingId] = useState(null)
   const [selectedCover, setSelectedCover] = useState(null)
   const [coverPreview, setCoverPreview] = useState('')
+  const [aparatSource, setAparatSource] = useState('')
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState('videos')
   const [newCategory, setNewCategory] = useState('')
@@ -91,12 +93,14 @@ function AdminDashboard() {
     setEditingId(null)
     setSelectedCover(null)
     setCoverPreview('')
+    setAparatSource('')
   }
 
   async function startEdit(video) {
     const memberships = await supabase.select('playlist_videos', '&video_id=eq.' + video.id)
     setEditingId(video.id)
     setSelectedCover(null)
+    setAparatSource('')
     setCoverPreview(video.cover_url || '')
     setForm({
       title: video.title || '', slug: video.slug || '', description: video.description || '',
@@ -109,6 +113,15 @@ function AdminDashboard() {
     })
     setActiveTab('form')
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const aparatResult = extractAparatId(aparatSource)
+
+  function handleAparatSourceChange(event) {
+    const value = event.target.value
+    setAparatSource(value)
+    const result = extractAparatId(value)
+    if (result.id) setForm((current) => ({ ...current, aparat_id: result.id }))
   }
 
   async function handleVideoSubmit(event) {
@@ -237,7 +250,12 @@ function AdminDashboard() {
             <div className="admin-form-grid">
               <label>عنوان ویدیو *<input name="title" value={form.title} onChange={updateField} required placeholder="مثلاً آموزش تحلیل تکنیکال" /></label>
               <label>شناسه یکتای صفحه (Slug)<input name="slug" value={form.slug} onChange={updateField} placeholder="اگر خالی باشد خودکار ساخته می‌شود" /></label>
-              <label>شناسه یا هش آپارات *<input name="aparat_id" value={form.aparat_id} onChange={updateField} required placeholder="مثلاً gvtvv7m" /></label>
+              <label className="full">لینک یا کد ویدیوی آپارات
+                <input value={aparatSource} onChange={handleAparatSourceChange} dir="ltr" placeholder="https://www.aparat.com/v/nssb82r  یا  کد iframe آپارات" aria-invalid={Boolean(aparatResult.error)} />
+                {aparatResult.error && <small className="admin-field-hint error" role="alert">{aparatResult.error}</small>}
+                {aparatResult.id && aparatResult.id === form.aparat_id && <small className="admin-field-hint success">شناسه ویدیو استخراج شد و در فیلد زیر قرار گرفت: {aparatResult.id}</small>}
+              </label>
+              <label>شناسه یا هش آپارات *<input name="aparat_id" value={form.aparat_id} onChange={updateField} required placeholder="مثلاً gvtvv7m (از لینک بالا خودکار پر می‌شود)" /></label>
               <div className="admin-cover-field">
                 <span>تصویر کاور ویدیو</span>
                 <label className="admin-cover-picker">

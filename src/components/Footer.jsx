@@ -38,7 +38,7 @@ function Footer() {
         {...(telegramUrl ? { target: '_blank', rel: 'noopener noreferrer' } : { onClick: (event) => event.preventDefault() })}
       >
         <span className="telegram-cta-copy">
-          <strong>به جمع تریدرهای TradeFarsi بپیوند</strong>
+          <strong>به جمع تریدرهای چارت مسترز بپیوند</strong>
           <span>جدیدترین ویدیوها، نکته‌ها و آموزش‌ها را زودتر از همه در تلگرام ببین.</span>
           <span className="telegram-cta-button">عضویت در کانال تلگرام <span aria-hidden="true">←</span></span>
         </span>
@@ -51,13 +51,13 @@ function Footer() {
 
       <div className="footer-top">
         <div className="footer-brand">
-          <a className="brand" href="/" aria-label="TradeFarsi home">
-            <span className="brand-mark">T<span>.</span></span>
+          <a className="brand" href="/" aria-label="چارت مسترز - ChartMasters home">
+            <span className="brand-mark" aria-hidden="true">C<span>.</span></span>
             <span className="brand-name">Trade<span>Farsi</span></span>
           </a>
-          <p>TradeFarsi بستری برای یادگیری بازارهای مالی است که با ارائه ویدیوهای آموزشی باکیفیت و محتوای فارسی، مسیر یادگیری تحلیل و معامله‌گری را برای علاقه‌مندان ساده‌تر می‌کند.</p>
+          <p>چارت مسترز بستری برای یادگیری بازارهای مالی است که با ارائه ویدیوهای آموزشی باکیفیت و محتوای فارسی، مسیر یادگیری تحلیل و معامله‌گری را برای علاقه‌مندان ساده‌تر می‌کند.</p>
 
-          <div className="footer-socials" aria-label="شبکه‌های اجتماعی TradeFarsi">
+          <div className="footer-socials" aria-label="شبکه‌های اجتماعی چارت مسترز">
             {socials.map(({ key, label }) => {
               const url = socialLinks[key]
               const className = `footer-social-icon ${key}`
@@ -85,7 +85,7 @@ function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span>© {new Date().getFullYear()} TradeFarsi — تمامی حقوق محفوظ است.</span>
+        <span>© {new Date().getFullYear()} چارت مسترز — تمامی حقوق محفوظ است.</span>
         <span className="footer-caption">Learn smarter. Trade better.</span>
       </div>
     </footer>

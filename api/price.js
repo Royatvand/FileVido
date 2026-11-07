@@ -16,7 +16,7 @@ async function getJson(url) {
   try {
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: { Accept: 'application/json', 'User-Agent': 'TradeFarsi/1.0' },
+      headers: { Accept: 'application/json', 'User-Agent': 'ChartMasters/1.0' },
     })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     return await response.json()

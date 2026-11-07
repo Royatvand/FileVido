@@ -1,0 +1,30 @@
+-- جدول بنرهای اسلایدر صفحه اصلی TradeFarsi
+-- این فایل را یک بار در Supabase ← SQL Editor اجرا کن.
+
+create table if not exists public.banners (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  subtitle text not null default '',
+  image_url text not null,
+  link_url text not null default '',
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.banners enable row level security;
+
+-- همه می‌توانند بنرهای فعال را ببینند
+drop policy if exists "Public can read active banners" on public.banners;
+create policy "Public can read active banners"
+  on public.banners for select
+  using (is_active = true);
+
+-- فقط حساب‌هایی با نقش امن admin می‌توانند مدیریت کنند (همان الگوی جدول videos)
+drop policy if exists "Admins manage banners" on public.banners;
+create policy "Admins manage banners"
+  on public.banners for all
+  to authenticated
+  using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
+  with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');

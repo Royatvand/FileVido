@@ -3,6 +3,7 @@ import Footer from './components/Footer'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
 import VideosSection from './components/VideosSection'
+import BannerSlider from './components/BannerSlider'
 import VideoPage from './pages/VideoPage'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
@@ -62,6 +63,7 @@ function App() {
               <div className="floating-chip chip-bottom"><span className="status-dot" /> فارسی و روان</div>
             </div>
           </section>
+          <BannerSlider />
           <VideosSection />
         </main>
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}

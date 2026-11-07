@@ -85,9 +85,9 @@ export const supabase = {
     if (!session?.access_token) return null
     return request('/auth/v1/user', {}, session.access_token)
   },
-  async select(table, query = '') {
+  async select(table, query = '', columns = '*') {
     const session = await getValidSession()
-    return request(`/rest/v1/${table}?select=*${query}`, {}, session?.access_token)
+    return request(`/rest/v1/${table}?select=${columns}${query}`, {}, session?.access_token)
   },
   async insert(table, values) {
     const session = await getValidSession()
@@ -111,6 +111,31 @@ export const supabase = {
       method: 'DELETE',
       headers: { Prefer: 'return=minimal' },
     }, session?.access_token)
+  },
+  async updateWhere(table, filters, values) {
+    const session = await getValidSession()
+    return request(`/rest/v1/${table}?${filters}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(values) }, session?.access_token)
+  },
+  async replaceVideoPlaylists(videoId, playlistIds = []) {
+    const session = await getValidSession()
+    const token = session?.access_token
+    if (!token) throw new Error('برای مدیریت پلی‌لیست‌ها باید وارد حساب مدیر شوید.')
+    const currentRows = await request(`/rest/v1/playlist_videos?select=playlist_id,position&video_id=eq.${encodeURIComponent(videoId)}`, {}, token)
+    const selectedIds = [...new Set(playlistIds)]
+    const positions = new Map((currentRows || []).map((item) => [item.playlist_id, item.position]))
+    const nextPositions = new Map()
+    if (selectedIds.length) {
+      const existingRows = await request(`/rest/v1/playlist_videos?select=playlist_id,position&playlist_id=in.(${selectedIds.join(',')})`, {}, token)
+      for (const item of existingRows || []) {
+        const next = Math.max(nextPositions.get(item.playlist_id) || 0, Number(item.position) + 1)
+        nextPositions.set(item.playlist_id, next)
+      }
+    }
+    await request(`/rest/v1/playlist_videos?video_id=eq.${encodeURIComponent(videoId)}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, token)
+    if (selectedIds.length) {
+      const rows = selectedIds.map((playlist_id) => ({ playlist_id, video_id: videoId, position: positions.has(playlist_id) ? positions.get(playlist_id) : (nextPositions.get(playlist_id) || 0) }))
+      await request('/rest/v1/playlist_videos', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(rows) }, token)
+    }
   },
   async uploadVideoCover(file) {
     const session = await getValidSession()

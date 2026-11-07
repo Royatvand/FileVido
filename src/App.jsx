@@ -47,7 +47,7 @@ function App() {
               </p>
               <div className="hero-actions">
                 <a className="primary-button" href="#videos">مشاهده ویدیوها <span>←</span></a>
-                <a className="secondary-button" href="/about">درباره TradeFarsi</a>
+                <a className="secondary-button" href="/about">درباره چارت مسترز</a>
               </div>
               <div className="hero-meta">
                 <span><i /> محتوای تخصصی</span>

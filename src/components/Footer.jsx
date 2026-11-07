@@ -1,3 +1,4 @@
+import { FaHome, FaVideo, FaLayerGroup, FaInfoCircle } from 'react-icons/fa'
 import { socialLinks } from '../config/social'
 
 const icons = {
@@ -54,7 +55,7 @@ function Footer() {
             <span className="brand-mark">T<span>.</span></span>
             <span className="brand-name">Trade<span>Farsi</span></span>
           </a>
-          <p>یادگیری بازارهای مالی، با محتوای باکیفیت و به زبان فارسی.</p>
+          <p>TradeFarsi بستری برای یادگیری بازارهای مالی است که با ارائه ویدیوهای آموزشی باکیفیت و محتوای فارسی، مسیر یادگیری تحلیل و معامله‌گری را برای علاقه‌مندان ساده‌تر می‌کند.</p>
 
           <div className="footer-socials" aria-label="شبکه‌های اجتماعی TradeFarsi">
             {socials.map(({ key, label }) => {
@@ -71,10 +72,10 @@ function Footer() {
 
         <div className="footer-links">
           <span className="footer-heading">دسترسی سریع</span>
-          <a href="/">صفحه اصلی</a>
-          <a href="/#videos">ویدیوهای آموزشی</a>
-          <a href="/#categories">دسته‌بندی‌ها</a>
-          <a href="/about">درباره ما</a>
+          <a href="/"><FaHome aria-hidden="true" />صفحه اصلی</a>
+          <a href="/#videos"><FaVideo aria-hidden="true" />ویدیوهای آموزشی</a>
+          <a href="/#categories"><FaLayerGroup aria-hidden="true" />دسته‌بندی‌ها</a>
+          <a href="/about"><FaInfoCircle aria-hidden="true" />درباره ما</a>
         </div>
 
         <div className="footer-note">

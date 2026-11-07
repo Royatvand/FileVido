@@ -99,7 +99,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .footer-brand { min-width: 0; }
 .footer-brand .brand { display: inline-flex; }
 .footer-brand p {
-  max-width: 310px;
+  max-width: 360px;
   margin: 17px 0 0;
   color: #8b9990;
   font-size: 12px;
@@ -118,11 +118,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-weight: 800;
 }
 .footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   color: #8b9990;
   font-size: 12px;
   line-height: 1.7;
   transition: color .2s, transform .2s;
 }
+.footer-links a svg { flex-shrink: 0; width: 13px; height: 13px; opacity: .85; }
 .footer-links a:hover { color: var(--accent); transform: translateX(-3px); }
 .footer-note {
   display: flex;

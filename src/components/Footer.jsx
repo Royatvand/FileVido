@@ -53,7 +53,7 @@ function Footer() {
         <div className="footer-brand">
           <a className="brand" href="/" aria-label="چارت مسترز - ChartMasters home">
             <span className="brand-mark" aria-hidden="true">C<span>.</span></span>
-            <span className="brand-name">Trade<span>Farsi</span></span>
+            <span className="brand-name">Chart<span>Masters</span></span>
           </a>
           <p>چارت مسترز بستری برای یادگیری بازارهای مالی است که با ارائه ویدیوهای آموزشی باکیفیت و محتوای فارسی، مسیر یادگیری تحلیل و معامله‌گری را برای علاقه‌مندان ساده‌تر می‌کند.</p>
 

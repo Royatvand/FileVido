@@ -35,7 +35,7 @@ function AdminDashboard() {
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [videoRows, categoryRows] = await Promise.all([
+      const [videoRows, categoryRows, playlistRows] = await Promise.all([
         supabase.select('videos', '&order=created_at.desc'),
         supabase.select('categories', '&order=name.asc'),
         supabase.select('playlists', '&order=title.asc'),

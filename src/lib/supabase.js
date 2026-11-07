@@ -123,14 +123,17 @@ export const supabase = {
     const currentRows = await request(`/rest/v1/playlist_videos?select=playlist_id,position&video_id=eq.${encodeURIComponent(videoId)}`, {}, token)
     const selectedIds = [...new Set(playlistIds)]
     const positions = new Map((currentRows || []).map((item) => [item.playlist_id, item.position]))
-    let nextPosition = 0
+    const nextPositions = new Map()
     if (selectedIds.length) {
       const existingRows = await request(`/rest/v1/playlist_videos?select=playlist_id,position&playlist_id=in.(${selectedIds.join(',')})`, {}, token)
-      for (const item of existingRows || []) nextPosition = Math.max(nextPosition, Number(item.position) + 1)
+      for (const item of existingRows || []) {
+        const next = Math.max(nextPositions.get(item.playlist_id) || 0, Number(item.position) + 1)
+        nextPositions.set(item.playlist_id, next)
+      }
     }
     await request(`/rest/v1/playlist_videos?video_id=eq.${encodeURIComponent(videoId)}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } }, token)
     if (selectedIds.length) {
-      const rows = selectedIds.map((playlist_id) => ({ playlist_id, video_id: videoId, position: positions.has(playlist_id) ? positions.get(playlist_id) : nextPosition++ }))
+      const rows = selectedIds.map((playlist_id) => ({ playlist_id, video_id: videoId, position: positions.has(playlist_id) ? positions.get(playlist_id) : (nextPositions.get(playlist_id) || 0) }))
       await request('/rest/v1/playlist_videos', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(rows) }, token)
     }
   },

@@ -193,7 +193,7 @@ function AdminDashboard() {
         <a className="admin-sidebar-brand" href="/"><span className="admin-brand-mark">T<span>.</span></span><span>Trade<span>Farsi</span><small>مدیریت محتوا</small></span></a>
         <div className="admin-side-label">مدیریت</div>
         <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('videos') }}>▤ <span>ویدیوها</span></button>
-        <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form') }}>＋ <span>افزودن ویدیو</span></button>
+        <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form'); loadData() }}>＋ <span>افزودن ویدیو</span></button>
         <button className={activeTab === 'categories' ? 'active' : ''} onClick={() => setActiveTab('categories')}>◫ <span>دسته‌بندی‌ها</span></button>
         <button className={activeTab === 'playlists' ? 'active' : ''} onClick={() => setActiveTab('playlists')}>▤ <span>پلی‌لیست‌ها</span></button>
         <button className={activeTab === 'banners' ? 'active' : ''} onClick={() => setActiveTab('banners')}>▣ <span>اسلایدر</span></button>
@@ -258,7 +258,6 @@ function AdminDashboard() {
                     <small>{playlist.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</small>
                   </label>)}
                 </div>}
-                <a href="#playlists" onClick={(event) => { event.preventDefault(); setActiveTab('playlists') }}>ساخت پلی‌لیست جدید ↗</a>
               </div>
               <label>مدت ویدیو<input name="duration" value={form.duration} onChange={updateField} placeholder="مثلاً 18:45" /></label>
               <label>مدرس<input name="instructor" value={form.instructor} onChange={updateField} placeholder="نام مدرس" /></label>

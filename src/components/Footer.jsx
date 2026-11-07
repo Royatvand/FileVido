@@ -73,7 +73,7 @@ function Footer() {
         <div className="footer-links">
           <span className="footer-heading">دسترسی سریع</span>
           <a href="/"><FaHome aria-hidden="true" />صفحه اصلی</a>
-          <a href="/#videos"><FaVideo aria-hidden="true" />ویدیوهای آموزشی</a>
+          <a href="/videos"><FaVideo aria-hidden="true" />ویدیوهای آموزشی</a>
           <a href="/#categories"><FaLayerGroup aria-hidden="true" />دسته‌بندی‌ها</a>
           <a href="/about"><FaInfoCircle aria-hidden="true" />درباره ما</a>
         </div>

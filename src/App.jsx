@@ -10,6 +10,8 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
+import { useEffect } from 'react'
+import { setPageSeo } from './lib/seo'
 import './admin.css'
 
 function App() {
@@ -21,6 +23,28 @@ function App() {
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
   const videoId = videoMatch ? decodeURIComponent(videoMatch[1]) : null
+
+  useEffect(() => {
+    if (isHome) {
+      setPageSeo({
+        title: 'چارت مسترز | آموزش بازارهای مالی با ترجمه فارسی',
+        description: 'ویدیوهای آموزشی منتخب بازارهای مالی، تحلیل تکنیکال و ترید را با ترجمه فارسی در چارت مسترز یاد بگیر.',
+        path: '/',
+      })
+    } else if (isVideos) {
+      setPageSeo({
+        title: 'آرشیو ویدیوهای آموزشی بازارهای مالی | چارت مسترز',
+        description: 'مجموعه ویدیوهای آموزشی بازارهای مالی با ترجمه فارسی؛ جست‌وجو و انتخاب آموزش‌های ترید در چارت مسترز.',
+        path: '/videos',
+      })
+    } else if (isAbout) {
+      setPageSeo({
+        title: 'درباره چارت مسترز | آموزش ترید به زبان فارسی',
+        description: 'با هدف و داستان چارت مسترز آشنا شو؛ دسترسی ساده‌تر به آموزش‌های باکیفیت بازارهای مالی با ترجمه فارسی.',
+        path: '/about',
+      })
+    }
+  }, [path, isHome, isVideos, isAbout])
 
   if (isAdminLogin) return <AdminLogin />
   if (isAdmin) {

@@ -21,7 +21,11 @@ jobs:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
       - run: npm ci
+      # مقادیر Supabase فقط در Vercel تعریف شده‌اند؛ بدون این‌ها اپ به دیتابیس وصل نمی‌شود
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - run: npx cap sync android
 
       # اگر Secrets تنظیم شده باشد، APK امضاشده (مناسب مایکت) ساخته می‌شود؛ وگرنه فقط نسخه debug

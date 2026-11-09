@@ -1,5 +1,6 @@
 import { FaHome, FaVideo, FaLayerGroup, FaInfoCircle } from 'react-icons/fa'
 import { socialLinks } from '../config/social'
+import AnimatedText from './animated/AnimatedText'
 
 const icons = {
   telegram: (
@@ -53,7 +54,7 @@ function Footer() {
         <div className="footer-brand">
           <a className="brand" href="/" aria-label="چارت مسترز - ChartMasters home">
             <img className="brand-icon" src="/chartmasters-icon.webp" alt="" aria-hidden="true" />
-            <span className="brand-name">Chart<span>Masters</span></span>
+            <span className="brand-name"><AnimatedText text="Chart" by="char" /><span className="brand-accent"><AnimatedText text="Masters" by="char" offset={5} /></span></span>
           </a>
           <p>چارت مسترز بستری برای یادگیری بازارهای مالی است که با ارائه ویدیوهای آموزشی باکیفیت و محتوای فارسی، مسیر یادگیری تحلیل و معامله‌گری را برای علاقه‌مندان ساده‌تر می‌کند.</p>
 

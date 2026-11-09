@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import VideoCard from './VideoCard'
+import AnimatedText from './animated/AnimatedText'
+import Counter from './animated/Counter'
 import { supabase } from '../lib/supabase'
 import { videos as demoVideos } from '../data/videos'
 
@@ -85,7 +87,7 @@ function VideosSection({ archive = false }) {
     <section className={`videos-section ${archive ? 'videos-archive' : ''}`} id="videos">
       <div className="videos-heading">
         <span className="section-kicker">{archive ? 'آرشیو ویدیوها' : 'کتابخانه آموزشی'}</span>
-        {archive ? <h1>همه ویدیوهای آموزشی</h1> : <h2>ویدیوهای آموزشی</h2>}
+        {archive ? <h1><AnimatedText text="همه ویدیوهای آموزشی" /></h1> : <h2><AnimatedText text="ویدیوهای آموزشی" /></h2>}
         <p>آموزش‌های منتخب بازارهای مالی با ترجمه فارسی.</p>
       </div>
 
@@ -127,7 +129,10 @@ function VideosSection({ archive = false }) {
           )}
 
           <div className="filters-status" aria-live="polite">
-            <span>{filteredVideos.length} ویدیو{hasFilters ? ` از ${videos.length}` : ''}</span>
+            <span>
+              <span className="sr-only">{filteredVideos.length} ویدیو{hasFilters ? ` از ${videos.length}` : ''}</span>
+              <span aria-hidden="true"><Counter targetValue={filteredVideos.length} /> ویدیو{hasFilters ? ` از ${videos.length}` : ''}</span>
+            </span>
             {hasFilters && <button type="button" className="filter-reset" onClick={resetFilters}>پاک کردن فیلترها</button>}
           </div>
         </div>

@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://chartmasters.top/sitemap.xml
+Sitemap: https://www.chartmasters.top/sitemap.xml

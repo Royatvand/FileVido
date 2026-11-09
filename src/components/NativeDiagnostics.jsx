@@ -31,7 +31,10 @@ function NativeDiagnostics() {
     ]
     setLines([...base, 'در حال تست...'])
     const results = await Promise.all([
-      probe('سایت chartmasters.top/api/price', 'https://chartmasters.top/api/price'),
+      probe('قیمت (حالت عادی)', 'https://chartmasters.top/api/price'),
+      probe('قیمت بدون CORS (فقط رسیدن به سرور)', 'https://chartmasters.top/api/price', { mode: 'no-cors' }),
+      probe('صفحه اصلی سایت بدون CORS', 'https://chartmasters.top/', { mode: 'no-cors' }),
+      probe('قیمت از آدرس vercel.app', 'https://tradefarsi.vercel.app/api/price'),
       supabaseUrl
         ? probe('Supabase', `${supabaseUrl}/rest/v1/videos?select=id&limit=1`, { headers: { apikey: key } })
         : Promise.resolve('Supabase: تنظیم نشده'),

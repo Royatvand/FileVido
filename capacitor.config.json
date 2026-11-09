@@ -1,0 +1,11 @@
+{
+  "appId": "top.chartmasters.app",
+  "appName": "چارت مسترز",
+  "webDir": "dist",
+  "backgroundColor": "#080d0c",
+  "server": { "androidScheme": "https" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 800, "backgroundColor": "#080d0c", "showSpinner": false },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#080d0c" }
+  }
+}

@@ -95,6 +95,8 @@ export async function loadPrice() {
 }
 
 export default async function handler(request, response) {
+  // اپ اندروید از origin دیگری (https://localhost) درخواست می‌دهد؛ داده قیمت عمومی است
+  response.setHeader('Access-Control-Allow-Origin', '*')
   try {
     const data = await loadPrice()
     // کش ۱ ثانیه‌ای روی CDN تا با تعداد زیاد بازدیدکننده به منابع بیرونی فشار نیاید

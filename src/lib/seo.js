@@ -12,7 +12,7 @@ function upsertMeta(attribute, key, content) {
 
 export function setPageSeo({ title, description, path = '/', image } = {}) {
   const pageTitle = title || 'چارت مسترز | ChartMasters'
-  const pageDescription = description || 'آموزش بازارهای مالی با ویدیوهای آموزشی منتخب و ترجمه فارسی.'
+  const pageDescription = description || 'ویدیوهای آموزش ترید با زیرنویس فارسی و ترجمه آموزش‌های بازارهای مالی.'
   const canonicalUrl = new URL(path, SITE_URL).toString()
 
   document.title = pageTitle

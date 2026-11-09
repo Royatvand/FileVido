@@ -4,6 +4,7 @@ import About from './pages/About'
 import NotFound from './pages/NotFound'
 import VideosSection from './components/VideosSection'
 import BannerSlider from './components/BannerSlider'
+import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
@@ -41,7 +42,7 @@ function App() {
             <div className="hero-glow" />
             <div className="hero-content">
               <span className="eyebrow"><span className="status-dot" /> دنیای ترید، به زبان خودت</span>
-              <h1>دانش ترید را<br /><span>بدون مرز زبانی</span> یاد بگیر.</h1>
+              <h1><AnimatedText text="دانش ترید را" /><br /><span className="hl"><AnimatedText text="بدون مرز زبانی" offset={3} /></span>{' '}<AnimatedText text="یاد بگیر." offset={6} /></h1>
               <p className="hero-description">
                 آموزش‌های ارزشمند بازارهای مالی از بهترین منابع دنیا؛
                 حالا با ترجمه فارسی، ساده‌تر و در دسترس‌تر از همیشه.

@@ -1,3 +1,5 @@
+import AnimatedText from './animated/AnimatedText'
+
 function Header() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isAbout = path === '/about'
@@ -8,7 +10,7 @@ function Header() {
       <div className="header-inner">
         <a className="brand" href="/" aria-label="چارت مسترز - ChartMasters home">
           <img className="brand-icon" src="/chartmasters-icon.webp" alt="" aria-hidden="true" />
-          <span className="brand-name">Chart<span>Masters</span></span>
+          <span className="brand-name"><AnimatedText text="Chart" by="char" /><span className="brand-accent"><AnimatedText text="Masters" by="char" offset={5} /></span></span>
         </a>
 
         <nav className="main-nav" aria-label="منوی اصلی">

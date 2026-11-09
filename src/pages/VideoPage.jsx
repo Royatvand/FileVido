@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getVideoById, getAparatEmbedUrl, getPlaylistForVideo, videos } from '../data/videos'
 import { supabase } from '../lib/supabase'
 import NotFound from './NotFound'
+import { setPageSeo } from '../lib/seo'
 import './VideoPage.css'
 
 function VideoPage({ videoId }) {
@@ -60,6 +61,19 @@ function VideoPage({ videoId }) {
     instructor: databaseVideo.instructor,
     tags: databaseVideo.tags || [],
   } : null)
+
+  useEffect(() => {
+    if (!video) return
+    const description = (video.description || 'ویدیوی آموزشی بازارهای مالی با ترجمه فارسی در چارت مسترز.')
+      .replace(/\\s+/g, ' ')
+      .slice(0, 160)
+    setPageSeo({
+      title: `${video.title} | چارت مسترز`,
+      description,
+      path: `/video/${encodeURIComponent(video.id)}`,
+      image: video.cover,
+    })
+  }, [video?.id, video?.title, video?.description, video?.cover])
 
   if (loading) return <main className="page-content video-page"><div className="admin-empty">در حال بارگذاری ویدیو...</div></main>
   if (!video) return <NotFound />

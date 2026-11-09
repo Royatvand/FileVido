@@ -1,4 +1,4 @@
-const SITE_URL = 'https://chartmasters.top'
+const SITE_URL = 'https://www.chartmasters.top'
 
 function upsertMeta(attribute, key, content) {
   let element = document.head.querySelector(`meta[${attribute}="${key}"]`)

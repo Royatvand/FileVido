@@ -1,4 +1,4 @@
-const SITE_URL = 'https://chartmasters.top'
+const SITE_URL = 'https://www.chartmasters.top'
 
 function escapeXml(value = '') {
   return String(value).replace(/[<>&'"\u0000-\u001f]/g, (char) => ({

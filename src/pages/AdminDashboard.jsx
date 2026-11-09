@@ -203,7 +203,7 @@ function AdminDashboard() {
   return (
     <main className="admin-page" dir="rtl">
       <aside className="admin-sidebar">
-        <a className="admin-sidebar-brand" href="/"><span className="admin-brand-mark">C<span>.</span></span><span>Chart<span>Masters</span><small>مدیریت محتوا</small></span></a>
+        <a className="admin-sidebar-brand" href="/"><img className="admin-brand-mark" src="/chartmasters-icon.webp" alt="" /><span>Chart<span>Masters</span><small>مدیریت محتوا</small></span></a>
         <div className="admin-side-label">مدیریت</div>
         <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('videos') }}>▤ <span>ویدیوها</span></button>
         <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form'); loadData() }}>＋ <span>افزودن ویدیو</span></button>

@@ -28,7 +28,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .site-header { position: relative; z-index: 5; border-bottom: 1px solid var(--line); background: rgba(8,13,12,.78); backdrop-filter: blur(18px); }
 .header-inner { width: min(1160px, calc(100% - 48px)); height: 84px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; direction: rtl; flex-shrink: 0; }
+.brand { display: inline-flex; align-items: center; gap: 10px; direction: ltr; flex-direction: row-reverse; flex-shrink: 0; }
 .brand-icon { width: 48px; height: 48px; display: block; flex: 0 0 auto; object-fit: contain; }
 .brand-name { color: #f5f8f6; font-size: 19px; font-weight: 800; letter-spacing: -.7px; }
 .brand-name .brand-accent { color: var(--accent); }

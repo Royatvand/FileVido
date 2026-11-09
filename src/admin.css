@@ -21,7 +21,7 @@
 .admin-alert button { float:left; border:0; color:inherit; background:none; cursor:pointer; }
 .admin-page { min-height:100vh; display:grid; grid-template-columns:245px minmax(0,1fr); background:#080d0c; }
 .admin-sidebar { position:sticky; top:0; height:100vh; display:flex; flex-direction:column; padding:27px 18px; border-left:1px solid var(--line); background:#0b120e; }
-.admin-sidebar-brand { display:flex; align-items:center; gap:11px; padding:0 8px 30px; color:#f4f7f5; font-size:15px; font-weight:800; direction:rtl; }
+.admin-sidebar-brand { display:flex; align-items:center; gap:11px; padding:0 8px 30px; color:#f4f7f5; font-size:15px; font-weight:800; direction:ltr; flex-direction:row-reverse; }
 .admin-sidebar-brand>span:last-child { direction:ltr; }
 .admin-sidebar-brand>span:last-child>span { color:var(--accent); }
 .admin-sidebar-brand small { display:block; margin-top:5px; color:#819087; font-size:9px; font-weight:400; text-align:right; }

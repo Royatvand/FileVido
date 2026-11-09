@@ -10,6 +10,7 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
+import NativeDiagnostics from './components/NativeDiagnostics'
 import './admin.css'
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
         </main>
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       <Footer />
+      <NativeDiagnostics />
     </div>
   )
 }

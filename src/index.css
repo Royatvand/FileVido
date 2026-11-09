@@ -30,7 +30,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .header-inner { width: min(1160px, calc(100% - 48px)); height: 84px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; direction: rtl; flex-shrink: 0; }
 .brand-icon { width: 48px; height: 48px; display: block; flex: 0 0 auto; object-fit: contain; }
-.brand-name { color: #f5f8f6; font-size: 19px; font-weight: 800; letter-spacing: -.7px; }
+.brand-name { direction: ltr; unicode-bidi: isolate; color: #f5f8f6; font-size: 19px; font-weight: 800; letter-spacing: -.7px; }
 .brand-name .brand-accent { color: var(--accent); }
 .main-nav { display: flex; align-items: center; gap: 34px; direction: rtl; }
 .nav-link { color: #9ca8a2; font-size: 13px; transition: color .2s ease; }

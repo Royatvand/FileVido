@@ -3,7 +3,9 @@ import { Liveline } from 'liveline'
 import './MarketChart.css'
 
 // قیمت از تابع سرورلس خود سایت (/api/price) خوانده می‌شود؛ مرورگر مستقیم به صرافی‌ها وصل نمی‌شود.
-const PRICE_URL = '/api/price'
+// داخل اپ اندروید فایل‌ها محلی‌اند، پس API را از دامنه اصلی سایت می‌گیریم
+const isNativeApp = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+const PRICE_URL = isNativeApp ? 'https://chartmasters.top/api/price' : '/api/price'
 const POLL_MS = 1000 // تایم‌فریم ۱ ثانیه‌ای: هر ثانیه یک نقطهٔ جدید
 const MAX_POINTS = 300
 const WINDOW_SECS = 60 // بازهٔ قابل مشاهده روی نمودار

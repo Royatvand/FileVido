@@ -1,4 +1,4 @@
-package top.chartmasters.app;
+package chartmasters.app;
 
 import com.getcapacitor.BridgeActivity;
 

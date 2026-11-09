@@ -7,7 +7,7 @@ function Header() {
     <header className="site-header">
       <div className="header-inner">
         <a className="brand" href="/" aria-label="چارت مسترز - ChartMasters home">
-          <span className="brand-mark" aria-hidden="true">C<span>.</span></span>
+          <img className="brand-icon" src="/chartmasters-icon.webp" alt="" aria-hidden="true" />
           <span className="brand-name">Chart<span>Masters</span></span>
         </a>
 

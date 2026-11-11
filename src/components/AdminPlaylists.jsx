@@ -15,7 +15,10 @@ function AdminPlaylists({ onNotice }) {
   const [memberships, setMemberships] = useState([])
   const [selectedId, setSelectedId] = useState('')
   const [editingId, setEditingId] = useState(null)
-  const [form, setForm] = useState({ title: '', slug: '', description: '', status: 'draft' })
+  const [form, setForm] = useState({ title: '', slug: '', description: '', status: 'draft', cover_url: '' })
+  const [selectedCover, setSelectedCover] = useState(null)
+  const [coverPreview, setCoverPreview] = useState('')
+  const [coverRemoved, setCoverRemoved] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -38,6 +41,11 @@ function AdminPlaylists({ onNotice }) {
   }, [onNotice])
 
   useEffect(() => { loadData() }, [loadData])
+  useEffect(() => {
+    return () => {
+      if (coverPreview.startsWith('blob:')) URL.revokeObjectURL(coverPreview)
+    }
+  }, [coverPreview])
 
   const selectedVideos = useMemo(() => memberships
     .filter((item) => item.playlist_id === selectedId)
@@ -51,12 +59,40 @@ function AdminPlaylists({ onNotice }) {
   }
 
   function resetForm() {
-    setForm({ title: '', slug: '', description: '', status: 'draft' })
+    setForm({ title: '', slug: '', description: '', status: 'draft', cover_url: '' })
+    setSelectedCover(null)
+    setCoverPreview('')
+    setCoverRemoved(false)
     setEditingId(null)
   }
 
+  function handleCoverChange(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      onNotice({ type: 'error', text: 'فقط تصویر JPG، PNG یا WEBP مجاز است.' })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      onNotice({ type: 'error', text: 'حجم تصویر باید حداکثر ۵ مگابایت باشد.' })
+      return
+    }
+    setSelectedCover(file)
+    setCoverPreview(URL.createObjectURL(file))
+    setCoverRemoved(false)
+  }
+
+  function removeCover() {
+    setSelectedCover(null)
+    setCoverPreview('')
+    setCoverRemoved(true)
+  }
+
   function editPlaylist(playlist) {
-    setForm({ title: playlist.title, slug: playlist.slug, description: playlist.description || '', status: playlist.status })
+    setForm({ title: playlist.title, slug: playlist.slug, description: playlist.description || '', status: playlist.status, cover_url: playlist.cover_url || '' })
+    setSelectedCover(null)
+    setCoverPreview(playlist.cover_url || '')
+    setCoverRemoved(false)
     setEditingId(playlist.id)
     setSelectedId(playlist.id)
   }
@@ -64,14 +100,21 @@ function AdminPlaylists({ onNotice }) {
   async function handleSubmit(event) {
     event.preventDefault()
     setSaving(true)
-    const payload = {
-      title: form.title.trim(),
-      slug: form.slug.trim() || slugify(form.title) || 'playlist-' + Date.now(),
-      description: form.description.trim(),
-      status: form.status,
-      updated_at: new Date().toISOString(),
-    }
     try {
+      let coverUrl = coverRemoved ? '' : form.cover_url
+      if (selectedCover) {
+        onNotice({ type: '', text: 'در حال آپلود تصویر کاور...' })
+        coverUrl = await supabase.uploadVideoCover(selectedCover)
+      }
+      const payload = {
+        title: form.title.trim(),
+        slug: form.slug.trim() || slugify(form.title) || 'playlist-' + Date.now(),
+        description: form.description.trim(),
+        status: form.status,
+        updated_at: new Date().toISOString(),
+      }
+      // ستون cover_url فقط وقتی فرستاده می‌شود که کاوری وجود دارد یا حذف شده؛ تا قبل از اجرای SQL هم ذخیره بقیه فیلدها کار کند
+      if (coverUrl || (editingId && coverRemoved)) payload.cover_url = coverUrl
       if (editingId) await supabase.update('playlists', editingId, payload)
       else await supabase.insert('playlists', payload)
       onNotice({ type: 'success', text: editingId ? 'پلی‌لیست به‌روزرسانی شد.' : 'پلی‌لیست ساخته شد.' })
@@ -124,6 +167,16 @@ function AdminPlaylists({ onNotice }) {
         <div className="admin-form-grid">
           <label>عنوان پلی‌لیست *<input name="title" value={form.title} onChange={updateField} required placeholder="مثلاً دوره کامل پرایس اکشن" /></label>
           <label>شناسه صفحه (Slug)<input name="slug" value={form.slug} onChange={updateField} placeholder="در صورت خالی بودن خودکار ساخته می‌شود" /></label>
+          <div className="admin-cover-field full">
+            <span>تصویر کاور پلی‌لیست</span>
+            <label className="admin-cover-picker">
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverChange} />
+              <span>＋ انتخاب تصویر از دستگاه</span>
+            </label>
+            <small>JPG، PNG یا WEBP — حداکثر ۵ مگابایت. این تصویر در صفحه اصلی روی کارت دوره نمایش داده می‌شود.</small>
+            {coverPreview && <img className="admin-cover-preview" src={coverPreview} alt="پیش‌نمایش کاور پلی‌لیست" />}
+            {coverPreview && <button type="button" className="admin-secondary-button" onClick={removeCover}>حذف کاور</button>}
+          </div>
           <label className="full">توضیحات<textarea name="description" rows="3" value={form.description} onChange={updateField} placeholder="توضیح کوتاه درباره این مجموعه..." /></label>
           <label>وضعیت انتشار<select name="status" value={form.status} onChange={updateField}><option value="draft">پیش‌نویس</option><option value="published">انتشار عمومی</option></select></label>
         </div>
@@ -141,6 +194,7 @@ function AdminPlaylists({ onNotice }) {
               const count = memberships.filter((item) => item.playlist_id === playlist.id).length
               return (
                 <article key={playlist.id} className={selectedId === playlist.id ? 'selected' : ''}>
+                  {playlist.cover_url && <img className="admin-playlist-thumb" src={playlist.cover_url} alt="" />}
                   <div className="admin-playlist-info"><strong>{playlist.title}</strong><small>{count} ویدیو · {playlist.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</small></div>
                   <div className="admin-row-actions">
                     <button type="button" onClick={() => setSelectedId(playlist.id)}>ترتیب ویدیوها</button>

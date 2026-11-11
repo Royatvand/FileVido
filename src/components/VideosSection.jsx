@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import VideoCard from './VideoCard'
+import PlaylistCard from './PlaylistCard'
 import AnimatedText from './animated/AnimatedText'
 import Counter from './animated/Counter'
 import { supabase } from '../lib/supabase'
-import { videos as demoVideos } from '../data/videos'
+import { videos as demoVideos, playlists as demoPlaylists } from '../data/videos'
 
 // یکسان‌سازی حروف عربی/فارسی و حذف نیم‌فاصله تا جست‌وجو دقیق‌تر کار کند
 function normalize(value = '') {
@@ -19,6 +20,7 @@ const LEVEL_ORDER = ['مقدماتی', 'متوسط', 'پیشرفته']
 
 function VideosSection({ archive = false }) {
   const [videos, setVideos] = useState(demoVideos)
+  const [playlists, setPlaylists] = useState(() => demoPlaylists.map((item) => ({ id: item.id, title: item.title, description: item.description, cover: '', createdAt: '', videoIds: item.videoIds })))
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
   const [level, setLevel] = useState('')
@@ -27,14 +29,17 @@ function VideosSection({ archive = false }) {
     let active = true
     async function loadPublishedVideos() {
       try {
-        const [rows, categoryRows] = await Promise.all([
+        const [rows, categoryRows, playlistRows, membershipRows] = await Promise.all([
           supabase.select('videos', '&status=eq.published&order=created_at.desc'),
           supabase.select('categories', '&order=name.asc').catch(() => []),
+          supabase.select('playlists', '&status=eq.published&order=created_at.desc').catch(() => []),
+          supabase.select('playlist_videos', '&order=position.asc').catch(() => []),
         ])
         if (!active || !rows) return
         const categoryNames = new Map((categoryRows || []).map((item) => [item.id, item.name]))
         setVideos(rows.map((video) => ({
           id: video.slug,
+          createdAt: video.created_at,
           aparatId: video.aparat_id,
           title: video.title,
           description: video.description,
@@ -44,6 +49,19 @@ function VideosSection({ archive = false }) {
           level: video.level,
           instructor: video.instructor,
           tags: video.tags || [],
+        })))
+        const slugById = new Map(rows.map((video) => [video.id, video.slug]))
+        setPlaylists((playlistRows || []).map((playlist) => ({
+          id: playlist.id,
+          title: playlist.title,
+          description: playlist.description || '',
+          cover: playlist.cover_url || '',
+          createdAt: playlist.created_at,
+          videoIds: (membershipRows || [])
+            .filter((item) => item.playlist_id === playlist.id)
+            .sort((a, b) => a.position - b.position)
+            .map((item) => slugById.get(item.video_id))
+            .filter(Boolean),
         })))
       } catch {
         // Keep demo content visible until the database is configured.
@@ -73,6 +91,44 @@ function VideosSection({ archive = false }) {
       return haystack.includes(term)
     })
   }, [videos, query, category, level])
+
+  // هر دوره فقط یک کارت دارد؛ ویدیوهای بدون دوره مثل قبل کارت جدا می‌گیرند
+  const { items, totalItems } = useMemo(() => {
+    const byId = new Map(videos.map((video) => [video.id, video]))
+    const term = normalize(query)
+    const inPlaylist = new Set()
+    const visibleIds = new Set(filteredVideos.map((video) => video.id))
+    const playlistItems = []
+    let total = 0
+    playlists.forEach((playlist) => {
+      const lessonVideos = playlist.videoIds.map((id) => byId.get(id)).filter(Boolean)
+      if (lessonVideos.length === 0) return
+      lessonVideos.forEach((video) => inPlaylist.add(video.id))
+      total += 1
+      const matchesVideo = lessonVideos.some((video) => visibleIds.has(video.id))
+      const matchesText = !category && !level && term && normalize(`${playlist.title} ${playlist.description}`).includes(term)
+      if (!matchesVideo && !matchesText) return
+      playlistItems.push({
+        type: 'playlist',
+        key: `playlist-${playlist.id}`,
+        createdAt: playlist.createdAt || '',
+        playlist: {
+          ...playlist,
+          videos: lessonVideos,
+          firstVideoId: lessonVideos[0].id,
+          cover: playlist.cover || lessonVideos[0].cover,
+          category: lessonVideos[0].category,
+        },
+      })
+    })
+    const singles = videos.filter((video) => !inPlaylist.has(video.id))
+    total += singles.length
+    const singleItems = filteredVideos
+      .filter((video) => !inPlaylist.has(video.id))
+      .map((video) => ({ type: 'video', key: `video-${video.id}`, createdAt: video.createdAt || '', video }))
+    const merged = [...playlistItems, ...singleItems].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    return { items: merged, totalItems: total }
+  }, [videos, playlists, filteredVideos, query, category, level])
 
   const hasFilters = Boolean(query || category || level)
   const showFilters = videos.length > 1
@@ -130,17 +186,17 @@ function VideosSection({ archive = false }) {
 
           <div className="filters-status" aria-live="polite">
             <span>
-              <span className="sr-only">{filteredVideos.length} ویدیو{hasFilters ? ` از ${videos.length}` : ''}</span>
-              <span aria-hidden="true"><Counter targetValue={filteredVideos.length} /> ویدیو{hasFilters ? ` از ${videos.length}` : ''}</span>
+              <span className="sr-only">{items.length} آموزش{hasFilters ? ` از ${totalItems}` : ''}</span>
+              <span aria-hidden="true"><Counter targetValue={items.length} /> آموزش{hasFilters ? ` از ${totalItems}` : ''}</span>
             </span>
             {hasFilters && <button type="button" className="filter-reset" onClick={resetFilters}>پاک کردن فیلترها</button>}
           </div>
         </div>
       )}
 
-      {filteredVideos.length > 0 ? (
+      {items.length > 0 ? (
         <div className="videos-grid">
-          {filteredVideos.map((video) => <VideoCard key={video.id} video={video} />)}
+          {items.map((item) => (item.type === 'playlist' ? <PlaylistCard key={item.key} playlist={item.playlist} /> : <VideoCard key={item.key} video={item.video} />))}
         </div>
       ) : (
         <div className="videos-empty">

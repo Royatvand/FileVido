@@ -166,3 +166,6 @@
 .admin-field-hint.error { color:#ffb4a9; }
 .admin-field-hint.success { color:#8cf2b1; }
 .admin-form-grid input[aria-invalid="true"] { border-color:rgba(251,113,133,.6); }
+.admin-playlist-thumb { width:64px; aspect-ratio:16/9; object-fit:cover; border:1px solid var(--line); border-radius:6px; background:#101a14; flex:0 0 auto; }
+.admin-playlist-list article .admin-playlist-thumb + .admin-playlist-info { flex:1; }
+.admin-cover-field.full { grid-column:1 / -1; }

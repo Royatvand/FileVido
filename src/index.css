@@ -275,6 +275,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .video-card:hover .video-thumb img { transform: scale(1.05); }
 .video-play { position: absolute; inset: 0; margin: auto; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; color: #07110b; background: var(--accent); font-size: 16px; padding-right: 3px; opacity: 0; transform: scale(.85); transition: .2s ease; box-shadow: 0 8px 28px rgba(140,242,177,.28); }
 .video-card:hover .video-play, .video-card:focus-visible .video-play { opacity: 1; transform: scale(1); }
+.playlist-badge { position: absolute; right: 10px; bottom: 10px; padding: 4px 10px; border: 1px solid rgba(140,242,177,.35); border-radius: 6px; color: var(--accent); background: rgba(8,13,12,.82); backdrop-filter: blur(6px); font-size: 10px; font-weight: 700; }
 .video-duration { position: absolute; left: 10px; bottom: 10px; padding: 4px 9px; border-radius: 6px; color: #e8f1ea; background: rgba(8,13,12,.78); backdrop-filter: blur(6px); font-size: 10px; }
 .video-body { display: flex; flex: 1; flex-direction: column; gap: 9px; padding: 18px 18px 20px; }
 .video-category { align-self: flex-start; padding: 4px 10px; border: 1px solid rgba(140,242,177,.2); border-radius: 20px; color: var(--accent); background: rgba(140,242,177,.06); font-size: 10px; }

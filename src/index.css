@@ -383,3 +383,25 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .telegram-cta-art { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .telegram-ring.ring-one { animation: none; } }
+
+/* بخش‌های دوره‌ها و ویدیوهای تکی */
+.videos-block { margin-top: 34px; }
+.videos-block:first-of-type { margin-top: 8px; }
+.videos-block-title { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; color: #e9f0eb; font-size: 17px; font-weight: 800; }
+.videos-block-title small { color: #7e8d83; font-size: 11px; font-weight: 400; }
+.course-slider { position: relative; }
+.course-slider-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 2px 10px; direction: rtl; }
+.course-slider-track::-webkit-scrollbar { display: none; }
+.course-slider-track > .video-card { flex: 0 0 calc((100% - 40px) / 3); scroll-snap-align: start; }
+.slider-arrow { position: absolute; top: 34%; z-index: 3; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid rgba(140,242,177,.3); border-radius: 50%; color: var(--accent); background: rgba(8,13,12,.86); backdrop-filter: blur(6px); font-size: 17px; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
+.slider-arrow:hover { background: rgba(140,242,177,.14); border-color: var(--accent); }
+.slider-prev { right: -14px; }
+.slider-next { left: -14px; }
+@media (max-width: 900px) {
+  .course-slider-track > .video-card { flex-basis: calc((100% - 20px) / 2); }
+}
+@media (max-width: 600px) {
+  .course-slider-track { gap: 14px; }
+  .course-slider-track > .video-card { flex-basis: 86%; }
+  .slider-arrow { display: none; }
+}

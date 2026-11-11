@@ -137,7 +137,8 @@ function AdminDashboard() {
 
       const payload = {
         title: form.title.trim(),
-        slug: (form.slug.trim() || slugify(form.title) || `video-${Date.now()}`),
+        // اگر Slug دستی وارد نشده، یک پسوند یکتا اضافه می‌شود؛ چون عنوان‌های فارسی بعد از حذف حروف فارسی اغلب یکسان می‌شوند
+        slug: form.slug.trim() || `${slugify(form.title) || 'video'}-${Date.now().toString(36)}`,
         description: form.description.trim(),
         aparat_id: form.aparat_id.trim(),
         cover_url: coverUrl,
@@ -164,7 +165,8 @@ function AdminDashboard() {
       setActiveTab('videos')
       await loadData()
     } catch (error) {
-      setNotice({ type: 'error', text: error.message })
+      const duplicate = /videos_slug_key|duplicate key/i.test(error.message || '')
+      setNotice({ type: 'error', text: duplicate ? 'این شناسه صفحه (Slug) قبلاً برای ویدیوی دیگری استفاده شده است. فیلد Slug را خالی بگذار یا مقدار دیگری وارد کن.' : error.message })
     } finally {
       setSaving(false)
     }

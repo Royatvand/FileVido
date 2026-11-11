@@ -1,7 +1,10 @@
 import AnimatedText from './animated/AnimatedText'
+import { supabase } from '../lib/supabase'
 
 function Header() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
+  const isLogin = path === '/login'
+  const loggedIn = Boolean(supabase.getUserSession())
   const isAbout = path === '/about'
   const isVideos = path === '/videos' || path.startsWith('/video/')
 
@@ -20,9 +23,12 @@ function Header() {
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>
 
-        <a className="header-action" href="/#videos">
-          شروع یادگیری <span aria-hidden="true">↗</span>
-        </a>
+        <div className="header-actions">
+          <a className={`header-login ${isLogin ? 'active' : ''}`} href="/login">{loggedIn ? 'حساب من' : 'ورود'}</a>
+          <a className="header-action" href="/#videos">
+            شروع یادگیری <span aria-hidden="true">↗</span>
+          </a>
+        </div>
       </div>
     </header>
   )

@@ -18,4 +18,9 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // تابع‌های سرورلس Vercel در Node اجرا می‌شوند
+    files: ['api/**/*.js'],
+    languageOptions: { globals: globals.node },
+  },
 ])

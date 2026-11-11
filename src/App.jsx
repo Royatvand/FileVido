@@ -6,6 +6,7 @@ import VideosSection from './components/VideosSection'
 import BannerSlider from './components/BannerSlider'
 import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
+import Login from './pages/Login'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
@@ -19,6 +20,7 @@ function App() {
   const isHome = path === '/'
   const isAbout = path === '/about'
   const isVideos = path === '/videos'
+  const isLogin = path === '/login'
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
@@ -91,6 +93,10 @@ function App() {
           </section>
           <BannerSlider />
           <VideosSection />
+        </main>
+      ) : isLogin ? (
+        <main className="main-content">
+          <Login />
         </main>
       ) : isVideos ? (
         <main className="main-content">

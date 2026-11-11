@@ -1,6 +1,8 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const SESSION_KEY = 'tradefarsi_admin_session'
+// نشست کاربران عادی جدا از نشست ادمین نگه داشته می‌شود تا روی دسترسی پنل اثری نگذارد
+const USER_SESSION_KEY = 'chartmasters_user_session'
 
 function getSession() {
   try {
@@ -32,9 +34,29 @@ async function request(path, options = {}, token) {
 
   const result = response.status === 204 ? null : await response.json().catch(() => null)
   if (!response.ok) {
-    throw new Error(result?.msg || result?.message || result?.error_description || result?.hint || 'درخواست با خطا مواجه شد.')
+    const error = new Error(result?.msg || result?.message || result?.error_description || result?.hint || 'درخواست با خطا مواجه شد.')
+    error.code = result?.error_code || result?.code
+    error.status = response.status
+    throw error
   }
   return result
+}
+
+function getUserSession() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_SESSION_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
+function saveUserSession(session) {
+  try {
+    if (session) localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session))
+    else localStorage.removeItem(USER_SESSION_KEY)
+  } catch {
+    // در حالت خصوصی مرورگر ممکن است ذخیره‌سازی در دسترس نباشد
+  }
 }
 
 async function refreshSession(session) {
@@ -65,6 +87,23 @@ async function getValidSession() {
 
 export const supabase = {
   getSession,
+  getUserSession,
+  // ورود کاربران با کد پیامکی؛ phone باید به شکل E.164 باشد، مثل +989121234567
+  async sendPhoneOtp(phone) {
+    await request('/auth/v1/otp', { method: 'POST', body: JSON.stringify({ phone, create_user: true }) })
+  },
+  async verifyPhoneOtp(phone, token) {
+    const data = await request('/auth/v1/verify', { method: 'POST', body: JSON.stringify({ type: 'sms', phone, token }) })
+    saveUserSession({ ...data, expires_at: Math.floor(Date.now() / 1000) + (data.expires_in || 3600) })
+    return data
+  },
+  async signOutUser() {
+    const session = getUserSession()
+    if (session?.access_token) {
+      await request('/auth/v1/logout', { method: 'POST' }, session.access_token).catch(() => {})
+    }
+    saveUserSession(null)
+  },
   async signIn(email, password) {
     const data = await request('/auth/v1/token?grant_type=password', {
       method: 'POST',

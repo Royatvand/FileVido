@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import VideoCard from './VideoCard'
-import PlaylistCard from './PlaylistCard'
+import CourseSlider from './CourseSlider'
 import AnimatedText from './animated/AnimatedText'
 import Counter from './animated/Counter'
 import { supabase } from '../lib/supabase'
@@ -130,6 +130,9 @@ function VideosSection({ archive = false }) {
     return { items: merged, totalItems: total }
   }, [videos, playlists, filteredVideos, query, category, level])
 
+  const courseItems = useMemo(() => items.filter((item) => item.type === 'playlist'), [items])
+  const singleItems = useMemo(() => items.filter((item) => item.type === 'video'), [items])
+
   const hasFilters = Boolean(query || category || level)
   const showFilters = videos.length > 1
 
@@ -195,9 +198,22 @@ function VideosSection({ archive = false }) {
       )}
 
       {items.length > 0 ? (
-        <div className="videos-grid">
-          {items.map((item) => (item.type === 'playlist' ? <PlaylistCard key={item.key} playlist={item.playlist} /> : <VideoCard key={item.key} video={item.video} />))}
-        </div>
+        <>
+          {courseItems.length > 0 && (
+            <div className="videos-block" id="courses">
+              <h3 className="videos-block-title">دوره‌های آموزشی <small>{courseItems.length} دوره</small></h3>
+              <CourseSlider playlists={courseItems.map((item) => item.playlist)} />
+            </div>
+          )}
+          {singleItems.length > 0 && (
+            <div className="videos-block">
+              <h3 className="videos-block-title">ویدیوهای تکی <small>{singleItems.length} ویدیو</small></h3>
+              <div className="videos-grid">
+                {singleItems.map((item) => <VideoCard key={item.key} video={item.video} />)}
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div className="videos-empty">
           <strong>ویدیویی با این فیلترها پیدا نشد.</strong>

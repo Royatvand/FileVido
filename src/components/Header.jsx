@@ -1,6 +1,11 @@
 import AnimatedText from './animated/AnimatedText'
 import { supabase } from '../lib/supabase'
 
+// تا وقتی ورود کاربران رسماً راه‌اندازی نشده، لینک آن در هدر پنهان است؛
+// برای نمایش، در Vercel متغیر VITE_SHOW_LOGIN=true را بگذار و دوباره دیپلوی کن.
+// صفحهٔ /login با آدرس مستقیم همچنان کار می‌کند.
+const SHOW_LOGIN_LINK = import.meta.env.VITE_SHOW_LOGIN === 'true'
+
 function Header() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isLogin = path === '/login'
@@ -24,7 +29,7 @@ function Header() {
         </nav>
 
         <div className="header-actions">
-          <a className={`header-login ${isLogin ? 'active' : ''}`} href="/login">{loggedIn ? 'حساب من' : 'ورود'}</a>
+          {SHOW_LOGIN_LINK && <a className={`header-login ${isLogin ? 'active' : ''}`} href="/login">{loggedIn ? 'حساب من' : 'ورود'}</a>}
           <a className="header-action" href="/#videos">
             شروع یادگیری <span aria-hidden="true">↗</span>
           </a>

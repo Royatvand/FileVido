@@ -405,3 +405,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .course-slider-track > .video-card { flex-basis: 86%; }
   .slider-arrow { display: none; }
 }
+
+/* ورود کاربران در هدر */
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.header-login { padding: 10px 14px; border: 1px solid var(--line); border-radius: 9px; color: #cbd7cf; font-size: 12px; font-weight: 700; transition: .2s ease; white-space: nowrap; }
+.header-login:hover, .header-login.active { color: var(--accent); border-color: rgba(140,242,177,.4); }
+@media (max-width: 540px) { .header-login { padding: 7px 10px; font-size: 11px; } }

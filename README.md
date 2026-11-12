@@ -41,3 +41,17 @@ npm run build && npx cap sync android   # همگام‌سازی نسخه وب ب
 `ANDROID_KEYSTORE_BASE64`، `ANDROID_KEYSTORE_PASSWORD`، `ANDROID_KEY_ALIAS`، `ANDROID_KEY_PASSWORD`.
 فایل keystore را هرگز در گیت نگذار و از آن نسخه پشتیبان نگه دار؛ برای هر آپدیت باید با همان کلید امضا شود.
 قبل از هر انتشار جدید `versionCode` را در `android/app/build.gradle` یکی زیاد کن.
+
+## ورود با شماره موبایل (پیامک ملی پیامک)
+
+جریان: سایت از Supabase کد می‌خواهد ← Supabase تابع `api/send-sms-hook` را صدا می‌زند ← این تابع کد را با الگوی تأییدشده در ملی پیامک می‌فرستد.
+
+۱. **SQL:** محتوای `supabase/profiles.sql` را یک بار در Supabase → SQL Editor اجرا کن.
+۲. **متغیرهای محیطی Vercel** (Settings → Environment Variables؛ هرگز در گیت نگذار):
+   - `MELIPAYAMAK_USERNAME`، `MELIPAYAMAK_PASSWORD`
+   - `MELIPAYAMAK_BODY_ID` = `453363` (الگوی «کاربر گرامی کد تایید شما {0} می‌باشد»)
+   - `SEND_SMS_HOOK_SECRET` (در مرحله ۴ از Supabase می‌گیری)
+۳. **Supabase → Authentication → Providers → Phone:** فعالش کن (تنظیم Twilio لازم نیست).
+۴. **Supabase → Authentication → Hooks → Send SMS:** نوع HTTPS، آدرس `https://www.chartmasters.top/api/send-sms-hook`؛ Secret تولیدشده (`v1,whsec_...`) را در `SEND_SMS_HOOK_SECRET` بگذار و دوباره دیپلوی کن.
+۵. در همان بخش Auth، حد ارسال پیامک (SMS rate limit) را کم نگه دار تا اعتبار پنل خالی نشود.
+۶. در پنل ملی پیامک، «IP مجاز» نباید برای وب‌سرویس الزامی باشد (خطای 109)، چون IP تابع‌های Vercel ثابت نیست.

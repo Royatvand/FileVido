@@ -6,6 +6,7 @@ import VideosSection from './components/VideosSection'
 import BannerSlider from './components/BannerSlider'
 import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
+import Chart from './pages/Chart'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
@@ -19,6 +20,7 @@ function App() {
   const isHome = path === '/'
   const isAbout = path === '/about'
   const isVideos = path === '/videos'
+  const isChart = path === '/chart'
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
@@ -37,6 +39,12 @@ function App() {
         description: 'آرشیو ویدیوهای ترید ترجمه‌شده؛ آموزش ترید با ترجمه فارسی، ویدیوهای آموزشی فارکس با زیرنویس و آموزش بازارهای مالی به زبان فارسی.',
         path: '/videos',
       })
+    } else if (isChart) {
+      setPageSeo({
+        title: 'نمودار زنده بیت‌کوین | چارت مسترز',
+        description: 'نمودار زنده و حرفه‌ای قیمت بیت‌کوین با ابزارهای تحلیل تکنیکال و پشتیبانی از بازه‌های زمانی مختلف.',
+        path: '/chart',
+      })
     } else if (isAbout) {
       setPageSeo({
         title: 'درباره چارت مسترز | آموزش بازارهای مالی با زیرنویس فارسی',
@@ -44,7 +52,7 @@ function App() {
         path: '/about',
       })
     }
-  }, [path, isHome, isVideos, isAbout])
+  }, [path, isHome, isVideos, isChart, isAbout])
 
   if (isAdminLogin) return <AdminLogin />
   if (isAdmin) {
@@ -95,6 +103,10 @@ function App() {
       ) : isVideos ? (
         <main className="main-content">
           <VideosSection archive />
+        </main>
+      ) : isChart ? (
+        <main className="main-content">
+          <Chart />
         </main>
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       <Footer />

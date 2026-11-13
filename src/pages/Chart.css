@@ -1,0 +1,11 @@
+.chart-page { padding: 56px 0 70px; }
+.chart-heading { max-width: 680px; margin-bottom: 26px; }
+.chart-heading h1 { margin: 10px 0 8px; color: #f0f6f2; font-size: clamp(26px, 4vw, 38px); font-weight: 800; }
+.chart-heading p { margin: 0; color: #8d9b92; font-size: 13px; line-height: 2.1; }
+.chart-frame { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #0a110d; box-shadow: 0 24px 80px #0006; }
+.chart-note { margin: 14px 2px 0; color: #66746b; font-size: 11px; line-height: 2; }
+.bitycle-widget { position: relative; }
+.bitycle-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 40px 20px; text-align: center; color: #9ca8a2; }
+.bitycle-fallback p { margin: 0; font-size: 13px; line-height: 2; }
+.bitycle-widget .bitycle-fallback { position: absolute; inset: 0; background: #0a110d; }
+@media (max-width: 540px) { .chart-page { padding: 34px 0 50px; } .chart-frame { border-radius: 12px; } }

@@ -11,7 +11,7 @@ function escapeXml(value = '') {
 }
 
 export default async function handler(_req, res) {
-  const urls = ['/', '/videos', '/about']
+  const urls = ['/', '/videos', '/chart', '/about']
 
   try {
     const supabaseUrl = process.env.VITE_SUPABASE_URL

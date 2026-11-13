@@ -3,6 +3,7 @@ import AnimatedText from './animated/AnimatedText'
 function Header() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isAbout = path === '/about'
+  const isChart = path === '/chart'
   const isVideos = path === '/videos' || path.startsWith('/video/')
 
   return (
@@ -14,8 +15,9 @@ function Header() {
         </a>
 
         <nav className="main-nav" aria-label="منوی اصلی">
-          <a className={`nav-link ${!isAbout && !isVideos ? 'active' : ''}`} href="/">خانه</a>
+          <a className={`nav-link ${!isAbout && !isVideos && !isChart ? 'active' : ''}`} href="/">خانه</a>
           <a className={`nav-link ${isVideos ? 'active' : ''}`} href="/videos">ویدیوها</a>
+          <a className={`nav-link ${isChart ? 'active' : ''}`} href="/chart">نمودار</a>
           <a className="nav-link" href="/#categories">دسته‌بندی‌ها</a>
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>

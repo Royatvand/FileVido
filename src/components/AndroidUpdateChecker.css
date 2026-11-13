@@ -1,0 +1,53 @@
+.android-update-notice {
+  position: fixed;
+  z-index: 9999;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 620px;
+  margin-inline: auto;
+  padding: 16px;
+  color: #f4f7f5;
+  background: #14211d;
+  border: 1px solid rgba(120, 190, 155, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.android-update-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.android-update-copy strong {
+  font-size: 14px;
+}
+
+.android-update-copy span {
+  color: #aab9b1;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.android-update-notice a {
+  flex-shrink: 0;
+  padding: 9px 13px;
+  color: #07130d;
+  background: #8fe0b3;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 420px) {
+  .android-update-notice {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

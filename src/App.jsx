@@ -105,11 +105,11 @@ function App() {
           <VideosSection archive />
         </main>
       ) : isChart ? (
-        <main className="main-content">
+        <main className="main-content chart-main">
           <Chart />
         </main>
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
-      <Footer />
+      {!isChart && <Footer />}
     </div>
   )
 }

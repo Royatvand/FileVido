@@ -20,6 +20,13 @@ const widgetConfig = {
   calendar_type: 'miladi',
   ai: { enabled: false, effort: 'low', disabled_features: [], enabled_features: [] },
   source_priority: ['binance_spot'],
+  // بازارهایی که در پنجرهٔ جست‌وجوی نماد قابل انتخاب‌اند
+  symbol_modal: {
+    kind: [
+      'tehran_stock', 'car', 'tehran_cgf', 'forex', 'crypto', 'swap', 'structured',
+      'stock', 'index', 'futures', 'fund', 'economic', 'dr', 'bond', 'commodity',
+    ],
+  },
 }
 
 // ویجت فقط روی دامنه‌های وایت‌لیست‌شده کار می‌کند؛ داخل اپ اندروید آدرس صفحه https://localhost است

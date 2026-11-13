@@ -67,7 +67,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Header />
+      {!isChart && <Header />}
       {isHome ? (
         <main className="main-content" id="home">
           <section className="hero-section">

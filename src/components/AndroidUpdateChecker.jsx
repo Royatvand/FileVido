@@ -6,6 +6,8 @@ const RELEASES_URL = 'https://api.github.com/repos/Royatvand/FileVido/releases/l
 const CURRENT_VERSION_CODE = Number(import.meta.env.VITE_ANDROID_VERSION_CODE || 1)
 
 function versionCodeFromTag(tagName) {
+  if (typeof tagName !== 'string') return null
+
   const match = tagName.match(/^app-v(\d+)\.(\d+)\.(\d+)$/)
   if (!match) return null
 
@@ -54,10 +56,12 @@ export default function AndroidUpdateChecker() {
 
     checkForUpdate()
     window.addEventListener('focus', checkForUpdate)
+    document.addEventListener('visibilitychange', checkForUpdate)
 
     return () => {
       cancelled = true
       window.removeEventListener('focus', checkForUpdate)
+      document.removeEventListener('visibilitychange', checkForUpdate)
     }
   }, [])
 

@@ -38,7 +38,7 @@ function BitycleWidget({ height = 550 }) {
     // اسکریپت Bitycle تنظیمات را از متن همین تگ script می‌خواند؛ پس مثل کد اصلی بعد از div قرار می‌گیرد
     const container = document.createElement('div')
     container.id = WIDGET_ID
-    container.style.cssText = `width:100%;height:${height}px`
+    container.style.cssText = `width:100%;height:${typeof height === 'number' ? `${height}px` : height}`
     const script = document.createElement('script')
     script.type = 'text/javascript'
     script.src = SCRIPT_SRC
@@ -60,7 +60,7 @@ function BitycleWidget({ height = 550 }) {
 
   if (isNativeApp) {
     return (
-      <div className="bitycle-fallback" style={{ minHeight: height / 2 }}>
+      <div className="bitycle-fallback" style={{ minHeight: 260 }}>
         <p>نمودار پیشرفته در مرورگر نمایش داده می‌شود.</p>
         <a className="primary-button" href="https://www.chartmasters.top/chart" target="_blank" rel="noopener noreferrer">باز کردن نمودار در مرورگر <span aria-hidden="true">↗</span></a>
       </div>
@@ -68,8 +68,8 @@ function BitycleWidget({ height = 550 }) {
   }
 
   return (
-    <div ref={wrapperRef} className="bitycle-widget" style={{ minHeight: height }}>
-      <div ref={holderRef} />
+    <div ref={wrapperRef} className="bitycle-widget">
+      <div ref={holderRef} style={{ height: '100%' }} />
       {failed && (
         <div className="bitycle-fallback" role="status">
           <p>نمودار بارگذاری نشد. اتصال اینترنت را بررسی کن و صفحه را دوباره باز کن.</p>

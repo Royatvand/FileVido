@@ -1,19 +1,21 @@
-import AnimatedText from '../components/animated/AnimatedText'
+import { useEffect } from 'react'
 import BitycleWidget from '../components/BitycleWidget'
 import './Chart.css'
 
+// صفحهٔ نمودار تمام‌صفحه است: ارتفاع = ارتفاع صفحه منهای هدر، بدون فوتر
 function Chart() {
+  useEffect(() => {
+    const header = document.querySelector('.site-header')
+    const update = () => document.documentElement.style.setProperty('--header-h', `${header?.offsetHeight || 84}px`)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   return (
     <section className="chart-page">
-      <div className="chart-heading">
-        <span className="section-kicker">بازار زنده</span>
-        <h1><AnimatedText text="نمودار زنده بیت‌کوین" /></h1>
-        <p>نمودار حرفه‌ای قیمت بیت‌کوین با ابزارهای تحلیل؛ بازهٔ زمانی و ابزارها را خودت انتخاب کن.</p>
-      </div>
-      <div className="chart-frame">
-        <BitycleWidget height={550} />
-      </div>
-      <p className="chart-note">داده‌های نمودار از Binance و توسط سرویس Bitycle ارائه می‌شود و صرفاً جنبهٔ اطلاع‌رسانی دارد؛ توصیهٔ مالی نیست.</p>
+      <h1 className="sr-only">نمودار زنده بیت‌کوین</h1>
+      <BitycleWidget height="100%" />
     </section>
   )
 }

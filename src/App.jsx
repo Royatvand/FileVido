@@ -11,6 +11,7 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
+import AndroidUpdateChecker from './components/AndroidUpdateChecker'
 import { useEffect } from 'react'
 import { setPageSeo } from './lib/seo'
 import './admin.css'
@@ -67,6 +68,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <AndroidUpdateChecker />
       {!isChart && <Header />}
       {isHome ? (
         <main className="main-content" id="home">

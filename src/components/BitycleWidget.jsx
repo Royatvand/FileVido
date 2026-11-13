@@ -7,7 +7,7 @@ const LOAD_TIMEOUT_MS = 15000
 
 const widgetConfig = {
   id: WIDGET_ID,
-  theme: 'Chartmasters',
+  theme: 'chartmasters.top',
   type: 'ac',
   locale: 'fa',
   mode: 'dark',

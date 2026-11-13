@@ -1,5 +1,8 @@
 .chart-main { width: 100%; max-width: none; margin: 0; }
-.chart-page { height: calc(100dvh - var(--header-h, 84px)); min-height: 420px; background: #0a110d; }
+.chart-page { position: relative; height: 100dvh; min-height: 420px; background: #0a110d; }
+/* دکمهٔ شناور بازگشت؛ پایین چپ، جایی که معمولاً ابزار ویجت نیست */
+.chart-back { position: fixed; z-index: 50; left: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border: 1px solid rgba(140,242,177,.35); border-radius: 999px; color: var(--accent); background: rgba(8,13,12,.82); backdrop-filter: blur(8px); font-size: 12px; font-weight: 700; box-shadow: 0 8px 28px #0007; transition: background .2s ease, border-color .2s ease; }
+.chart-back:hover { background: rgba(140,242,177,.16); border-color: var(--accent); }
 .bitycle-widget { position: relative; width: 100%; height: 100%; }
 .bitycle-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 40px 20px; text-align: center; color: #9ca8a2; }
 .bitycle-fallback p { margin: 0; font-size: 13px; line-height: 2; }

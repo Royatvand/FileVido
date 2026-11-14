@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/page.js": {
+      "includeFiles": "dist/index.html"
+    }
+  },
   "rewrites": [
     {
       "source": "/sitemap.xml",
@@ -6,7 +11,7 @@
     },
     {
       "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "destination": "/api/page?path=$1"
     }
   ]
 }

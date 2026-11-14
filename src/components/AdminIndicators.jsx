@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, INDICATOR_PLATFORMS, formatFileSize, getIndicatorExtension } from '../lib/indicators'
+import PlatformIcon from './PlatformIcon'
 
 const emptyForm = { title: '', slug: '', description: '', content: '', platform: 'tradingview', version: '1.0', cover_url: '', status: 'draft' }
 
@@ -242,7 +243,7 @@ function AdminIndicators({ onNotice }) {
           {items.map((item) => (
             <tr key={item.id}>
               <td><strong>{item.title}</strong><br /><small dir="ltr">/indicator/{item.slug}</small></td>
-              <td>{(INDICATOR_PLATFORMS[item.platform] || INDICATOR_PLATFORMS.other).label}</td>
+              <td><span className="admin-indicator-platform"><PlatformIcon platform={item.platform} />{(INDICATOR_PLATFORMS[item.platform] || INDICATOR_PLATFORMS.other).label}</span></td>
               <td><span className={`admin-status ${item.status}`}>{item.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</span></td>
               <td>{item.download_count}</td>
               <td><div className="admin-row-actions">

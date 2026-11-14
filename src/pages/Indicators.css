@@ -53,3 +53,7 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 
 .admin-indicator-platform { display: inline-flex; align-items: center; gap: 7px; }
 .admin-indicator-platform .platform-icon { width: 16px; height: 16px; flex-basis: 16px; }
+
+/* Official platform brand assets */
+.platform-icon { object-fit: cover; border-radius: 3px; }
+.platform-icon-tradingview { object-position: left center; border-radius: 0; }

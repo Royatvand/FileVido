@@ -3,6 +3,7 @@ import NotFound from './NotFound'
 import { supabase } from '../lib/supabase'
 import { INDICATOR_PLATFORMS, formatFileSize, indicatorDownloadUrl } from '../lib/indicators'
 import PlatformIcon from '../components/PlatformIcon'
+import { setPageSeo } from '../lib/seo'
 import './Indicators.css'
 
 const INSTALL_GUIDES = {

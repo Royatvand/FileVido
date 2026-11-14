@@ -35,3 +35,18 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 @media (max-width: 900px) { .indicators-grid { grid-template-columns: repeat(2, 1fr); } .indicator-head { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .indicators-page { padding: 36px 0 64px; } .indicators-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .indicator-card, .indicator-card.skeleton { animation: none; transition: none; } }
+
+
+/* Platform SVG marks */
+.platform-icon { display: inline-block; width: 17px; height: 17px; flex: 0 0 17px; vertical-align: middle; }
+.indicator-platform { display: inline-flex; align-items: center; gap: 6px; }
+.indicator-platform .platform-icon { width: 15px; height: 15px; flex-basis: 15px; }
+.indicators-chips button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.indicators-chips .platform-icon { width: 16px; height: 16px; flex-basis: 16px; }
+.indicator-section h2 { display: flex; align-items: center; gap: 9px; }
+
+/* Related indicators — the last content block before the site footer */
+.related-indicators { margin-top: 52px; padding-top: 32px; border-top: 1px solid var(--line); }
+.related-indicators-heading { margin-bottom: 20px; }
+.related-indicators-heading h2 { margin: 8px 0 0; color: #e9f0eb; font-size: clamp(19px, 3vw, 24px); }
+.related-indicator-link { margin-top: 5px; color: var(--accent); font-size: 11px; font-weight: 700; }

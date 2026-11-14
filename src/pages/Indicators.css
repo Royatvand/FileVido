@@ -78,3 +78,20 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   height: 16px;
   flex-basis: 16px;
 }
+
+/* MetaTrader 5 uses a square app icon; give it enough room to stay legible. */
+.platform-icon-metatrader5 {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 3px;
+}
+.indicator-platform .platform-icon-metatrader5,
+.indicators-chips .platform-icon-metatrader5,
+.admin-indicator-platform .platform-icon-metatrader5 {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+}

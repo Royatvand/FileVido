@@ -16,7 +16,7 @@ const widgetConfig = {
   symbol: 'binance_spot:BTCUSDT',
   interval: '1M',
   disabled_features: [],
-  enabled_features: [],
+  enabled_features: ['replay'],
   calendar_type: 'miladi',
   ai: { enabled: false, effort: 'low', disabled_features: [], enabled_features: [] },
   source_priority: ['binance_spot'],

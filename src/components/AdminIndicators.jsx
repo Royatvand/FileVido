@@ -16,6 +16,7 @@ function AdminIndicators({ onNotice }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [tableMissing, setTableMissing] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [editing, setEditing] = useState(null)
@@ -23,7 +24,11 @@ function AdminIndicators({ onNotice }) {
   const [selectedCover, setSelectedCover] = useState(null)
   const [saving, setSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
-  const load = () => setReloadKey((key) => key + 1)
+  const load = () => {
+    setLoading(true)
+    setLoadError('')
+    setReloadKey((key) => key + 1)
+  }
 
   useEffect(() => {
     let active = true
@@ -31,8 +36,11 @@ function AdminIndicators({ onNotice }) {
       .then((rows) => { if (active) { setItems(rows || []); setTableMissing(false) } })
       .catch((error) => {
         if (!active) return
-        setTableMissing(true)
-        onNotice({ type: 'error', text: `بارگذاری اندیکاتورها انجام نشد: ${error.message}` })
+        const message = error.message || 'خطای نامشخص در بارگذاری اندیکاتورها'
+        const missing = /PGRST205|42P01|could not find the table|relation .* does not exist/i.test(message)
+        setTableMissing(missing)
+        setLoadError(missing ? '' : message)
+        onNotice({ type: 'error', text: `بارگذاری اندیکاتورها انجام نشد: ${message}` })
       })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
@@ -57,6 +65,7 @@ function AdminIndicators({ onNotice }) {
       return
     }
     setSelectedFile(file)
+    event.target.value = ''
     onNotice({ type: '', text: '' })
   }
 
@@ -65,9 +74,16 @@ function AdminIndicators({ onNotice }) {
     if (!file) return
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       onNotice({ type: 'error', text: 'فقط تصویر JPG، PNG یا WEBP مجاز است.' })
+      event.target.value = ''
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      onNotice({ type: 'error', text: 'حجم تصویر باید حداکثر ۵ مگابایت باشد.' })
+      event.target.value = ''
       return
     }
     setSelectedCover(file)
+    event.target.value = ''
   }
 
   function closeForm() {
@@ -91,6 +107,10 @@ function AdminIndicators({ onNotice }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
+    if (!form.title.trim()) {
+      onNotice({ type: 'error', text: 'عنوان اندیکاتور را وارد کن.' })
+      return
+    }
     if (!editing && !selectedFile) {
       onNotice({ type: 'error', text: 'برای اندیکاتور جدید باید یک فایل انتخاب کنی.' })
       return
@@ -215,6 +235,7 @@ function AdminIndicators({ onNotice }) {
       </div>
       {loading && <div className="admin-empty">در حال بارگذاری...</div>}
       {!loading && tableMissing && <div className="admin-empty">جدول <code>indicators</code> هنوز در Supabase ساخته نشده است. فایل <code>supabase/indicators.sql</code> را در SQL Editor اجرا کن و صفحه را دوباره باز کن.</div>}
+      {!loading && loadError && <div className="admin-empty">بارگذاری اندیکاتورها ناموفق بود: {loadError}<div style={{ marginTop: 12 }}><button className="admin-secondary-button" type="button" onClick={load}>تلاش دوباره</button></div></div>}
       {!loading && !tableMissing && items.length === 0 && <div className="admin-empty">هنوز اندیکاتوری ثبت نشده است.</div>}
       {items.length > 0 && (
         <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>عنوان</th><th>پلتفرم</th><th>وضعیت</th><th>دانلود</th><th>عملیات</th></tr></thead><tbody>

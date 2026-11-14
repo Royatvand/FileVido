@@ -12,7 +12,7 @@ function PlatformIcon({ platform, className = '' }) {
     return (
       <img
         className={`${imageClassName} platform-icon-tradingview`}
-        src="https://www.tradingview.com/widget-docs/tradingview-logo.svg"
+        src="https://cdn.simpleicons.org/tradingview/FFFFFF"
         alt=""
         aria-hidden="true"
         loading="lazy"

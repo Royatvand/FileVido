@@ -95,3 +95,27 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   height: 20px;
   flex-basis: 20px;
 }
+
+/* Illustrated platform installation instructions */
+.install-guide { margin-top: 18px; }
+.install-guide-intro { margin: 0 0 24px; color: var(--muted); font-size: 13px; line-height: 2; }
+.install-guide-steps { display: grid; gap: 24px; margin: 0; padding: 0; list-style: none; }
+.install-guide-step { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.025); }
+.install-guide-step-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.install-guide-number { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; color: #07110b; background: var(--accent); font-size: 13px; font-weight: 800; }
+.install-guide-step h3 { margin: 0; color: #e9f0eb; font-size: 15px; line-height: 1.8; }
+.install-guide-step > p { margin: 0; color: #c0cbc4; font-size: 13px; line-height: 2.1; }
+.install-guide-path { display: inline-block; max-width: 100%; margin-top: 12px; padding: 9px 12px; overflow-wrap: anywhere; border: 1px solid var(--line); border-radius: 8px; color: var(--accent); background: rgba(0,0,0,.2); font-size: 12px; }
+.install-guide-figure { max-width: 760px; margin: 18px 0 0; }
+.install-guide-figure > a { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #101713; }
+.install-guide-figure img { display: block; width: 100%; max-height: 440px; object-fit: contain; }
+.install-guide-figure figcaption { margin-top: 8px; color: #87958d; font-size: 11px; line-height: 1.9; }
+.install-guide-figure figcaption a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.install-guide-note { margin-top: 22px; padding: 16px 18px; border: 1px solid var(--line); border-right: 3px solid var(--accent); border-radius: 10px; color: #c0cbc4; font-size: 12px; line-height: 2.1; }
+.install-guide-note strong { color: #e9f0eb; }
+@media (max-width: 600px) {
+  .install-guide-step { padding: 15px; }
+  .install-guide-step-heading { align-items: flex-start; }
+  .install-guide-step h3 { font-size: 14px; }
+  .install-guide-figure img { max-height: 300px; }
+}

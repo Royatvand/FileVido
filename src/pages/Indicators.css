@@ -50,3 +50,6 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 .related-indicators-heading { margin-bottom: 20px; }
 .related-indicators-heading h2 { margin: 8px 0 0; color: #e9f0eb; font-size: clamp(19px, 3vw, 24px); }
 .related-indicator-link { margin-top: 5px; color: var(--accent); font-size: 11px; font-weight: 700; }
+
+.admin-indicator-platform { display: inline-flex; align-items: center; gap: 7px; }
+.admin-indicator-platform .platform-icon { width: 16px; height: 16px; flex-basis: 16px; }

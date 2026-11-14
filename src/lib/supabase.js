@@ -1,3 +1,5 @@
+import { compressImage } from './imageCompress'
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 const SESSION_KEY = 'tradefarsi_admin_session'
@@ -141,9 +143,12 @@ export const supabase = {
     const session = await getValidSession()
     if (!session?.access_token) throw new Error('برای آپلود کاور باید دوباره وارد حساب مدیر شوید.')
 
-    const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[file.type]
-    if (!extension) throw new Error('فرمت تصویر پشتیبانی نمی‌شود.')
+    if (!({ 'image/jpeg': 1, 'image/png': 1, 'image/webp': 1 })[file.type]) throw new Error('فرمت تصویر پشتیبانی نمی‌شود.')
     if (file.size > 5 * 1024 * 1024) throw new Error('حجم تصویر بیشتر از ۵ مگابایت است.')
+
+    // قبل از آپلود کوچک و به WebP تبدیل می‌شود تا صفحه‌ها سریع‌تر باز شوند
+    const { blob, type } = await compressImage(file)
+    const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[type]
 
     const path = `covers/${crypto.randomUUID()}.${extension}`
     const response = await fetch(`${SUPABASE_URL}/storage/v1/object/video-covers/${path}`, {
@@ -151,11 +156,11 @@ export const supabase = {
       headers: {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${session.access_token}`,
-        'Content-Type': file.type,
+        'Content-Type': type,
         'Cache-Control': 'max-age=31536000',
         'x-upsert': 'false',
       },
-      body: file,
+      body: blob,
     })
     const result = await response.json().catch(() => null)
     if (!response.ok) {

@@ -3,11 +3,13 @@ import NotFound from './NotFound'
 import { supabase } from '../lib/supabase'
 import { setPageSeo } from '../lib/seo'
 import { INDICATOR_PLATFORMS, formatFileSize, indicatorDownloadUrl } from '../lib/indicators'
+import PlatformIcon from '../components/PlatformIcon'
 import './Indicators.css'
 
 function IndicatorPage({ slug }) {
   const [indicator, setIndicator] = useState(null)
   const [state, setState] = useState('loading') // loading | ready | missing | error
+  const [relatedItems, setRelatedItems] = useState([])
 
   useEffect(() => {
     let active = true
@@ -19,6 +21,21 @@ function IndicatorPage({ slug }) {
       .catch(() => { if (active) setState('error') })
     return () => { active = false }
   }, [slug])
+
+  useEffect(() => {
+    if (!indicator) return
+    let active = true
+    supabase.select('indicators', '&status=eq.published&order=created_at.desc&limit=50')
+      .then((rows) => {
+        if (!active) return
+        const published = (rows || []).filter((item) => item.id !== indicator.id)
+        const samePlatform = published.filter((item) => item.platform === indicator.platform)
+        const recommendations = [...samePlatform, ...published.filter((item) => item.platform !== indicator.platform)].slice(0, 3)
+        setRelatedItems(recommendations)
+      })
+      .catch(() => { if (active) setRelatedItems([]) })
+    return () => { active = false }
+  }, [indicator])
 
   useEffect(() => {
     if (!indicator) return
@@ -46,7 +63,7 @@ function IndicatorPage({ slug }) {
       <header className="indicator-head">
         {indicator.cover_url && <img src={indicator.cover_url} alt="" />}
         <div>
-          <span className="indicator-platform inline">{platform.label}</span>
+          <span className="indicator-platform inline"><PlatformIcon platform={indicator.platform} />{platform.label}</span>
           <h1>{indicator.title}</h1>
           {indicator.description && <p className="indicators-intro">{indicator.description}</p>}
           <div className="indicator-meta">
@@ -70,11 +87,38 @@ function IndicatorPage({ slug }) {
       )}
 
       <section className="indicator-section">
-        <h2>نصب روی {platform.label}</h2>
+        <h2><PlatformIcon platform={indicator.platform} />نصب روی {platform.label}</h2>
         <p>{platform.help}</p>
       </section>
 
       <p className="indicators-note">این اسکریپت فقط برای آموزش و تحلیل است و توصیهٔ مالی یا سیگنال خرید و فروش نیست؛ پیش از استفاده روی حساب واقعی، آن را روی دمو بسنج.</p>
+
+      {relatedItems.length > 0 && (
+        <section className="related-indicators">
+          <div className="related-indicators-heading">
+            <span className="section-kicker">بیشتر کشف کن</span>
+            <h2>اندیکاتورهای پیشنهادی</h2>
+          </div>
+          <div className="indicators-grid">
+            {relatedItems.map((item) => {
+              const itemPlatform = INDICATOR_PLATFORMS[item.platform] || INDICATOR_PLATFORMS.other
+              return (
+                <a className="indicator-card" href={`/indicator/${encodeURIComponent(item.slug)}`} key={item.id}>
+                  <div className="indicator-thumb">
+                    {item.cover_url ? <img src={item.cover_url} alt="" loading="lazy" /> : <span className="indicator-thumb-fallback" aria-hidden="true">ƒ(x)</span>}
+                    <span className="indicator-platform"><PlatformIcon platform={item.platform} />{itemPlatform.label}</span>
+                  </div>
+                  <div className="indicator-body">
+                    <h3>{item.title}</h3>
+                    {item.description && <p>{item.description}</p>}
+                    <span className="related-indicator-link">مشاهده جزئیات ←</span>
+                  </div>
+                </a>
+              )
+            })}
+          </div>
+        </section>
+      )}
     </article>
   )
 }

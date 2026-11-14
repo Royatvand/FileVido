@@ -57,3 +57,24 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 /* Official platform brand assets */
 .platform-icon { object-fit: cover; border-radius: 3px; }
 .platform-icon-tradingview { object-position: left center; border-radius: 0; }
+
+/* TradingView is a square brand mark, not the wide wordmark */
+.platform-icon-tradingview {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 0;
+}
+.indicator-platform .platform-icon-tradingview {
+  width: 15px;
+  height: 15px;
+  flex-basis: 15px;
+}
+.indicators-chips .platform-icon-tradingview,
+.admin-indicator-platform .platform-icon-tradingview {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}

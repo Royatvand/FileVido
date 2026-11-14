@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { videos as demoVideos } from '../src/data/videos.js'
 
-const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/about', '/admin', '/admin/login'])
+const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/admin', '/admin/login'])
 const DEMO_SLUGS = new Set(demoVideos.map((video) => video.id))
 const SLUG_PATTERN = /^[^/\s]{1,200}$/
 
@@ -25,9 +25,8 @@ async function loadIndexHtml(request) {
   }
 }
 
-// true = ویدیو منتشرشده وجود دارد، false = ندارد، null = نتوانستیم بررسی کنیم
-async function videoExists(slug) {
-  if (DEMO_SLUGS.has(slug)) return true
+// true = ردیف منتشرشده با این slug وجود دارد، false = ندارد، null = نتوانستیم بررسی کنیم
+async function publishedRowExists(table, slug) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL
   const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
   if (!supabaseUrl || !supabaseKey) return null
@@ -35,7 +34,7 @@ async function videoExists(slug) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 4000)
     const response = await fetch(
-      `${supabaseUrl}/rest/v1/videos?select=slug&status=eq.published&slug=eq.${encodeURIComponent(slug)}&limit=1`,
+      `${supabaseUrl}/rest/v1/${table}?select=slug&status=eq.published&slug=eq.${encodeURIComponent(slug)}&limit=1`,
       { headers: { apikey: supabaseKey }, signal: controller.signal },
     )
     clearTimeout(timer)
@@ -53,11 +52,15 @@ export async function resolveStatus(rawPath) {
   path = `/${path.replace(/^\/+/, '')}`.replace(/\/+$/, '') || '/'
 
   if (STATIC_PAGES.has(path)) return 200
-  const match = path.match(/^\/video\/([^/]+)$/)
-  if (match && SLUG_PATTERN.test(match[1])) {
-    const exists = await videoExists(match[1])
+  const video = path.match(/^\/video\/([^/]+)$/)
+  if (video && SLUG_PATTERN.test(video[1])) {
+    const exists = DEMO_SLUGS.has(video[1]) || await publishedRowExists('videos', video[1])
     // اگر دیتابیس در دسترس نبود، صفحهٔ احتمالاً درست را ۴۰۴ نمی‌کنیم
     return exists === false ? 404 : 200
+  }
+  const indicator = path.match(/^\/indicator\/([^/]+)$/)
+  if (indicator && SLUG_PATTERN.test(indicator[1])) {
+    return await publishedRowExists('indicators', indicator[1]) === false ? 404 : 200
   }
   return 404
 }

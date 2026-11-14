@@ -1,4 +1,5 @@
 import { compressImage } from './imageCompress'
+import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, getIndicatorExtension } from './indicators'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -168,5 +169,47 @@ export const supabase = {
     }
 
     return `${SUPABASE_URL}/storage/v1/object/public/video-covers/${path}`
+  },
+  // آپلود فایل اسکریپت یا اندیکاتور؛ مسیر فایل در bucket برمی‌گردد (نه آدرس کامل)
+  async uploadIndicatorFile(file) {
+    const session = await getValidSession()
+    if (!session?.access_token) throw new Error('برای آپلود فایل باید دوباره وارد حساب مدیر شوید.')
+    const extension = getIndicatorExtension(file.name)
+    if (!INDICATOR_EXTENSIONS.includes(extension)) throw new Error(`فرمت فایل پشتیبانی نمی‌شود. فرمت‌های مجاز: ${INDICATOR_EXTENSIONS.join('، ')}`)
+    if (file.size > INDICATOR_MAX_BYTES) throw new Error('حجم فایل بیشتر از ۱۰ مگابایت است.')
+
+    const path = `files/${crypto.randomUUID()}.${extension}`
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/indicator-files/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': file.type || 'application/octet-stream',
+        'Cache-Control': 'max-age=31536000',
+        'x-upsert': 'false',
+      },
+      body: file,
+    })
+    const result = await response.json().catch(() => null)
+    if (!response.ok) {
+      throw new Error(result?.message || result?.error || 'آپلود فایل انجام نشد. SQL فایل supabase/indicators.sql اجرا شده است؟')
+    }
+    return path
+  },
+  async removeIndicatorFile(path) {
+    const session = await getValidSession()
+    if (!session?.access_token || !path) return
+    await fetch(`${SUPABASE_URL}/storage/v1/object/indicator-files/${path}`, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
+    }).catch(() => {})
+  },
+  // شمارندهٔ دانلود؛ شکستش نباید جلوی دانلود را بگیرد
+  async countIndicatorDownload(slug) {
+    try {
+      await request('/rest/v1/rpc/increment_indicator_downloads', { method: 'POST', body: JSON.stringify({ p_slug: slug }) })
+    } catch {
+      // نادیده گرفته می‌شود
+    }
   },
 }

@@ -1,0 +1,37 @@
+.indicators-page { padding: 56px 0 90px; }
+.indicators-page h1 { margin: 10px 0 12px; font-size: clamp(26px, 4vw, 38px); line-height: 1.5; }
+.indicators-intro { max-width: 640px; margin: 0 0 26px; color: var(--muted); font-size: 14px; line-height: 2; }
+.indicators-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 26px; }
+.indicators-filters input { flex: 1 1 240px; min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 10px; color: #f2f5f3; background: rgba(255,255,255,.03); font: inherit; font-size: 13px; }
+.indicators-filters input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.indicators-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.indicators-chips button { min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; color: #c0cbc4; background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.indicators-chips button.active { border-color: var(--accent); color: #07110b; background: var(--accent); font-weight: 700; }
+.indicators-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.indicator-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.025); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242,177,.32); box-shadow: 0 18px 50px rgba(0,0,0,.3); }
+.indicator-card.skeleton { min-height: 280px; animation: indicator-pulse 1.4s ease-in-out infinite; }
+@keyframes indicator-pulse { 50% { opacity: .5; } }
+.indicator-thumb { position: relative; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #0d1f17, #0a110d); }
+.indicator-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.indicator-thumb-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(140,242,177,.4); font-size: 34px; font-weight: 800; direction: ltr; }
+.indicator-platform { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 999px; color: #07110b; background: var(--accent); font-size: 11px; font-weight: 700; }
+.indicator-platform.inline { position: static; display: inline-block; margin-bottom: 10px; }
+.indicator-body { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 18px; }
+.indicator-body h3 { margin: 0; font-size: 15px; line-height: 1.8; }
+.indicator-body p { margin: 0; color: var(--muted); font-size: 12px; line-height: 2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.indicator-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 4px; color: #9aa7a0; font-size: 11px; }
+.indicators-empty { padding: 40px 20px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); font-size: 13px; text-align: center; line-height: 2; }
+.indicators-note { margin: 40px 0 0; color: #7d8a84; font-size: 11px; line-height: 2; }
+.indicator-back { display: inline-flex; gap: 8px; margin-bottom: 22px; color: var(--accent); font-size: 12px; }
+.indicator-head { display: grid; grid-template-columns: minmax(0, 360px) 1fr; gap: 32px; align-items: start; }
+.indicator-head img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--line); border-radius: 14px; }
+.indicator-head:not(:has(img)) { grid-template-columns: 1fr; }
+.indicator-download { margin-top: 22px; }
+.indicator-section { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+.indicator-section h2 { margin: 0 0 12px; font-size: 18px; }
+.indicator-section p, .indicator-content { color: #c0cbc4; font-size: 14px; line-height: 2.1; }
+.indicator-content { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .indicators-grid { grid-template-columns: repeat(2, 1fr); } .indicator-head { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .indicators-page { padding: 36px 0 64px; } .indicators-grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .indicator-card, .indicator-card.skeleton { animation: none; transition: none; } }

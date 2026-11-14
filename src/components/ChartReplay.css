@@ -1,11 +1,5 @@
 .replay-layer { position: absolute; inset: 0; z-index: 40; pointer-events: none; direction: ltr; }
-.replay-pick, .replay-lock, .replay-mask, .replay-handle { position: absolute; top: var(--rp-top); bottom: var(--rp-bottom); }
-.replay-pick, .replay-lock { pointer-events: auto; touch-action: none; }
-/* مستطیل کلیک را رد می‌کند تا ابزارهای ویجت و جابه‌جایی چارت زیرش کار کنند */
-.replay-mask { pointer-events: none; }
-/* دستگیرهٔ کشیدنی روی لبهٔ مستطیل؛ بعد از جابه‌جایی چارت، با آن لبه را به کندل درست برگردان */
-.replay-handle { width: 18px; margin-left: -9px; cursor: ew-resize; pointer-events: auto; touch-action: none; display: flex; align-items: center; justify-content: center; }
-.replay-handle i { display: block; width: 6px; height: 44px; border-radius: 4px; background: var(--accent); box-shadow: 0 0 0 3px rgba(8,13,12,.7); }
+.replay-pick, .replay-lock, .replay-mask { position: absolute; top: var(--rp-top); bottom: var(--rp-bottom); pointer-events: auto; touch-action: none; }
 .replay-pick { left: 0; right: var(--rp-right); cursor: crosshair; background: rgba(140,242,177,.05); }
 .replay-guide { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--accent); pointer-events: none; }
 .replay-lock { left: 0; cursor: not-allowed; }

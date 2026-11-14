@@ -17,8 +17,7 @@ function ChartReplay() {
   const [x, setX] = useState(0)
   const [step, setStep] = useState(8)
   const [playing, setPlaying] = useState(false)
-  const [lock, setLock] = useState(false)
-  const dragging = useRef(false)
+  const [lock, setLock] = useState(true)
 
   const maxX = useCallback(() => {
     const w = layerRef.current?.clientWidth ?? 0
@@ -79,24 +78,9 @@ function ChartReplay() {
       {mode === 'run' && (
         <>
           {lock && <div className="replay-lock" style={{ width: x }} onWheel={(e) => e.stopPropagation()} />}
-          {/* خود مستطیل کلیک‌ها را رد می‌کند تا ابزارها و جابه‌جایی چارت کار کنند؛ فقط دستگیره را می‌شود کشید */}
           <div className="replay-mask" style={{ left: x }}>
             <span>آینده پنهان است</span>
           </div>
-          <div
-            className="replay-handle"
-            style={{ left: x }}
-            role="slider"
-            aria-label="لبهٔ پنهان‌کننده؛ بکش تا با کندل مورد نظر هم‌تراز شود"
-            aria-valuemin={0}
-            aria-valuemax={4000}
-            aria-valuenow={Math.round(x)}
-            title="بکش تا با کندل مورد نظر هم‌تراز شود"
-            onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); setPlaying(false) }}
-            onPointerMove={(e) => { if (dragging.current) setX(Math.min(maxX(), Math.max(0, relX(e)))) }}
-            onPointerUp={() => { dragging.current = false }}
-            onPointerCancel={() => { dragging.current = false }}
-          ><i /></div>
         </>
       )}
 
@@ -120,7 +104,7 @@ function ChartReplay() {
               <input type="range" min={STEP_MIN} max={STEP_MAX} value={step} onChange={(e) => setStep(Number(e.target.value))} />
             </label>
             <label className="replay-check">
-              <input type="checkbox" checked={lock} onChange={(e) => setLock(e.target.checked)} /> قفل چارت (جلوی زوم و جابه‌جایی)
+              <input type="checkbox" checked={lock} onChange={(e) => setLock(e.target.checked)} /> قفل چارت
             </label>
             <button type="button" className="replay-btn" onClick={() => { setPlaying(false); setMode('pick') }}>نقطهٔ جدید</button>
             <button type="button" className="replay-btn" onClick={exit}>خروج</button>

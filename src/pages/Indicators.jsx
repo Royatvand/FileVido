@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { INDICATOR_PLATFORMS, formatFileSize } from '../lib/indicators'
+import PlatformIcon from '../components/PlatformIcon'
 import './Indicators.css'
 
 function normalize(value = '') {
@@ -13,7 +14,7 @@ function IndicatorCard({ item }) {
     <a className="indicator-card" href={`/indicator/${encodeURIComponent(item.slug)}`} aria-label={`مشاهده و دانلود: ${item.title}`}>
       <div className="indicator-thumb">
         {item.cover_url ? <img src={item.cover_url} alt="" loading="lazy" /> : <span className="indicator-thumb-fallback" aria-hidden="true">ƒ(x)</span>}
-        <span className="indicator-platform">{platform.label}</span>
+        <span className="indicator-platform"><PlatformIcon platform={item.platform} />{platform.label}</span>
       </div>
       <div className="indicator-body">
         <h3>{item.title}</h3>
@@ -65,7 +66,7 @@ function Indicators() {
             <div className="indicators-chips" role="group" aria-label="فیلتر پلتفرم">
               <button type="button" className={!platform ? 'active' : ''} onClick={() => setPlatform('')}>همه</button>
               {usedPlatforms.map((key) => (
-                <button type="button" key={key} className={platform === key ? 'active' : ''} onClick={() => setPlatform(key)}>{(INDICATOR_PLATFORMS[key] || INDICATOR_PLATFORMS.other).label}</button>
+                <button type="button" key={key} className={platform === key ? 'active' : ''} onClick={() => setPlatform(key)}><PlatformIcon platform={key} />{(INDICATOR_PLATFORMS[key] || INDICATOR_PLATFORMS.other).label}</button>
               ))}
             </div>
           )}

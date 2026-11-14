@@ -1,34 +1,49 @@
+const PLATFORM_ASSETS = {
+  // MetaQuotes app icons, served by Apple's App Store CDN.
+  // The App Store listings identify MetaQuotes Software Corp. as the developer.
+  metatrader4: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/34/5f/2a/345f2a6d-4862-b588-7d6e-a9df65763dee/icon-0-0-1x_U007emarketing-0-5-0-0-85-220.png/512x512bb.jpg',
+  metatrader5: 'https://is1-ssl.mzstatic.com/image/thumb/Purple116/v4/6e/76/b3/6e76b3d9-14f3-e6a1-3255-bc5b47bc59ac/icon-0-0-1x_U007emarketing-0-0-0-4-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/1200x630wa.png',
+}
+
 function PlatformIcon({ platform, className = '' }) {
-  const common = { className: `platform-icon ${className}`.trim(), viewBox: '0 0 32 32', 'aria-hidden': true, focusable: 'false' }
+  const imageClassName = `platform-icon ${className}`.trim()
 
   if (platform === 'tradingview') {
     return (
-      <svg {...common}>
-        <path fill="#2962FF" d="M5 7h22v5h-8v13h-6V12H5z" />
-        <path fill="#2962FF" d="M19 17h5v8h-5z" />
+      <svg
+        className={imageClassName}
+        viewBox="0 0 157 21"
+        role="img"
+        aria-label="TradingView"
+        focusable="false"
+      >
+        <use href="https://www.tradingview.com/widget-docs/tradingview-logo.svg#tradingview-logo" />
       </svg>
     )
   }
 
-  if (platform === 'metatrader4') {
-    return (
-      <svg {...common}>
-        <path fill="#29A6D8" d="M4 7h5v18H4zM12 12h5v13h-5zM20 4h5v21h-5z" />
-        <path fill="none" stroke="#29A6D8" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="m5 10 9 5 10-9" />
-      </svg>
-    )
-  }
+  const imageSrc = PLATFORM_ASSETS[platform]
 
-  if (platform === 'metatrader5') {
+  if (imageSrc) {
     return (
-      <svg {...common}>
-        <path fill="#29A6D8" d="M4 5h5v20H4zM12 5h5v20h-5zM20 5h8v5h-8zM20 13h8v5h-8zM20 21h8v4h-8z" />
-      </svg>
+      <img
+        className={imageClassName}
+        src={imageSrc}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
     )
   }
 
   return (
-    <svg {...common}>
+    <svg
+      className={imageClassName}
+      viewBox="0 0 32 32"
+      aria-hidden="true"
+      focusable="false"
+    >
       <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" strokeWidth="2" />
       <path d="M10 16h12M16 10v12" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
     </svg>

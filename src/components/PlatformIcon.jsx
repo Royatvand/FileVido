@@ -10,15 +10,14 @@ function PlatformIcon({ platform, className = '' }) {
 
   if (platform === 'tradingview') {
     return (
-      <svg
-        className={imageClassName}
-        viewBox="0 0 157 21"
-        role="img"
-        aria-label="TradingView"
-        focusable="false"
-      >
-        <use href="https://www.tradingview.com/widget-docs/tradingview-logo.svg#tradingview-logo" />
-      </svg>
+      <img
+        className={`${imageClassName} platform-icon-tradingview`}
+        src="https://www.tradingview.com/widget-docs/tradingview-logo.svg"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+      />
     )
   }
 

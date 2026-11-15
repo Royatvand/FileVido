@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, INDICATOR_PLATFORMS, formatFileSize, getIndicatorExtension } from '../lib/indicators'
+import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, INDICATOR_PLATFORMS, formatFileSize, getIndicatorExtension, indicatorImageUrl } from '../lib/indicators'
 import PlatformIcon from './PlatformIcon'
 
 const emptyForm = { title: '', slug: '', description: '', content: '', platform: 'tradingview', version: '1.0', cover_url: '', status: 'draft' }
@@ -23,6 +23,9 @@ function AdminIndicators({ onNotice }) {
   const [editing, setEditing] = useState(null)
   const [selectedFile, setSelectedFile] = useState(null)
   const [selectedCover, setSelectedCover] = useState(null)
+  const [galleryItems, setGalleryItems] = useState([])
+  const [removedGalleryItems, setRemovedGalleryItems] = useState([])
+  const [galleryLoading, setGalleryLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const load = () => {
@@ -87,15 +90,57 @@ function AdminIndicators({ onNotice }) {
     event.target.value = ''
   }
 
+  function handleGalleryFiles(event) {
+    const files = Array.from(event.target.files || [])
+    const additions = []
+    for (const file of files) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        onNotice({ type: 'error', text: `فرمت تصویر «${file.name}» مجاز نیست؛ فقط JPG، PNG و WEBP.` })
+        continue
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        onNotice({ type: 'error', text: `حجم تصویر «${file.name}» بیشتر از ۵ مگابایت است.` })
+        continue
+      }
+      additions.push({ localId: crypto.randomUUID(), file, previewUrl: URL.createObjectURL(file), caption: '' })
+    }
+    if (additions.length) setGalleryItems((current) => [...current, ...additions])
+    event.target.value = ''
+  }
+
+  function updateGalleryCaption(localId, caption) {
+    setGalleryItems((current) => current.map((image) => (image.id || image.localId) === localId ? { ...image, caption } : image))
+  }
+
+  function moveGalleryItem(index, direction) {
+    setGalleryItems((current) => {
+      const nextIndex = index + direction
+      if (nextIndex < 0 || nextIndex >= current.length) return current
+      const next = [...current]
+      ;[next[index], next[nextIndex]] = [next[nextIndex], next[index]]
+      return next
+    })
+  }
+
+  function removeGalleryItem(image) {
+    if (image.id) setRemovedGalleryItems((current) => [...current, image])
+    else if (image.previewUrl) URL.revokeObjectURL(image.previewUrl)
+    setGalleryItems((current) => current.filter((item) => (item.id || item.localId) !== (image.id || image.localId)))
+  }
+
   function closeForm() {
+    galleryItems.filter((image) => image.file && image.previewUrl).forEach((image) => URL.revokeObjectURL(image.previewUrl))
     setFormOpen(false)
     setEditing(null)
     setForm(emptyForm)
     setSelectedFile(null)
     setSelectedCover(null)
+    setGalleryItems([])
+    setRemovedGalleryItems([])
+    setGalleryLoading(false)
   }
 
-  function startEdit(item) {
+  async function startEdit(item) {
     setEditing(item)
     setForm({
       title: item.title, slug: item.slug, description: item.description || '', content: item.content || '',
@@ -103,7 +148,18 @@ function AdminIndicators({ onNotice }) {
     })
     setSelectedFile(null)
     setSelectedCover(null)
+    setGalleryItems([])
+    setRemovedGalleryItems([])
+    setGalleryLoading(true)
     setFormOpen(true)
+    try {
+      const images = await supabase.select('indicator_images', `&indicator_id=eq.${encodeURIComponent(item.id)}&order=position.asc,created_at.asc`)
+      setGalleryItems((images || []).map((image) => ({ ...image, previewUrl: indicatorImageUrl(image.file_path) })))
+    } catch (error) {
+      onNotice({ type: 'error', text: `بارگذاری تصاویر گالری انجام نشد: ${error.message}` })
+    } finally {
+      setGalleryLoading(false)
+    }
   }
 
   async function handleSubmit(event) {
@@ -118,6 +174,9 @@ function AdminIndicators({ onNotice }) {
     }
     setSaving(true)
     let uploadedPath = ''
+    let savedIndicator = editing
+    const uploadedGalleryPaths = []
+    const insertedGalleryRows = []
     try {
       const payload = {
         title: form.title.trim(),
@@ -140,17 +199,59 @@ function AdminIndicators({ onNotice }) {
         payload.file_name = selectedFile.name
         payload.file_size = selectedFile.size
       }
-      if (editing) await supabase.update('indicators', editing.id, payload)
-      else await supabase.insert('indicators', payload)
+      const previousFilePath = editing?.file_path
+      if (editing) {
+        await supabase.update('indicators', editing.id, payload)
+        savedIndicator = { ...editing, ...payload }
+      } else {
+        const inserted = await supabase.insert('indicators', payload)
+        savedIndicator = inserted?.[0]
+        if (!savedIndicator?.id) throw new Error('اندیکاتور ذخیره شد اما شناسه آن دریافت نشد؛ صفحه را تازه‌سازی و وضعیت را بررسی کن.')
+        setEditing(savedIndicator)
+      }
+      const newIndicatorFilePath = uploadedPath
+      uploadedPath = ''
 
-      // فایل قدیمی فقط بعد از ذخیرهٔ موفق پاک می‌شود
-      if (editing && uploadedPath && editing.file_path) await supabase.removeIndicatorFile(editing.file_path)
+      // ابتدا تغییرات گالری ذخیره می‌شوند؛ سپس تصاویر حذف‌شده از Storage پاک می‌شوند.
+      const existingItems = galleryItems.filter((image) => image.id)
+      for (let index = 0; index < existingItems.length; index += 1) {
+        const image = existingItems[index]
+        await supabase.update('indicator_images', image.id, { caption: (image.caption || '').trim(), position: index })
+      }
+
+      const newItems = galleryItems.filter((image) => image.file)
+      const newRows = []
+      for (let index = 0; index < newItems.length; index += 1) {
+        const image = newItems[index]
+        const filePath = await supabase.uploadIndicatorImage(image.file)
+        uploadedGalleryPaths.push(filePath)
+        newRows.push({ indicator_id: savedIndicator.id, file_path: filePath, caption: (image.caption || '').trim(), position: galleryItems.indexOf(image) })
+      }
+      if (newRows.length) {
+        const insertedImages = await supabase.insert('indicator_images', newRows)
+        insertedGalleryRows.push(...(insertedImages || []))
+      }
+
+      for (const image of removedGalleryItems) {
+        await supabase.remove('indicator_images', image.id)
+        await supabase.removeIndicatorImageFile(image.file_path)
+      }
+      uploadedGalleryPaths.length = 0
+      insertedGalleryRows.length = 0
+
+      // فایل قبلی فقط بعد از ذخیرهٔ موفق اطلاعات جدید پاک می‌شود.
+      if (editing && newIndicatorFilePath && previousFilePath) await supabase.removeIndicatorFile(previousFilePath)
       onNotice({ type: 'success', text: editing ? 'تغییرات ذخیره شد.' : 'اندیکاتور جدید ثبت شد.' })
       closeForm()
       load()
     } catch (error) {
-      // اگر ذخیرهٔ ردیف شکست خورد، فایل تازه‌آپلودشده بی‌صاحب نماند
+      // فایل‌هایی که هنوز در جدول ثبت نشده‌اند، در صورت شکست پاک می‌شوند.
       if (uploadedPath) await supabase.removeIndicatorFile(uploadedPath)
+      for (const image of insertedGalleryRows) {
+        if (image.id) await supabase.remove('indicator_images', image.id).catch(() => {})
+      }
+      for (const path of uploadedGalleryPaths) await supabase.removeIndicatorImageFile(path).catch(() => {})
+      if (savedIndicator?.id) setEditing(savedIndicator)
       const duplicate = /indicators_slug_key|duplicate key/i.test(error.message || '')
       onNotice({ type: 'error', text: duplicate ? 'این شناسه صفحه (Slug) قبلاً استفاده شده است. فیلد Slug را خالی بگذار یا مقدار دیگری وارد کن.' : error.message })
     } finally {
@@ -205,13 +306,37 @@ function AdminIndicators({ onNotice }) {
             {!selectedFile && editing?.file_name && <small>فایل فعلی: {editing.file_name} ({formatFileSize(editing.file_size)})</small>}
           </div>
           <div className="admin-cover-field">
-            <span>تصویر (اختیاری)</span>
+            <span>تصویر اصلی (کاور) — اختیاری</span>
             <label className="admin-cover-picker">
               <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCover} />
               <span>＋ انتخاب تصویر</span>
             </label>
             {selectedCover && <small>انتخاب‌شده: {selectedCover.name}</small>}
             {!selectedCover && form.cover_url && <img className="admin-cover-preview" src={form.cover_url} alt="تصویر فعلی" />}
+          </div>
+          <div className="admin-gallery-field full">
+            <div className="admin-gallery-heading">
+              <div><strong>تصاویر نحوهٔ عملکرد اندیکاتور</strong><small>چند تصویر از چارت، سیگنال‌ها یا تنظیمات اضافه کن. هر تصویر حداکثر ۵ مگابایت.</small></div>
+              <label className="admin-cover-picker">
+                <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleGalleryFiles} />
+                <span>＋ افزودن تصاویر</span>
+              </label>
+            </div>
+            {galleryLoading && <small>در حال بارگذاری تصاویر فعلی...</small>}
+            {galleryItems.length > 0 && <div className="admin-gallery-grid">
+              {galleryItems.map((image, index) => (
+                <article className="admin-gallery-item" key={image.id || image.localId}>
+                  <img src={image.previewUrl} alt={image.caption || 'پیش‌نمایش تصویر گالری'} />
+                  <input value={image.caption || ''} onChange={(event) => updateGalleryCaption(image.id || image.localId, event.target.value)} maxLength={160} placeholder="توضیح کوتاه تصویر (اختیاری)" aria-label="توضیح تصویر" />
+                  <div className="admin-gallery-actions">
+                    <button type="button" onClick={() => moveGalleryItem(index, -1)} disabled={index === 0} aria-label="انتقال تصویر به بالا">↑</button>
+                    <button type="button" onClick={() => moveGalleryItem(index, 1)} disabled={index === galleryItems.length - 1} aria-label="انتقال تصویر به پایین">↓</button>
+                    <button type="button" className="danger" onClick={() => removeGalleryItem(image)}>حذف</button>
+                  </div>
+                </article>
+              ))}
+            </div>}
+            {!galleryLoading && galleryItems.length === 0 && <p className="admin-gallery-empty">هنوز تصویری برای گالری انتخاب نشده است.</p>}
           </div>
           <label>وضعیت
             <select name="status" value={form.status} onChange={updateField}>

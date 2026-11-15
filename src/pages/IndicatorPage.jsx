@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import NotFound from './NotFound'
 import { supabase } from '../lib/supabase'
-import { INDICATOR_PLATFORMS, formatFileSize, indicatorDownloadUrl } from '../lib/indicators'
+import { INDICATOR_PLATFORMS, formatFileSize, indicatorDownloadUrl, indicatorImageUrl } from '../lib/indicators'
 import PlatformIcon from '../components/PlatformIcon'
 import { setPageSeo } from '../lib/seo'
 import './Indicators.css'
@@ -150,13 +150,20 @@ function IndicatorPage({ slug }) {
   const [indicator, setIndicator] = useState(null)
   const [state, setState] = useState('loading') // loading | ready | missing | error
   const [relatedItems, setRelatedItems] = useState([])
+  const [galleryImages, setGalleryImages] = useState([])
+  const [lightboxImage, setLightboxImage] = useState(null)
 
   useEffect(() => {
     let active = true
     supabase.select('indicators', `&slug=eq.${encodeURIComponent(slug)}&status=eq.published&limit=1`)
-      .then((rows) => {
+      .then(async (rows) => {
         if (!active) return
-        if (rows?.[0]) { setIndicator(rows[0]); setState('ready') } else setState('missing')
+        if (!rows?.[0]) { setState('missing'); return }
+        const images = await supabase.select('indicator_images', `&indicator_id=eq.${encodeURIComponent(rows[0].id)}&order=position.asc,created_at.asc`)
+        if (!active) return
+        setGalleryImages(images || [])
+        setIndicator(rows[0])
+        setState('ready')
       })
       .catch(() => { if (active) setState('error') })
     return () => { active = false }
@@ -219,6 +226,23 @@ function IndicatorPage({ slug }) {
         </div>
       </header>
 
+      {galleryImages.length > 0 && (
+        <section className="indicator-section indicator-gallery-section">
+          <h2>تصاویر نحوهٔ عملکرد</h2>
+          <div className="indicator-gallery-grid">
+            {galleryImages.map((image) => (
+              <figure className="indicator-gallery-item" key={image.id}>
+                <button type="button" onClick={() => setLightboxImage(image)} aria-label={`نمایش بزرگ تصویر ${image.caption || indicator.title}`}>
+                  <img src={indicatorImageUrl(image.file_path)} alt={image.caption || `تصویر عملکرد ${indicator.title}`} loading="lazy" />
+                  <span aria-hidden="true">⌕</span>
+                </button>
+                {image.caption && <figcaption>{image.caption}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
       {indicator.content && (
         <section className="indicator-section">
           <h2>توضیحات و نحوهٔ استفاده</h2>
@@ -258,6 +282,13 @@ function IndicatorPage({ slug }) {
             })}
           </div>
         </section>
+      )}
+      {lightboxImage && (
+        <div className="indicator-lightbox" role="dialog" aria-modal="true" aria-label="نمایش تصویر اندیکاتور" onClick={() => setLightboxImage(null)}>
+          <button type="button" className="indicator-lightbox-close" onClick={() => setLightboxImage(null)} aria-label="بستن تصویر">×</button>
+          <img src={indicatorImageUrl(lightboxImage.file_path)} alt={lightboxImage.caption || indicator.title} onClick={(event) => event.stopPropagation()} />
+          {lightboxImage.caption && <p onClick={(event) => event.stopPropagation()}>{lightboxImage.caption}</p>}
+        </div>
       )}
     </article>
   )

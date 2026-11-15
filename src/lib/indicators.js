@@ -24,6 +24,12 @@ export function formatFileSize(bytes = 0) {
 }
 
 // آدرس دانلود؛ پارامتر download باعث می‌شود Supabase فایل را با نام اصلی دانلود کند
+export function indicatorImageUrl(filePath) {
+  const base = import.meta.env.VITE_SUPABASE_URL
+  if (!base || !filePath) return ''
+  return `${base}/storage/v1/object/public/indicator-images/${filePath}`
+}
+
 export function indicatorDownloadUrl(indicator) {
   const base = import.meta.env.VITE_SUPABASE_URL
   if (!base || !indicator?.file_path) return ''

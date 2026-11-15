@@ -216,7 +216,7 @@ function AdminIndicators({ onNotice }) {
       const existingItems = galleryItems.filter((image) => image.id)
       for (let index = 0; index < existingItems.length; index += 1) {
         const image = existingItems[index]
-        await supabase.update('indicator_images', image.id, { caption: (image.caption || '').trim(), position: index })
+        await supabase.update('indicator_images', image.id, { caption: (image.caption || '').trim(), position: galleryItems.indexOf(image) })
       }
 
       const newItems = galleryItems.filter((image) => image.file)
@@ -271,9 +271,11 @@ function AdminIndicators({ onNotice }) {
   async function handleDelete(item) {
     if (!window.confirm(`«${item.title}» و فایلش حذف شود؟`)) return
     try {
+      const images = await supabase.select('indicator_images', `&indicator_id=eq.${encodeURIComponent(item.id)}`)
       await supabase.remove('indicators', item.id)
       await supabase.removeIndicatorFile(item.file_path)
-      onNotice({ type: 'success', text: 'اندیکاتور حذف شد.' })
+      for (const image of images || []) await supabase.removeIndicatorImageFile(image.file_path)
+      onNotice({ type: 'success', text: 'اندیکاتور و تصاویر گالری آن حذف شدند.' })
       load()
     } catch (error) {
       onNotice({ type: 'error', text: error.message })

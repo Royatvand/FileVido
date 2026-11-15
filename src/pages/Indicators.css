@@ -219,3 +219,17 @@ a.indicator-card:focus-visible,
   .liquid-glass-action,
   .liquid-glass-action-arrow { transition: none; }
 }
+
+
+/* Public indicator image gallery */
+.indicator-gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr)); gap:16px; }
+.indicator-gallery-item { min-width:0; margin:0; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:#ffffff04; }
+.indicator-gallery-item>button { position:relative; display:block; width:100%; padding:0; border:0; background:#080d0c; cursor:zoom-in; }
+.indicator-gallery-item>button img { display:block; width:100%; aspect-ratio:16/10; object-fit:cover; }
+.indicator-gallery-item>button span { position:absolute; left:12px; bottom:12px; display:grid; width:32px; height:32px; place-items:center; border:1px solid #ffffff35; border-radius:50%; color:#fff; background:#07110bbd; font-size:21px; }
+.indicator-gallery-item figcaption { padding:10px 12px; color:#aab8ae; font-size:11px; line-height:1.9; }
+.indicator-lightbox { position:fixed; z-index:1000; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; padding:56px 20px 24px; background:rgba(0,0,0,.92); cursor:zoom-out; }
+.indicator-lightbox>img { display:block; max-width:min(100%,1200px); max-height:80vh; object-fit:contain; border-radius:8px; cursor:default; }
+.indicator-lightbox>p { margin:0; color:#e4eee7; font-size:12px; }
+.indicator-lightbox-close { position:absolute; top:16px; left:18px; width:42px; height:42px; border:1px solid #ffffff35; border-radius:50%; color:#fff; background:#ffffff12; font-size:28px; cursor:pointer; }
+@media(max-width:650px) { .indicator-gallery-grid { grid-template-columns:1fr; } }

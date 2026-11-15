@@ -79,9 +79,15 @@ function Footer() {
           <a href="/about"><FaInfoCircle aria-hidden="true" />درباره ما</a>
         </div>
 
-        <div className="footer-note">
+        <div className="footer-note footer-support">
           <span className="status-dot" />
-          <span>در مسیر یادگیری، همراهت هستیم.</span>
+          <div className="footer-support-copy">
+            <strong>پشتیبانی چارت مسترز</strong>
+            <span>سؤال یا مشکلی داری؟ از طریق تلگرام با ما در ارتباط باش.</span>
+            <a href="https://t.me/Chartmasters_admin" target="_blank" rel="noopener noreferrer">
+              ارتباط با پشتیبانی <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
       </div>
 

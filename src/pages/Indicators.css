@@ -39,6 +39,8 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 /* اسلایدر «اندیکاتورهای مشابه» بالای فوتر */
 .similar-indicators { margin-top: 64px; padding-top: 36px; border-top: 1px solid var(--line); }
 .similar-indicators h2 { margin: 10px 0 22px; font-size: 22px; }
+.indicator-slider-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.indicator-slider-all { margin-bottom: 22px; }
 .indicator-slider-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 2px 10px; direction: rtl; }
 .indicator-slider-track::-webkit-scrollbar { display: none; }
 .indicator-slider-track > .indicator-card { flex: 0 0 calc((100% - 40px) / 3); scroll-snap-align: start; }

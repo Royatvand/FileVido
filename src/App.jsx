@@ -3,6 +3,7 @@ import Footer from './components/Footer'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
 import VideosSection from './components/VideosSection'
+import HomeIndicators from './components/HomeIndicators'
 import BannerSlider from './components/BannerSlider'
 import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
@@ -110,6 +111,7 @@ function App() {
           </section>
           <BannerSlider />
           <VideosSection />
+          <HomeIndicators />
         </main>
       ) : isVideos ? (
         <main className="main-content">

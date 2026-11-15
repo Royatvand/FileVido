@@ -122,7 +122,7 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 
 
 /* Liquid-glass inspired card action: lightweight CSS, no WebGL canvas */
-.indicator-card-cta {
+.liquid-glass-action {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -130,7 +130,7 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   gap: 12px;
   align-self: flex-start;
   min-height: 38px;
-  margin-top: 10px;
+  margin-top: auto;
   padding: 0 15px;
   overflow: hidden;
   border: 1px solid rgba(210, 255, 229, 0.22);
@@ -150,7 +150,7 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
-.indicator-card-cta::before {
+.liquid-glass-action::before {
   position: absolute;
   inset: 1px 18% auto;
   height: 1px;
@@ -160,7 +160,7 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   pointer-events: none;
 }
 
-.indicator-card-cta-arrow {
+.liquid-glass-action-arrow {
   display: inline-grid;
   width: 23px;
   height: 23px;
@@ -171,8 +171,14 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   transition: transform 180ms ease, background 180ms ease;
 }
 
-a.indicator-card:hover .indicator-card-cta,
-a.indicator-card:focus-visible .indicator-card-cta {
+a.indicator-card:hover .liquid-glass-action,
+a.indicator-card:focus-visible .liquid-glass-action,
+.video-card:hover .liquid-glass-action,
+.video-card:focus-visible .liquid-glass-action,
+.banner-slide:hover .liquid-glass-action,
+.banner-slide:focus-visible .liquid-glass-action,
+.related-item:hover .liquid-glass-action,
+.related-item:focus-visible .liquid-glass-action {
   border-color: rgba(160, 255, 195, 0.52);
   background:
     linear-gradient(135deg, rgba(224, 255, 239, 0.27), rgba(110, 224, 157, 0.13) 48%, rgba(255, 255, 255, 0.17)),
@@ -182,8 +188,14 @@ a.indicator-card:focus-visible .indicator-card-cta {
     0 7px 24px rgba(74, 220, 132, 0.13);
 }
 
-a.indicator-card:hover .indicator-card-cta-arrow,
-a.indicator-card:focus-visible .indicator-card-cta-arrow {
+a.indicator-card:hover .liquid-glass-action-arrow,
+a.indicator-card:focus-visible .liquid-glass-action-arrow,
+.video-card:hover .liquid-glass-action-arrow,
+.video-card:focus-visible .liquid-glass-action-arrow,
+.banner-slide:hover .liquid-glass-action-arrow,
+.banner-slide:focus-visible .liquid-glass-action-arrow,
+.related-item:hover .liquid-glass-action-arrow,
+.related-item:focus-visible .liquid-glass-action-arrow {
   transform: translateX(-3px);
   background: rgba(220, 255, 235, 0.2);
 }
@@ -193,7 +205,17 @@ a.indicator-card:focus-visible {
   outline-offset: 4px;
 }
 
+a.indicator-card:focus-visible,
+.video-card:focus-visible,
+.banner-slide:focus-visible,
+.related-item:focus-visible {
+  outline: 2px solid rgba(140, 242, 177, 0.8);
+  outline-offset: 4px;
+}
+
+.banner-cta.liquid-glass-action { margin-top: 4px; }
+
 @media (prefers-reduced-motion: reduce) {
-  .indicator-card-cta,
-  .indicator-card-cta-arrow { transition: none; }
+  .liquid-glass-action,
+  .liquid-glass-action-arrow { transition: none; }
 }

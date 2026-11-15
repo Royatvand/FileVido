@@ -12,7 +12,7 @@ function VideoCard({ video }) {
         {video.category && <span className="video-category">{video.category}</span>}
         <h3>{video.title}</h3>
         <p><RichText text={video.description} /></p>
-        <span className="video-link">تماشای ویدیو <span aria-hidden="true">←</span></span>
+        <span className="video-link liquid-glass-action">تماشای ویدیو <span className="liquid-glass-action-arrow" aria-hidden="true">←</span></span>
       </div>
     </a>
   )

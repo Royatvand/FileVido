@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { INDICATOR_PLATFORMS } from '../lib/indicators'
 import IndicatorCard from '../components/IndicatorCard'
+import PlatformIcon from '../components/PlatformIcon'
 import './Indicators.css'
 
 function normalize(value = '') {
@@ -45,7 +46,7 @@ function Indicators() {
             <div className="indicators-chips" role="group" aria-label="فیلتر پلتفرم">
               <button type="button" className={!platform ? 'active' : ''} onClick={() => setPlatform('')}>همه</button>
               {usedPlatforms.map((key) => (
-                <button type="button" key={key} className={platform === key ? 'active' : ''} onClick={() => setPlatform(key)}>{(INDICATOR_PLATFORMS[key] || INDICATOR_PLATFORMS.other).label}</button>
+                <button type="button" key={key} className={platform === key ? 'active' : ''} onClick={() => setPlatform(key)}><PlatformIcon platform={key} />{(INDICATOR_PLATFORMS[key] || INDICATOR_PLATFORMS.other).label}</button>
               ))}
             </div>
           )}

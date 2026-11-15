@@ -44,3 +44,200 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
 .indicator-slider-track > .indicator-card { flex: 0 0 calc((100% - 40px) / 3); scroll-snap-align: start; }
 @media (max-width: 900px) { .indicator-slider-track > .indicator-card { flex-basis: calc((100% - 20px) / 2); } }
 @media (max-width: 600px) { .indicator-slider-track { gap: 14px; } .indicator-slider-track > .indicator-card { flex-basis: 86%; } }
+
+/* Platform SVG marks */
+.platform-icon { display: inline-block; width: 17px; height: 17px; flex: 0 0 17px; vertical-align: middle; }
+.indicator-platform { display: inline-flex; align-items: center; gap: 6px; }
+.indicator-platform .platform-icon { width: 15px; height: 15px; flex-basis: 15px; }
+.indicators-chips button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.indicators-chips .platform-icon { width: 16px; height: 16px; flex-basis: 16px; }
+.indicator-section h2 { display: flex; align-items: center; gap: 9px; }
+
+/* Related indicators — the last content block before the site footer */
+.related-indicators { margin-top: 52px; padding-top: 32px; border-top: 1px solid var(--line); }
+.related-indicators-heading { margin-bottom: 20px; }
+.related-indicators-heading h2 { margin: 8px 0 0; color: #e9f0eb; font-size: clamp(19px, 3vw, 24px); }
+.related-indicator-link { margin-top: 5px; color: var(--accent); font-size: 11px; font-weight: 700; }
+
+.admin-indicator-platform { display: inline-flex; align-items: center; gap: 7px; }
+.admin-indicator-platform .platform-icon { width: 16px; height: 16px; flex-basis: 16px; }
+
+/* Official platform brand assets */
+.platform-icon { object-fit: cover; border-radius: 3px; }
+.platform-icon-tradingview { object-position: left center; border-radius: 0; }
+
+/* TradingView is a square brand mark, not the wide wordmark */
+.platform-icon-tradingview {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 0;
+}
+.indicator-platform .platform-icon-tradingview {
+  width: 15px;
+  height: 15px;
+  flex-basis: 15px;
+}
+.indicators-chips .platform-icon-tradingview,
+.admin-indicator-platform .platform-icon-tradingview {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+
+/* MetaTrader 5 uses a square app icon; give it enough room to stay legible. */
+.platform-icon-metatrader5 {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 3px;
+}
+.indicator-platform .platform-icon-metatrader5,
+.indicators-chips .platform-icon-metatrader5,
+.admin-indicator-platform .platform-icon-metatrader5 {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+}
+
+/* Illustrated platform installation instructions */
+.install-guide { margin-top: 18px; }
+.install-guide-intro { margin: 0 0 24px; color: var(--muted); font-size: 13px; line-height: 2; }
+.install-guide-steps { display: grid; gap: 24px; margin: 0; padding: 0; list-style: none; }
+.install-guide-step { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.025); }
+.install-guide-step-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.install-guide-number { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; color: #07110b; background: var(--accent); font-size: 13px; font-weight: 800; }
+.install-guide-step h3 { margin: 0; color: #e9f0eb; font-size: 15px; line-height: 1.8; }
+.install-guide-step > p { margin: 0; color: #c0cbc4; font-size: 13px; line-height: 2.1; }
+.install-guide-path { display: inline-block; max-width: 100%; margin-top: 12px; padding: 9px 12px; overflow-wrap: anywhere; border: 1px solid var(--line); border-radius: 8px; color: var(--accent); background: rgba(0,0,0,.2); font-size: 12px; }
+.install-guide-figure { max-width: 760px; margin: 18px 0 0; }
+.install-guide-figure > a { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #101713; }
+.install-guide-figure img { display: block; width: 100%; max-height: 440px; object-fit: contain; }
+.install-guide-figure figcaption { margin-top: 8px; color: #87958d; font-size: 11px; line-height: 1.9; }
+.install-guide-figure figcaption a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.install-guide-note { margin-top: 22px; padding: 16px 18px; border: 1px solid var(--line); border-right: 3px solid var(--accent); border-radius: 10px; color: #c0cbc4; font-size: 12px; line-height: 2.1; }
+.install-guide-note strong { color: #e9f0eb; }
+@media (max-width: 600px) {
+  .install-guide-step { padding: 15px; }
+  .install-guide-step-heading { align-items: flex-start; }
+  .install-guide-step h3 { font-size: 14px; }
+  .install-guide-figure img { max-height: 300px; }
+}
+
+
+/* Liquid-glass inspired card action: lightweight CSS, no WebGL canvas */
+.liquid-glass-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  align-self: flex-start;
+  min-height: 38px;
+  margin-top: auto;
+  padding: 0 15px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 255, 229, 0.22);
+  border-radius: 999px;
+  color: #eafff1;
+  background:
+    linear-gradient(135deg, rgba(224, 255, 239, 0.19), rgba(110, 224, 157, 0.07) 48%, rgba(255, 255, 255, 0.12)),
+    rgba(16, 34, 25, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 5px 18px rgba(0, 0, 0, 0.16);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  backdrop-filter: blur(14px) saturate(145%);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.liquid-glass-action::before {
+  position: absolute;
+  inset: 1px 18% auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.liquid-glass-action-arrow {
+  display: inline-grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border: 1px solid rgba(220, 255, 235, 0.2);
+  border-radius: 50%;
+  background: rgba(220, 255, 235, 0.1);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+a.indicator-card:hover .liquid-glass-action,
+a.indicator-card:focus-visible .liquid-glass-action,
+.video-card:hover .liquid-glass-action,
+.video-card:focus-visible .liquid-glass-action,
+.banner-slide:hover .liquid-glass-action,
+.banner-slide:focus-visible .liquid-glass-action,
+.related-item:hover .liquid-glass-action,
+.related-item:focus-visible .liquid-glass-action {
+  border-color: rgba(160, 255, 195, 0.52);
+  background:
+    linear-gradient(135deg, rgba(224, 255, 239, 0.27), rgba(110, 224, 157, 0.13) 48%, rgba(255, 255, 255, 0.17)),
+    rgba(16, 44, 29, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 7px 24px rgba(74, 220, 132, 0.13);
+}
+
+a.indicator-card:hover .liquid-glass-action-arrow,
+a.indicator-card:focus-visible .liquid-glass-action-arrow,
+.video-card:hover .liquid-glass-action-arrow,
+.video-card:focus-visible .liquid-glass-action-arrow,
+.banner-slide:hover .liquid-glass-action-arrow,
+.banner-slide:focus-visible .liquid-glass-action-arrow,
+.related-item:hover .liquid-glass-action-arrow,
+.related-item:focus-visible .liquid-glass-action-arrow {
+  transform: translateX(-3px);
+  background: rgba(220, 255, 235, 0.2);
+}
+
+a.indicator-card:focus-visible {
+  outline: 2px solid rgba(140, 242, 177, 0.8);
+  outline-offset: 4px;
+}
+
+a.indicator-card:focus-visible,
+.video-card:focus-visible,
+.banner-slide:focus-visible,
+.related-item:focus-visible {
+  outline: 2px solid rgba(140, 242, 177, 0.8);
+  outline-offset: 4px;
+}
+
+.banner-cta.liquid-glass-action { margin-top: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass-action,
+  .liquid-glass-action-arrow { transition: none; }
+}
+
+
+/* Public indicator image gallery */
+.indicator-gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr)); gap:16px; }
+.indicator-gallery-item { min-width:0; margin:0; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:#ffffff04; }
+.indicator-gallery-item>button { position:relative; display:block; width:100%; padding:0; border:0; background:#080d0c; cursor:zoom-in; }
+.indicator-gallery-item>button img { display:block; width:100%; aspect-ratio:16/10; object-fit:cover; }
+.indicator-gallery-item>button span { position:absolute; left:12px; bottom:12px; display:grid; width:32px; height:32px; place-items:center; border:1px solid #ffffff35; border-radius:50%; color:#fff; background:#07110bbd; font-size:21px; }
+.indicator-gallery-item figcaption { padding:10px 12px; color:#aab8ae; font-size:11px; line-height:1.9; }
+.indicator-lightbox { position:fixed; z-index:1000; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; padding:56px 20px 24px; background:rgba(0,0,0,.92); cursor:zoom-out; }
+.indicator-lightbox>img { display:block; max-width:min(100%,1200px); max-height:80vh; object-fit:contain; border-radius:8px; cursor:default; }
+.indicator-lightbox>p { margin:0; color:#e4eee7; font-size:12px; }
+.indicator-lightbox-close { position:absolute; top:16px; left:18px; width:42px; height:42px; border:1px solid #ffffff35; border-radius:50%; color:#fff; background:#ffffff12; font-size:28px; cursor:pointer; }
+@media(max-width:650px) { .indicator-gallery-grid { grid-template-columns:1fr; } }

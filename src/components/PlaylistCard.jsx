@@ -11,7 +11,7 @@ function PlaylistCard({ playlist }) {
         {playlist.category && <span className="video-category">{playlist.category}</span>}
         <h3>{playlist.title}</h3>
         {playlist.description && <p>{playlist.description}</p>}
-        <span className="video-link">شروع دوره <span aria-hidden="true">←</span></span>
+        <span className="video-link liquid-glass-action">شروع دوره <span className="liquid-glass-action-arrow" aria-hidden="true">←</span></span>
       </div>
     </a>
   )

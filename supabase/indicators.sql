@@ -41,7 +41,7 @@ create or replace function public.increment_indicator_downloads(p_slug text)
 returns void
 language sql
 security definer
-set search_path = public
+set search_path = ''
 as $$
   update public.indicators
   set download_count = download_count + 1
@@ -52,9 +52,12 @@ revoke all on function public.increment_indicator_downloads(text) from public;
 grant execute on function public.increment_indicator_downloads(text) to anon, authenticated;
 
 -- فضای ذخیرهٔ فایل‌ها (عمومی برای دانلود، آپلود فقط مدیر)
-insert into storage.buckets (id, name, public)
-values ('indicator-files', 'indicator-files', true)
-on conflict (id) do nothing;
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('indicator-files', 'indicator-files', true, 10485760)
+on conflict (id) do update
+  set name = excluded.name,
+      public = true,
+      file_size_limit = excluded.file_size_limit;
 
 drop policy if exists "Admins upload indicator files" on storage.objects;
 create policy "Admins upload indicator files"
@@ -66,7 +69,8 @@ drop policy if exists "Admins update indicator files" on storage.objects;
 create policy "Admins update indicator files"
   on storage.objects for update
   to authenticated
-  using (bucket_id = 'indicator-files' and (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
+  using (bucket_id = 'indicator-files' and (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
+  with check (bucket_id = 'indicator-files' and (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "Admins delete indicator files" on storage.objects;
 create policy "Admins delete indicator files"

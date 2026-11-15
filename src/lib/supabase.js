@@ -204,6 +204,42 @@ export const supabase = {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
     }).catch(() => {})
   },
+  async uploadIndicatorImage(file) {
+    const session = await getValidSession()
+    if (!session?.access_token) throw new Error('برای آپلود تصاویر باید دوباره وارد حساب مدیر شوید.')
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('فقط تصویر JPG، PNG یا WEBP مجاز است.')
+    if (file.size > 5 * 1024 * 1024) throw new Error('حجم هر تصویر باید حداکثر ۵ مگابایت باشد.')
+
+    const { blob, type } = await compressImage(file)
+    const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[type]
+    const path = `images/${crypto.randomUUID()}.${extension}`
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/indicator-images/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': type,
+        'Cache-Control': 'max-age=31536000',
+        'x-upsert': 'false',
+      },
+      body: blob,
+    })
+    const result = await response.json().catch(() => null)
+    if (!response.ok) throw new Error(result?.message || result?.error || 'آپلود تصویر گالری انجام نشد؛ تنظیمات Storage را بررسی کن.')
+    return path
+  },
+  async removeIndicatorImageFile(path) {
+    const session = await getValidSession()
+    if (!session?.access_token || !path) return
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/indicator-images/${path}`, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
+    })
+    if (!response.ok) {
+      const result = await response.json().catch(() => null)
+      throw new Error(result?.message || result?.error || 'حذف تصویر از Storage انجام نشد.')
+    }
+  },
   // شمارندهٔ دانلود؛ شکستش نباید جلوی دانلود را بگیرد
   async countIndicatorDownload(slug) {
     try {

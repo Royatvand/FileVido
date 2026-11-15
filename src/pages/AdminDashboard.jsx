@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import AdminBanners from '../components/AdminBanners'
+import AdminTopAnnouncement from '../components/AdminTopAnnouncement'
 import AdminPlaylists from '../components/AdminPlaylists'
 import { extractAparatId } from '../lib/aparat'
 
@@ -212,6 +213,7 @@ function AdminDashboard() {
         <button className={activeTab === 'categories' ? 'active' : ''} onClick={() => setActiveTab('categories')}>◫ <span>دسته‌بندی‌ها</span></button>
         <button className={activeTab === 'playlists' ? 'active' : ''} onClick={() => setActiveTab('playlists')}>▤ <span>پلی‌لیست‌ها</span></button>
         <button className={activeTab === 'banners' ? 'active' : ''} onClick={() => setActiveTab('banners')}>▣ <span>اسلایدر</span></button>
+        <button className={activeTab === 'announcement' ? 'active' : ''} onClick={() => setActiveTab('announcement')}>▱ <span>نوار تبلیغاتی</span></button>
         <div className="admin-sidebar-bottom">
           <a href="/" target="_blank" rel="noreferrer">مشاهده سایت ↗</a>
           <button onClick={handleLogout}>خروج از حساب <span>↗</span></button>
@@ -220,7 +222,7 @@ function AdminDashboard() {
 
       <section className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : 'دسته‌بندی‌ها'}</h1></div>
+          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'announcement' ? 'نوار تبلیغاتی بالای سایت' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : 'دسته‌بندی‌ها'}</h1></div>
           <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
         </header>
 
@@ -293,6 +295,7 @@ function AdminDashboard() {
 
         {activeTab === 'playlists' && <AdminPlaylists onNotice={setNotice} />}
         {activeTab === 'banners' && <AdminBanners videos={videos} onNotice={setNotice} />}
+        {activeTab === 'announcement' && <AdminTopAnnouncement onNotice={setNotice} />}
 
         {activeTab === 'categories' && (
           <div className="admin-panel">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const isExternal = (url = '') => /^https?:\\/\\//i.test(url)
+const isExternal = (url = '') => /^https?:\/\//i.test(url)
 
 function TopAnnouncement() {
   const [announcement, setAnnouncement] = useState(null)

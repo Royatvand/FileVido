@@ -3,10 +3,13 @@ import Footer from './components/Footer'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
 import VideosSection from './components/VideosSection'
+import HomeIndicators from './components/HomeIndicators'
 import BannerSlider from './components/BannerSlider'
 import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
 import Chart from './pages/Chart'
+import Indicators from './pages/Indicators'
+import IndicatorPage from './pages/IndicatorPage'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
@@ -21,10 +24,13 @@ function App() {
   const isAbout = path === '/about'
   const isVideos = path === '/videos'
   const isChart = path === '/chart'
+  const isIndicators = path === '/indicators'
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
   const videoId = videoMatch ? decodeURIComponent(videoMatch[1]) : null
+  const indicatorMatch = path.match(/^\/indicator\/([^/]+)$/)
+  const indicatorSlug = indicatorMatch ? decodeURIComponent(indicatorMatch[1]) : null
 
   useEffect(() => {
     if (isHome) {
@@ -45,6 +51,12 @@ function App() {
         description: 'نمودار زنده و حرفه‌ای قیمت بیت‌کوین با ابزارهای تحلیل تکنیکال و پشتیبانی از بازه‌های زمانی مختلف.',
         path: '/chart',
       })
+    } else if (isIndicators) {
+      setPageSeo({
+        title: 'دانلود اندیکاتور و اسکریپت تریدینگ‌ویو و متاتریدر | چارت مسترز',
+        description: 'دانلود اندیکاتورها و اسکریپت‌های آماده برای تریدینگ‌ویو (Pine Script) و متاتریدر ۴ و ۵ همراه با آموزش نصب و استفاده به زبان فارسی.',
+        path: '/indicators',
+      })
     } else if (isAbout) {
       setPageSeo({
         title: 'درباره چارت مسترز | آموزش بازارهای مالی با زیرنویس فارسی',
@@ -52,7 +64,7 @@ function App() {
         path: '/about',
       })
     }
-  }, [path, isHome, isVideos, isChart, isAbout])
+  }, [path, isHome, isVideos, isChart, isIndicators, isAbout])
 
   if (isAdminLogin) return <AdminLogin />
   if (isAdmin) {
@@ -99,6 +111,7 @@ function App() {
           </section>
           <BannerSlider />
           <VideosSection />
+          <HomeIndicators />
         </main>
       ) : isVideos ? (
         <main className="main-content">
@@ -108,6 +121,10 @@ function App() {
         <main className="main-content chart-main">
           <Chart />
         </main>
+      ) : isIndicators ? (
+        <main className="main-content"><Indicators /></main>
+      ) : indicatorSlug ? (
+        <IndicatorPage slug={indicatorSlug} />
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       {!isChart && <Footer />}
     </div>

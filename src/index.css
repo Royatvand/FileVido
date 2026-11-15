@@ -40,6 +40,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .header-action { display: inline-flex; align-items: center; gap: 12px; padding: 11px 17px; border: 1px solid rgba(140,242,177,.3); border-radius: 9px; color: var(--accent); font-size: 12px; font-weight: 700; transition: .2s ease; }
 .header-action:hover { background: rgba(140,242,177,.1); border-color: var(--accent); }
 .header-action span { font-size: 16px; }
+.nav-toggle { display: none; }
 
 .main-content { width: min(1160px, calc(100% - 48px)); margin: auto; }
 .hero-section { min-height: 590px; position: relative; display: grid; grid-template-columns: .95fr 1.05fr; align-items: center; gap: 50px; padding: 68px 0 76px; direction: ltr; }
@@ -182,7 +183,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .brand-icon { width: 42px; height: 42px; }
   .brand-name { font-size: 16px; }
   .main-nav { gap: 12px; }
-  .main-nav a:nth-child(4) { display: none; }
   .header-action { display: none; }
   .header-inner { justify-content: space-between; }
   .nav-link { padding: 10px 2px; font-size: 12px; }
@@ -413,3 +413,20 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .course-slider-track > .video-card { flex-basis: 86%; }
   .slider-arrow { display: none; }
 }
+
+/* منوی کولپس‌شونده فقط در موبایل */
+@media (max-width: 640px) {
+  .nav-toggle { display: inline-flex; flex-direction: column; justify-content: center; gap: 5px; width: 44px; height: 44px; padding: 0 11px; border: 1px solid var(--line); border-radius: 10px; background: transparent; cursor: pointer; }
+  .nav-toggle span { display: block; height: 2px; border-radius: 2px; background: #e8f0ea; transition: transform .2s ease, opacity .2s ease; }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .nav-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .main-nav { display: none; position: absolute; top: 100%; right: 0; left: 0; flex-direction: column; align-items: stretch; gap: 0; padding: 8px 16px 14px; border-bottom: 1px solid var(--line); background: #0a100e; }
+  .main-nav.open { display: flex; }
+  .main-nav .nav-link { padding: 14px 6px; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 14px; }
+  .main-nav .nav-link:last-child { border-bottom: 0; }
+  .main-nav .nav-link.active { color: var(--accent); }
+  .main-nav .nav-link.active::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .nav-toggle span { transition: none; } }

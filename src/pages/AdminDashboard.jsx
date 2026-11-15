@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import IconTextarea from '../components/IconTextarea'
 import { supabase } from '../lib/supabase'
 import AdminBanners from '../components/AdminBanners'
 import AdminPlaylists from '../components/AdminPlaylists'
+import AdminIndicators from '../components/AdminIndicators'
 import { extractAparatId } from '../lib/aparat'
 
 const emptyForm = {
@@ -212,6 +214,7 @@ function AdminDashboard() {
         <button className={activeTab === 'categories' ? 'active' : ''} onClick={() => setActiveTab('categories')}>◫ <span>دسته‌بندی‌ها</span></button>
         <button className={activeTab === 'playlists' ? 'active' : ''} onClick={() => setActiveTab('playlists')}>▤ <span>پلی‌لیست‌ها</span></button>
         <button className={activeTab === 'banners' ? 'active' : ''} onClick={() => setActiveTab('banners')}>▣ <span>اسلایدر</span></button>
+        <button className={activeTab === 'indicators' ? 'active' : ''} onClick={() => setActiveTab('indicators')}>ƒ <span>اندیکاتورها</span></button>
         <div className="admin-sidebar-bottom">
           <a href="/" target="_blank" rel="noreferrer">مشاهده سایت ↗</a>
           <button onClick={handleLogout}>خروج از حساب <span>↗</span></button>
@@ -220,7 +223,7 @@ function AdminDashboard() {
 
       <section className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : 'دسته‌بندی‌ها'}</h1></div>
+          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : activeTab === 'indicators' ? 'اندیکاتورها و اسکریپت‌ها' : 'دسته‌بندی‌ها'}</h1></div>
           <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
         </header>
 
@@ -282,7 +285,7 @@ function AdminDashboard() {
               <label>مدت ویدیو<input name="duration" value={form.duration} onChange={updateField} placeholder="مثلاً 18:45" /></label>
               <label>مدرس<input name="instructor" value={form.instructor} onChange={updateField} placeholder="نام مدرس" /></label>
               <label>سطح آموزش<select name="level" value={form.level} onChange={updateField}><option>مقدماتی</option><option>متوسط</option><option>پیشرفته</option></select></label>
-              <label className="full">توضیحات<textarea name="description" rows="5" value={form.description} onChange={updateField} placeholder="توضیحات کامل ویدیو..." /></label>
+              <IconTextarea label="توضیحات" name="description" rows={5} value={form.description} onChange={updateField} placeholder="توضیحات کامل ویدیو..." />
               <label className="full">تگ‌ها<input name="tags" value={form.tags} onChange={updateField} placeholder="پرایس اکشن، تحلیل تکنیکال، ترید (با کاما جدا کنید)" /></label>
               <label>وضعیت انتشار<select name="status" value={form.status} onChange={updateField}><option value="draft">پیش‌نویس</option><option value="published">انتشار عمومی</option></select></label>
               <label className="admin-checkbox"><input type="checkbox" name="is_featured" checked={form.is_featured} onChange={updateField} /> نمایش به‌عنوان ویدیوی ویژه</label>
@@ -293,6 +296,7 @@ function AdminDashboard() {
 
         {activeTab === 'playlists' && <AdminPlaylists onNotice={setNotice} />}
         {activeTab === 'banners' && <AdminBanners videos={videos} onNotice={setNotice} />}
+        {activeTab === 'indicators' && <AdminIndicators onNotice={setNotice} />}
 
         {activeTab === 'categories' && (
           <div className="admin-panel">

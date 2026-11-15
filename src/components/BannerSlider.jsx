@@ -96,7 +96,7 @@ function BannerSlider() {
                   <span className="banner-tag">ویدیوی جدید</span>
                   <strong>{banner.title}</strong>
                   {banner.subtitle && <span className="banner-subtitle">{banner.subtitle}</span>}
-                  {banner.link_url && <span className="banner-cta">مشاهده <span aria-hidden="true">←</span></span>}
+                  {banner.link_url && <span className="banner-cta liquid-glass-action">مشاهده <span className="liquid-glass-action-arrow" aria-hidden="true">←</span></span>}
                 </span>
               </>
             )

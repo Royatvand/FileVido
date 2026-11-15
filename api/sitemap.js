@@ -11,7 +11,7 @@ function escapeXml(value = '') {
 }
 
 export default async function handler(_req, res) {
-  const urls = ['/', '/videos', '/chart', '/about']
+  const urls = ['/', '/videos', '/chart', '/indicators', '/about']
 
   try {
     const supabaseUrl = process.env.VITE_SUPABASE_URL
@@ -27,6 +27,17 @@ export default async function handler(_req, res) {
         const videos = await response.json()
         for (const video of videos) {
           if (video.slug) urls.push(`/video/${encodeURIComponent(video.slug)}`)
+        }
+      }
+
+      // اگر جدول اندیکاتورها هنوز ساخته نشده باشد پاسخ خطا می‌دهد و فقط نادیده گرفته می‌شود
+      const indicatorResponse = await fetch(
+        `${supabaseUrl}/rest/v1/indicators?select=slug&status=eq.published&order=created_at.desc`,
+        { headers: { apikey: supabaseKey } },
+      )
+      if (indicatorResponse.ok) {
+        for (const indicator of await indicatorResponse.json()) {
+          if (indicator.slug) urls.push(`/indicator/${encodeURIComponent(indicator.slug)}`)
         }
       }
     }

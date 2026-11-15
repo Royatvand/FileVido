@@ -3,6 +3,7 @@ import NotFound from './NotFound'
 import { supabase } from '../lib/supabase'
 import { setPageSeo } from '../lib/seo'
 import { INDICATOR_PLATFORMS, formatFileSize, indicatorDownloadUrl } from '../lib/indicators'
+import RichText from '../components/RichText'
 import SimilarIndicators from '../components/SimilarIndicators'
 import './Indicators.css'
 
@@ -68,7 +69,7 @@ function IndicatorPage({ slug }) {
       {indicator.content && (
         <section className="indicator-section">
           <h2>توضیحات و نحوهٔ استفاده</h2>
-          <div className="indicator-content">{indicator.content}</div>
+          <div className="indicator-content"><RichText text={indicator.content} /></div>
         </section>
       )}
 

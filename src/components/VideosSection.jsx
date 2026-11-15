@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import VideoCard from './VideoCard'
+import { stripIconTokens } from '../lib/iconTokens'
 import CourseSlider from './CourseSlider'
 import AnimatedText from './animated/AnimatedText'
 import Counter from './animated/Counter'
@@ -87,7 +88,7 @@ function VideosSection({ archive = false }) {
       if (category && video.category !== category) return false
       if (level && video.level !== level) return false
       if (!term) return true
-      const haystack = normalize([video.title, video.description, video.instructor, video.category, video.level, ...(video.tags || [])].join(' '))
+      const haystack = normalize([video.title, stripIconTokens(video.description), video.instructor, video.category, video.level, ...(video.tags || [])].join(' '))
       return haystack.includes(term)
     })
   }, [videos, query, category, level])

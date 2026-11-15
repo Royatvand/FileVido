@@ -3,6 +3,8 @@ import { getVideoById, getAparatEmbedUrl, getPlaylistForVideo, videos } from '..
 import { supabase } from '../lib/supabase'
 import NotFound from './NotFound'
 import { setPageSeo } from '../lib/seo'
+import { stripIconTokens } from '../lib/iconTokens'
+import RichText from '../components/RichText'
 import './VideoPage.css'
 
 function VideoPage({ videoId }) {
@@ -64,7 +66,7 @@ function VideoPage({ videoId }) {
 
   useEffect(() => {
     if (!video) return
-    const description = (video.description || 'ویدیوی آموزشی بازارهای مالی با ترجمه فارسی در چارت مسترز.')
+    const description = stripIconTokens(video.description || 'ویدیوی آموزشی بازارهای مالی با ترجمه فارسی در چارت مسترز.')
       .replace(/\\s+/g, ' ')
       .slice(0, 160)
     setPageSeo({
@@ -102,7 +104,7 @@ function VideoPage({ videoId }) {
             </div>
             <h1>{video.title}</h1>
             <div className="video-meta">{video.instructor && <span>مدرس: {video.instructor}</span>}{video.level && <span>سطح: {video.level}</span>}{video.duration && <span>مدت: {video.duration}</span>}</div>
-            <div className="video-description"><h2>درباره این ویدیو</h2><p>{video.description}</p></div>
+            <div className="video-description"><h2>درباره این ویدیو</h2><p><RichText text={video.description} /></p></div>
             {video.tags.length > 0 && <div className="video-tags" aria-label="برچسب‌های ویدیو">{video.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
           </section>
           {playlist && <nav className="lesson-navigation" aria-label="ناوبری جلسات پلی‌لیست">

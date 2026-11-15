@@ -1,3 +1,5 @@
+import RichText from './RichText'
+
 function VideoCard({ video }) {
   return (
     <a className="video-card" href={`/video/${video.id}`} aria-label={`مشاهده ویدیو: ${video.title}`}>
@@ -9,7 +11,7 @@ function VideoCard({ video }) {
       <div className="video-body">
         {video.category && <span className="video-category">{video.category}</span>}
         <h3>{video.title}</h3>
-        <p>{video.description}</p>
+        <p><RichText text={video.description} /></p>
         <span className="video-link">تماشای ویدیو <span aria-hidden="true">←</span></span>
       </div>
     </a>

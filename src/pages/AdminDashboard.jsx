@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import IconTextarea from '../components/IconTextarea'
 import { supabase } from '../lib/supabase'
 import AdminBanners from '../components/AdminBanners'
 import AdminPlaylists from '../components/AdminPlaylists'
@@ -284,7 +285,7 @@ function AdminDashboard() {
               <label>مدت ویدیو<input name="duration" value={form.duration} onChange={updateField} placeholder="مثلاً 18:45" /></label>
               <label>مدرس<input name="instructor" value={form.instructor} onChange={updateField} placeholder="نام مدرس" /></label>
               <label>سطح آموزش<select name="level" value={form.level} onChange={updateField}><option>مقدماتی</option><option>متوسط</option><option>پیشرفته</option></select></label>
-              <label className="full">توضیحات<textarea name="description" rows="5" value={form.description} onChange={updateField} placeholder="توضیحات کامل ویدیو..." /></label>
+              <IconTextarea label="توضیحات" name="description" rows={5} value={form.description} onChange={updateField} placeholder="توضیحات کامل ویدیو..." />
               <label className="full">تگ‌ها<input name="tags" value={form.tags} onChange={updateField} placeholder="پرایس اکشن، تحلیل تکنیکال، ترید (با کاما جدا کنید)" /></label>
               <label>وضعیت انتشار<select name="status" value={form.status} onChange={updateField}><option value="draft">پیش‌نویس</option><option value="published">انتشار عمومی</option></select></label>
               <label className="admin-checkbox"><input type="checkbox" name="is_featured" checked={form.is_featured} onChange={updateField} /> نمایش به‌عنوان ویدیوی ویژه</label>

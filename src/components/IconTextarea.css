@@ -1,0 +1,11 @@
+.icon-field { display: grid; gap: 8px; }
+.icon-field-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.icon-field-toggle { min-height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--accent); background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.icon-field-toggle[aria-expanded="true"] { background: rgba(140,242,177,.12); }
+.icon-panel { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.03); }
+.icon-panel input { min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; color: inherit; background: rgba(0,0,0,.2); font: inherit; font-size: 13px; }
+.icon-panel-note { margin: 0; color: var(--muted); font-size: 11px; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; max-height: 220px; overflow-y: auto; }
+.icon-grid button { display: grid; place-items: center; aspect-ratio: 1; padding: 6px; border: 1px solid transparent; border-radius: 8px; background: rgba(255,255,255,.04); cursor: pointer; }
+.icon-grid button:hover, .icon-grid button:focus-visible { border-color: var(--accent); outline: none; }
+.icon-grid img { width: 26px; height: 26px; }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import IconTextarea from './IconTextarea'
 import { supabase } from '../lib/supabase'
 import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, INDICATOR_PLATFORMS, formatFileSize, getIndicatorExtension } from '../lib/indicators'
 
@@ -173,7 +174,7 @@ function AdminIndicators({ onNotice }) {
           </label>
           <label>نسخه<input name="version" value={form.version} onChange={updateField} dir="ltr" placeholder="1.0" /></label>
           <label className="full">توضیح کوتاه (روی کارت نمایش داده می‌شود)<input name="description" value={form.description} onChange={updateField} maxLength={200} /></label>
-          <label className="full">توضیحات کامل و نحوهٔ استفاده<textarea name="content" value={form.content} onChange={updateField} rows={8} placeholder="کاربرد، تنظیمات و نکات استفاده. متن ساده؛ HTML نمایش داده نمی‌شود." /></label>
+          <IconTextarea label="توضیحات کامل و نحوهٔ استفاده" name="content" value={form.content} onChange={updateField} rows={8} placeholder="کاربرد، تنظیمات و نکات استفاده. متن ساده؛ HTML نمایش داده نمی‌شود." />
           <div className="admin-cover-field">
             <span>فایل اسکریپت {editing ? '(خالی = همان فایل فعلی)' : '*'}</span>
             <label className="admin-cover-picker">

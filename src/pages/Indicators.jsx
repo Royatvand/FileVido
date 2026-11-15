@@ -24,6 +24,10 @@ function IndicatorCard({ item }) {
           {item.file_size > 0 && <span>{formatFileSize(item.file_size)}</span>}
           {item.download_count > 0 && <span>{item.download_count.toLocaleString('fa-IR')} دانلود</span>}
         </div>
+        <span className="indicator-card-cta">
+          مشاهده جزئیات
+          <span className="indicator-card-cta-arrow" aria-hidden="true">←</span>
+        </span>
       </div>
     </a>
   )

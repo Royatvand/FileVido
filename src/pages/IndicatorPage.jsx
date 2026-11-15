@@ -31,16 +31,18 @@ function IndicatorPage({ slug }) {
     })
   }, [indicator])
 
+  // NotFound خودش <main> دارد؛ پس بیرون از <main> این صفحه رندر می‌شود تا main تو در تو نشود
   if (state === 'missing') return <NotFound />
-  if (state === 'loading') return <section className="indicators-page"><div className="indicators-empty" aria-busy="true">در حال بارگذاری...</div></section>
+  if (state === 'loading') return <main className="main-content"><section className="indicators-page"><div className="indicators-empty" aria-busy="true">در حال بارگذاری...</div></section></main>
   if (state === 'error') {
-    return <section className="indicators-page"><div className="indicators-empty">بارگذاری انجام نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><a className="secondary-button" href="/indicators">بازگشت به اندیکاتورها</a></section>
+    return <main className="main-content"><section className="indicators-page"><div className="indicators-empty">بارگذاری انجام نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><a className="secondary-button" href="/indicators">بازگشت به اندیکاتورها</a></section></main>
   }
 
   const platform = INDICATOR_PLATFORMS[indicator.platform] || INDICATOR_PLATFORMS.other
   const downloadUrl = indicatorDownloadUrl(indicator)
 
   return (
+    <main className="main-content">
     <article className="indicators-page indicator-detail">
       <a className="indicator-back" href="/indicators"><span aria-hidden="true">→</span> همهٔ اندیکاتورها</a>
       <header className="indicator-head">
@@ -52,7 +54,7 @@ function IndicatorPage({ slug }) {
           <div className="indicator-meta">
             <span>نسخهٔ {indicator.version}</span>
             {indicator.file_size > 0 && <span>{formatFileSize(indicator.file_size)}</span>}
-            {indicator.download_count > 0 && <span>{indicator.download_count.toLocaleString('fa-IR')} دانلود</span>}
+            {indicator.download_count > 0 && <span>{indicator.download_count.toLocaleString('en-US')} دانلود</span>}
           </div>
           {downloadUrl ? (
             <a className="primary-button indicator-download" href={downloadUrl} download={indicator.file_name || true} onClick={() => supabase.countIndicatorDownload(indicator.slug)}>
@@ -76,6 +78,7 @@ function IndicatorPage({ slug }) {
 
       <p className="indicators-note">این اسکریپت فقط برای آموزش و تحلیل است و توصیهٔ مالی یا سیگنال خرید و فروش نیست؛ پیش از استفاده روی حساب واقعی، آن را روی دمو بسنج.</p>
     </article>
+    </main>
   )
 }
 

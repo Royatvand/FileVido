@@ -100,7 +100,8 @@ function AdminIndicators({ onNotice }) {
     try {
       const payload = {
         title: form.title.trim(),
-        slug: form.slug.trim() || slugify(form.title) || `indicator-${Date.now().toString(36)}`,
+        // Slug دستی هم پاک‌سازی می‌شود (فقط a-z، عدد و خط تیره)؛ وگرنه آدرس صفحه نامعتبر می‌شود
+        slug: slugify(form.slug) || slugify(form.title) || `indicator-${Date.now().toString(36)}`,
         description: form.description.trim(),
         content: form.content.trim(),
         platform: form.platform,

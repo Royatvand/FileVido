@@ -122,7 +122,7 @@ function App() {
       ) : isIndicators ? (
         <main className="main-content"><Indicators /></main>
       ) : indicatorSlug ? (
-        <main className="main-content"><IndicatorPage slug={indicatorSlug} /></main>
+        <IndicatorPage slug={indicatorSlug} />
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       {!isChart && <Footer />}
     </div>

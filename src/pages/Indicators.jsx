@@ -21,7 +21,7 @@ function IndicatorCard({ item }) {
         <div className="indicator-meta">
           <span>نسخهٔ {item.version}</span>
           {item.file_size > 0 && <span>{formatFileSize(item.file_size)}</span>}
-          {item.download_count > 0 && <span>{item.download_count.toLocaleString('fa-IR')} دانلود</span>}
+          {item.download_count > 0 && <span>{item.download_count.toLocaleString('en-US')} دانلود</span>}
         </div>
       </div>
     </a>

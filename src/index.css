@@ -413,3 +413,17 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .course-slider-track > .video-card { flex-basis: 86%; }
   .slider-arrow { display: none; }
 }
+
+
+/* Site-wide top promotional announcement */
+.top-announcement { position:relative; z-index:6; display:flex; min-height:44px; align-items:center; justify-content:center; gap:12px; padding:7px 48px; border-bottom:1px solid rgba(140,242,177,.14); color:#f3faf5; background:linear-gradient(100deg,#173d2b,#20513a 52%,#173d2b); text-align:center; }
+.top-announcement-link { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-width:0; color:inherit; font-size:12px; font-weight:600; line-height:1.8; }
+.top-announcement-link:hover { color:var(--accent); }
+.top-announcement img { width:30px; height:30px; flex:0 0 auto; object-fit:cover; border:1px solid rgba(255,255,255,.16); border-radius:6px; }
+.top-announcement-text { min-width:0; }
+.top-announcement-arrow { color:var(--accent); font-size:16px; }
+@media(max-width:600px) {
+  .top-announcement { min-height:42px; padding:6px 14px; }
+  .top-announcement-link { gap:8px; font-size:10px; }
+  .top-announcement img { width:26px; height:26px; }
+}

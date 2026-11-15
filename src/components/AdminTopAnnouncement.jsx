@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const emptyForm = { message: '', image_url: '', link_url: '', is_active: false }
+const isSafeLink = (url = '') => url.startsWith('/') && !url.startsWith('//') || /^https?:\/\//i.test(url)
 
 function AdminTopAnnouncement({ onNotice }) {
   const [form, setForm] = useState(emptyForm)
@@ -62,6 +63,10 @@ function AdminTopAnnouncement({ onNotice }) {
     event.preventDefault()
     if (!form.message.trim()) {
       onNotice({ type: 'error', text: 'متن نوار تبلیغاتی را وارد کن.' })
+      return
+    }
+    if (form.link_url.trim() && !isSafeLink(form.link_url.trim())) {
+      onNotice({ type: 'error', text: 'لینک باید یک آدرس داخلی سایت یا لینک معتبر با http/https باشد.' })
       return
     }
     setSaving(true)

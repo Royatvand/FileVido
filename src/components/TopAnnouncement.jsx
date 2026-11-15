@@ -25,9 +25,10 @@ function TopAnnouncement() {
 
   const content = (
     <>
+      <span className="top-announcement-label">CHARTMASTERS</span>
       {announcement.image_url && <img src={announcement.image_url} alt="" />}
       <span className="top-announcement-text">{announcement.message}</span>
-      {announcement.link_url && <span className="top-announcement-arrow" aria-hidden="true">←</span>}
+      {announcement.link_url && <span className="top-announcement-cta">مشاهده آموزش <span aria-hidden="true">←</span></span>}
     </>
   )
 

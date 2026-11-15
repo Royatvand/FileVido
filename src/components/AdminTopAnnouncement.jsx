@@ -104,10 +104,11 @@ function AdminTopAnnouncement({ onNotice }) {
       {loading ? <div className="admin-empty">در حال بارگذاری تنظیمات...</div> : (
         <>
           <p className="admin-announcement-hint">یک نوار تبلیغاتی فعال در سایت نمایش داده می‌شود. برای مخفی‌کردن آن، گزینه نمایش در سایت را غیرفعال کن.</p>
-          <div className={`admin-announcement-preview ${form.is_active ? '' : 'inactive'}`}>
+          <div className={`admin-announcement-preview ${form.is_active ? '' : 'inactive'} ${form.link_url ? 'has-link' : ''}`}>
+            <span className="admin-announcement-label">CHARTMASTERS</span>
             {previewUrl && <img src={previewUrl} alt="" />}
-            <span>{form.message || 'پیش‌نمایش متن نوار تبلیغاتی'}</span>
-            {form.link_url && <span aria-hidden="true">←</span>}
+            <span className="admin-announcement-text">{form.message || 'پیش‌نمایش متن نوار تبلیغاتی'}</span>
+            {form.link_url && <span className="admin-announcement-cta">مشاهده آموزش ←</span>}
           </div>
           <div className="admin-form-grid">
             <label className="full">متن نوار تبلیغاتی *<input name="message" value={form.message} onChange={updateField} maxLength={180} required placeholder="مثلاً آموزش جدید منتشر شد؛ همین حالا ببین" /></label>

@@ -119,3 +119,81 @@ a.indicator-card:hover { transform: translateY(-5px); border-color: rgba(140,242
   .install-guide-step h3 { font-size: 14px; }
   .install-guide-figure img { max-height: 300px; }
 }
+
+
+/* Liquid-glass inspired card action: lightweight CSS, no WebGL canvas */
+.indicator-card-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  align-self: flex-start;
+  min-height: 38px;
+  margin-top: 10px;
+  padding: 0 15px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 255, 229, 0.22);
+  border-radius: 999px;
+  color: #eafff1;
+  background:
+    linear-gradient(135deg, rgba(224, 255, 239, 0.19), rgba(110, 224, 157, 0.07) 48%, rgba(255, 255, 255, 0.12)),
+    rgba(16, 34, 25, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 5px 18px rgba(0, 0, 0, 0.16);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  backdrop-filter: blur(14px) saturate(145%);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.indicator-card-cta::before {
+  position: absolute;
+  inset: 1px 18% auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.indicator-card-cta-arrow {
+  display: inline-grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border: 1px solid rgba(220, 255, 235, 0.2);
+  border-radius: 50%;
+  background: rgba(220, 255, 235, 0.1);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+a.indicator-card:hover .indicator-card-cta,
+a.indicator-card:focus-visible .indicator-card-cta {
+  border-color: rgba(160, 255, 195, 0.52);
+  background:
+    linear-gradient(135deg, rgba(224, 255, 239, 0.27), rgba(110, 224, 157, 0.13) 48%, rgba(255, 255, 255, 0.17)),
+    rgba(16, 44, 29, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 7px 24px rgba(74, 220, 132, 0.13);
+}
+
+a.indicator-card:hover .indicator-card-cta-arrow,
+a.indicator-card:focus-visible .indicator-card-cta-arrow {
+  transform: translateX(-3px);
+  background: rgba(220, 255, 235, 0.2);
+}
+
+a.indicator-card:focus-visible {
+  outline: 2px solid rgba(140, 242, 177, 0.8);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator-card-cta,
+  .indicator-card-cta-arrow { transition: none; }
+}

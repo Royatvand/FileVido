@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+const isSafeLink = (url = '') => url.startsWith('/') && !url.startsWith('//') || /^https?:\/\//i.test(url)
 const isExternal = (url = '') => /^https?:\/\//i.test(url)
 
 function TopAnnouncement() {
@@ -32,7 +33,7 @@ function TopAnnouncement() {
 
   return (
     <aside className="top-announcement" aria-label="اطلاعیه و پیشنهاد ویژه">
-      {announcement.link_url ? (
+      {announcement.link_url && isSafeLink(announcement.link_url) ? (
         <a className="top-announcement-link" href={announcement.link_url} {...(isExternal(announcement.link_url) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
           {content}
         </a>

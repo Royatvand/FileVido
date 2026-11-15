@@ -3,6 +3,7 @@ import NotFound from './NotFound'
 import { supabase } from '../lib/supabase'
 import { setPageSeo } from '../lib/seo'
 import { INDICATOR_PLATFORMS, formatFileSize, indicatorDownloadUrl } from '../lib/indicators'
+import SimilarIndicators from '../components/SimilarIndicators'
 import './Indicators.css'
 
 function IndicatorPage({ slug }) {
@@ -77,6 +78,8 @@ function IndicatorPage({ slug }) {
       </section>
 
       <p className="indicators-note">این اسکریپت فقط برای آموزش و تحلیل است و توصیهٔ مالی یا سیگنال خرید و فروش نیست؛ پیش از استفاده روی حساب واقعی، آن را روی دمو بسنج.</p>
+
+      <SimilarIndicators current={indicator} />
     </article>
     </main>
   )

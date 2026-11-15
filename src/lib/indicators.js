@@ -29,3 +29,15 @@ export function indicatorDownloadUrl(indicator) {
   if (!base || !indicator?.file_path) return ''
   return `${base}/storage/v1/object/public/indicator-files/${indicator.file_path}?download=${encodeURIComponent(indicator.file_name || 'indicator')}`
 }
+
+// اندیکاتورهای مشابه: اول هم‌پلتفرم‌ها، بعد پردانلودتر، بعد جدیدتر؛ خودِ اندیکاتور حذف می‌شود
+export function pickSimilarIndicators(current, all, limit = 9) {
+  return all
+    .filter((item) => item.id !== current.id && item.slug !== current.slug)
+    .sort((a, b) => (
+      (Number(b.platform === current.platform) - Number(a.platform === current.platform))
+      || ((b.download_count || 0) - (a.download_count || 0))
+      || String(b.created_at || '').localeCompare(String(a.created_at || ''))
+    ))
+    .slice(0, limit)
+}

@@ -1,31 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { INDICATOR_PLATFORMS, formatFileSize } from '../lib/indicators'
+import { INDICATOR_PLATFORMS } from '../lib/indicators'
+import IndicatorCard from '../components/IndicatorCard'
 import './Indicators.css'
 
 function normalize(value = '') {
   return String(value).toLowerCase().replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/[‌‏‎]/g, '').trim()
-}
-
-function IndicatorCard({ item }) {
-  const platform = INDICATOR_PLATFORMS[item.platform] || INDICATOR_PLATFORMS.other
-  return (
-    <a className="indicator-card" href={`/indicator/${encodeURIComponent(item.slug)}`} aria-label={`مشاهده و دانلود: ${item.title}`}>
-      <div className="indicator-thumb">
-        {item.cover_url ? <img src={item.cover_url} alt="" loading="lazy" /> : <span className="indicator-thumb-fallback" aria-hidden="true">ƒ(x)</span>}
-        <span className="indicator-platform">{platform.label}</span>
-      </div>
-      <div className="indicator-body">
-        <h3>{item.title}</h3>
-        <p>{item.description}</p>
-        <div className="indicator-meta">
-          <span>نسخهٔ {item.version}</span>
-          {item.file_size > 0 && <span>{formatFileSize(item.file_size)}</span>}
-          {item.download_count > 0 && <span>{item.download_count.toLocaleString('en-US')} دانلود</span>}
-        </div>
-      </div>
-    </a>
-  )
 }
 
 function Indicators() {

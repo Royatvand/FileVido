@@ -251,7 +251,7 @@ function IndicatorPage({ slug }) {
                   <div className="indicator-body">
                     <h3>{item.title}</h3>
                     {item.description && <p>{item.description}</p>}
-                    <span className="related-indicator-link">مشاهده جزئیات ←</span>
+                    <span className="related-indicator-link liquid-glass-action">مشاهده جزئیات <span className="liquid-glass-action-arrow" aria-hidden="true">←</span></span>
                   </div>
                 </a>
               )

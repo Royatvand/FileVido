@@ -4,6 +4,7 @@ import About from './pages/About'
 import NotFound from './pages/NotFound'
 import VideosSection from './components/VideosSection'
 import BannerSlider from './components/BannerSlider'
+import TopAnnouncement from './components/TopAnnouncement'
 import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
 import Chart from './pages/Chart'
@@ -67,7 +68,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      {!isChart && <Header />}
+      {!isChart && <><TopAnnouncement /><Header /></>}
       {isHome ? (
         <main className="main-content" id="home">
           <section className="hero-section">

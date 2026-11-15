@@ -413,3 +413,30 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .course-slider-track > .video-card { flex-basis: 86%; }
   .slider-arrow { display: none; }
 }
+
+
+/* Site-wide top promotional announcement */
+.top-announcement { position:relative; z-index:6; display:flex; min-height:44px; align-items:center; justify-content:center; gap:12px; padding:7px 48px; border-bottom:1px solid rgba(140,242,177,.14); color:#f3faf5; background:linear-gradient(100deg,#173d2b,#20513a 52%,#173d2b); text-align:center; }
+.top-announcement-link { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-width:0; color:inherit; font-size:12px; font-weight:600; line-height:1.8; }
+.top-announcement-link:hover { color:var(--accent); }
+.top-announcement img { width:30px; height:30px; flex:0 0 auto; object-fit:cover; border:1px solid rgba(255,255,255,.16); border-radius:6px; }
+.top-announcement-text { min-width:0; }
+.top-announcement-arrow { color:var(--accent); font-size:16px; }
+@media(max-width:600px) {
+  .top-announcement { min-height:42px; padding:6px 14px; }
+  .top-announcement-link { gap:8px; font-size:10px; }
+  .top-announcement img { width:26px; height:26px; }
+}
+
+
+/* Liquid Glass announcement bar */
+.top-announcement { position:relative; z-index:6; display:flex; min-height:62px; align-items:center; justify-content:center; padding:9px 22px; overflow:hidden; color:#f3f7ff; text-align:center; border-bottom:1px solid rgba(177,207,255,.16); background:linear-gradient(105deg,rgba(13,24,48,.88),rgba(24,42,76,.76) 48%,rgba(12,22,43,.9)); -webkit-backdrop-filter:blur(22px) saturate(155%); backdrop-filter:blur(22px) saturate(155%); box-shadow:inset 0 1px rgba(255,255,255,.13),0 8px 28px rgba(0,0,0,.18); }
+.top-announcement::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at 18% 0%,rgba(113,174,255,.19),transparent 42%),linear-gradient(180deg,rgba(255,255,255,.055),transparent 55%); }
+.top-announcement-link { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:13px; width:min(100%,1100px); min-width:0; color:inherit; font-size:12px; font-weight:600; line-height:1.8; }
+.top-announcement-link:hover { color:#fff; }
+.top-announcement-label,.admin-announcement-label { flex:0 0 auto; padding:5px 9px; border:1px solid rgba(169,205,255,.24); border-radius:7px; color:#a9ceff; background:rgba(130,174,255,.09); font:700 9px/1.2 Arial,sans-serif; letter-spacing:1.1px; }
+.top-announcement img { width:34px; height:34px; flex:0 0 auto; object-fit:cover; border:1px solid rgba(255,255,255,.2); border-radius:9px; }
+.top-announcement-text { min-width:0; }
+.top-announcement-cta,.admin-announcement-cta { display:inline-flex; flex:0 0 auto; align-items:center; gap:9px; padding:8px 13px; border:1px solid rgba(156,208,255,.28); border-radius:9px; color:#e9f4ff; background:linear-gradient(135deg,rgba(105,164,255,.24),rgba(89,211,220,.15)); box-shadow:inset 0 1px rgba(255,255,255,.17),0 5px 18px rgba(75,143,220,.13); font-size:10px; font-weight:700; transition:background .2s ease,transform .2s ease; }
+.top-announcement-link:hover .top-announcement-cta { transform:translateY(-1px); background:linear-gradient(135deg,rgba(105,164,255,.34),rgba(89,211,220,.23)); }
+@media(max-width:600px) { .top-announcement { min-height:54px; padding:7px 12px; } .top-announcement-link { gap:8px; font-size:10px; } .top-announcement-label { display:none; } .top-announcement img { width:28px; height:28px; } .top-announcement-cta { padding:7px 9px; font-size:9px; } }

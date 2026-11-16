@@ -5,6 +5,7 @@ const SCRIPT_SRC = 'https://widget.bitycle.com/static/script/v1/script.js'
 const WIDGET_ID = 'bitycle-ac-widget'
 const LOAD_TIMEOUT_MS = 15000
 
+// طبق پاسخ پشتیبانی Bitycle: اگر symbol و source_priority مشخص نشوند، همهٔ نمادها در جست‌وجو و پنجرهٔ انتخاب نماد در دسترس‌اند
 const widgetConfig = {
   id: WIDGET_ID,
   theme: 'chartmasters.top',
@@ -13,13 +14,11 @@ const widgetConfig = {
   mode: 'dark',
   style: 'tradingview',
   datafeed_type: 'general',
-  symbol: 'binance_spot:BTCUSDT',
   interval: '1M',
   disabled_features: [],
   enabled_features: [],
   calendar_type: 'miladi',
   ai: { enabled: false, effort: 'low', disabled_features: [], enabled_features: [] },
-  source_priority: ['binance_spot'],
   symbol_modal: {
     kind: [
       'tehran_stock',

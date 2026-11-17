@@ -434,14 +434,61 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* Total duration shown on course cards */
 .playlist-total-duration {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  color: #9ba99f;
-  font-size: 10px;
-  line-height: 1.8;
+  align-self: flex-start;
+  gap: 10px;
+  max-width: 100%;
+  margin-top: 3px;
+  padding: 8px 12px;
+  border: 1px solid rgba(140,242,177,.16);
+  border-radius: 10px;
+  color: #dce9df;
+  background: linear-gradient(110deg, rgba(140,242,177,.09), rgba(140,242,177,.035));
+  direction: rtl;
 }
-.playlist-total-duration > span:first-child {
+.playlist-duration-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  flex: 0 0 30px;
+  place-items: center;
+  border: 1px solid rgba(140,242,177,.18);
+  border-radius: 8px;
   color: var(--accent);
-  font-size: 15px;
+  background: rgba(140,242,177,.08);
+  font-size: 21px;
+  line-height: 1;
+}
+.playlist-duration-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+.playlist-duration-label {
+  color: #82958a;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.playlist-duration-copy strong {
+  color: #e7f5eb;
+  font-size: 11px;
+  line-height: 1.7;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .playlist-total-duration {
+    gap: 8px;
+    padding: 7px 10px;
+  }
+  .playlist-duration-icon {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+  }
+  .playlist-duration-copy strong {
+    font-size: 10px;
+  }
 }

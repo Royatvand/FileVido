@@ -430,3 +430,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .main-nav .nav-link.active::after { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .nav-toggle span { transition: none; } }
+
+
+/* Total duration shown on course cards */
+.playlist-total-duration {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #9ba99f;
+  font-size: 10px;
+  line-height: 1.8;
+}
+.playlist-total-duration > span:first-child {
+  color: var(--accent);
+  font-size: 15px;
+}

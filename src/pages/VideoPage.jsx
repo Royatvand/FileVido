@@ -5,7 +5,6 @@ import NotFound from './NotFound'
 import { setPageSeo } from '../lib/seo'
 import { stripIconTokens } from '../lib/iconTokens'
 import RichText from '../components/RichText'
-import { playlistFileUrl } from '../lib/playlistFiles'
 import { formatFileSize } from '../lib/indicators'
 import './VideoPage.css'
 
@@ -42,7 +41,11 @@ function VideoPage({ videoId }) {
             .map((item) => ({ ...item.videos, id: item.videos.slug }))
           // فایل‌های PDF اختیاری‌اند؛ اگر جدول وجود نداشت یا خطا داد، فقط نمایش داده نمی‌شوند
           const files = await supabase.select('playlist_files', '&playlist_id=eq.' + membership.playlist_id + '&order=position.asc,created_at.asc').catch(() => [])
-          return { ...membership.playlists, videos: lessons, files: files || [] }
+          const filesWithUrls = await Promise.all((files || []).map(async (file) => ({
+            ...file,
+            downloadUrl: await supabase.createPlaylistFileSignedUrl(file.file_path, file.file_name).catch(() => ''),
+          })))
+          return { ...membership.playlists, videos: lessons, files: filesWithUrls.filter((file) => file.downloadUrl) }
         }))
         if (active) setDatabasePlaylists(details)
       } catch {
@@ -130,7 +133,7 @@ function VideoPage({ videoId }) {
             <div className="playlist-files">
               <h3>جزوه‌ها و فایل‌های دوره</h3>
               {playlist.files.map((file) => (
-                <a key={file.id} className="playlist-file" href={playlistFileUrl(file)} download={file.file_name || true}>
+                <a key={file.id} className="playlist-file" href={file.downloadUrl} download={file.file_name || true}>
                   <span className="playlist-file-icon" aria-hidden="true">PDF</span>
                   <span className="playlist-file-copy"><strong>{file.title}</strong>{file.file_size > 0 && <small>{formatFileSize(file.file_size)}</small>}</span>
                   <span aria-hidden="true">↓</span>

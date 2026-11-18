@@ -152,26 +152,26 @@ export const userAuth = {
   async completeGoogleSignIn(code) {
     if (googleCallbackPromise) return googleCallbackPromise
     googleCallbackPromise = (async () => {
-    const verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
-    if (!code || !verifier) {
-      throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
-    }
+      const verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
+      if (!code || !verifier) {
+        throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
+      }
 
-    const session = await request('/auth/v1/token?grant_type=pkce', {
-      method: 'POST',
-      body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
-    })
+      const session = await request('/auth/v1/token?grant_type=pkce', {
+        method: 'POST',
+        body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
+      })
 
-    sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
-    saveUserSession(session)
-    return getUserSession()
+      sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
+      saveUserSession(session)
+      return getUserSession()
     })()
     try {
       return await googleCallbackPromise
     } finally {
       googleCallbackPromise = null
     }
-  },
+  }
 }
 
 export const supabase = {

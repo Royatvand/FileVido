@@ -34,11 +34,11 @@ using (
 grant select on public.playlist_files to anon, authenticated;
 grant insert, update, delete on public.playlist_files to authenticated;
 
--- باکت فایل‌ها: عمومی (دانلود رایگان)، فقط PDF، حداکثر ۲۰ مگابایت
+-- باکت خصوصی؛ دانلود فقط با signed URL و دسترسی به فایل‌های پلی‌لیست منتشرشده، فقط PDF و حداکثر ۲۰ مگابایت
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('playlist-files', 'playlist-files', true, 20971520, array['application/pdf'])
+values ('playlist-files', 'playlist-files', false, 20971520, array['application/pdf'])
 on conflict (id) do update
-  set public = true,
+  set public = false,
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
@@ -57,3 +57,21 @@ drop policy if exists "Admins delete playlist files" on storage.objects;
 create policy "Admins delete playlist files"
   on storage.objects for delete to authenticated
   using (bucket_id = 'playlist-files' and (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
+
+-- ایجاد لینک دانلود فقط برای فایل‌های پلی‌لیست منتشرشده؛ فایل‌های پیش‌نویس خصوصی می‌مانند
+drop policy if exists "Public can read published playlist files" on storage.objects;
+create policy "Public can read published playlist files"
+  on storage.objects for select to anon, authenticated
+  using (
+    bucket_id = 'playlist-files'
+    and (
+      (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+      or exists (
+        select 1
+        from public.playlist_files pf
+        join public.playlists p on p.id = pf.playlist_id
+        where pf.file_path = storage.objects.name
+          and p.status = 'published'
+      )
+    )
+  );

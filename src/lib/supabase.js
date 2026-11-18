@@ -90,7 +90,7 @@ function saveUserSession(session) {
 function encodeBase64Url(bytes) {
   let binary = ''
   bytes.forEach((byte) => { binary += String.fromCharCode(byte) })
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
 }
 
 async function createCodeChallenge(verifier) {
@@ -125,6 +125,8 @@ async function getValidUserSession() {
 }
 
 // احراز هویت کاربران عادی؛ نشست آن کاملاً جدا از نشست پنل مدیریت است.
+let googleCallbackPromise = null
+
 export const userAuth = {
   getSession: getUserSession,
   async getValidSession() {
@@ -148,6 +150,8 @@ export const userAuth = {
     window.location.assign(authorizeUrl.toString())
   },
   async completeGoogleSignIn(code) {
+    if (googleCallbackPromise) return googleCallbackPromise
+    googleCallbackPromise = (async () => {
     const verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
     if (!code || !verifier) {
       throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
@@ -161,6 +165,12 @@ export const userAuth = {
     sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
     saveUserSession(session)
     return getUserSession()
+    })()
+    try {
+      return await googleCallbackPromise
+    } finally {
+      googleCallbackPromise = null
+    }
   },
 }
 

@@ -104,7 +104,7 @@ function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
                   <span className="admin-playlist-position" aria-hidden="true">PDF</span>
                   <strong>{item.title} <small>({formatFileSize(item.file_size)})</small></strong>
                   <div className="admin-row-actions">
-                    <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer">مشاهده</a>
+                    <a href={item.downloadUrl}>دانلود</a>
                     <button type="button" className="danger" onClick={() => handleDelete(item)}>حذف</button>
                   </div>
                 </div>

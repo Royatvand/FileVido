@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { PLAYLIST_FILE_MAX_BYTES, playlistFileUrl } from '../lib/playlistFiles'
+import { PLAYLIST_FILE_MAX_BYTES } from '../lib/playlistFiles'
 import { formatFileSize } from '../lib/indicators'
 
 // مدیریت PDFهای همراه یک پلی‌لیست (جزوه، چک‌لیست و ...)
 function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
   const [files, setFiles] = useState([])
-  const [state, setState] = useState('loading') // loading | ready | missing
+  const [state, setState] = useState('loading') // loading | ready | missing | error
   const [title, setTitle] = useState('')
   const [file, setFile] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -17,16 +17,33 @@ function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
 
   useEffect(() => {
     let active = true
-    supabase.select('playlist_files', `&playlist_id=eq.${playlistId}&order=position.asc,created_at.asc`)
-      .then((rows) => { if (active) { setFiles(rows || []); setState('ready') } })
-      .catch(() => { if (active) setState('missing') }) // معمولاً یعنی supabase/playlist-files.sql هنوز اجرا نشده
+    async function loadFiles() {
+      let rows
+      try {
+        rows = await supabase.select('playlist_files', `&playlist_id=eq.${playlistId}&order=position.asc,created_at.asc`)
+      } catch {
+        if (active) setState('missing') // معمولاً یعنی supabase/playlist-files.sql هنوز اجرا نشده
+        return
+      }
+
+      try {
+        const filesWithUrls = await Promise.all((rows || []).map(async (item) => ({
+          ...item,
+          downloadUrl: await supabase.createPlaylistFileSignedUrl(item.file_path, item.file_name),
+        })))
+        if (active) { setFiles(filesWithUrls); setState('ready') }
+      } catch {
+        if (active) setState('error')
+      }
+    }
+    loadFiles()
     return () => { active = false }
   }, [playlistId, reloadKey])
 
   function handleFile(event) {
     const picked = event.target.files?.[0]
     if (!picked) return
-    const isPdf = picked.type === 'application/pdf' || picked.name.toLowerCase().endsWith('.pdf')
+    const isPdf = picked.name.toLowerCase().endsWith('.pdf')
     if (!isPdf) { onNotice({ type: 'error', text: 'فقط فایل PDF مجاز است.' }); event.target.value = ''; return }
     if (picked.size > PLAYLIST_FILE_MAX_BYTES) { onNotice({ type: 'error', text: 'حجم فایل باید حداکثر ۲۰ مگابایت باشد.' }); event.target.value = ''; return }
     setFile(picked)
@@ -53,7 +70,7 @@ function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
       setTitle(''); setFile(null); setInputKey((key) => key + 1)
       load()
     } catch (error) {
-      if (path) await supabase.removePlaylistFile(path) // فایل یتیم باقی نماند
+      if (path) { try { await supabase.removePlaylistFile(path) } catch { onNotice({ type: 'error', text: 'ثبت PDF ناموفق بود و پاک‌سازی فایل هم انجام نشد؛ فایل ممکن است در Storage باقی مانده باشد.' }) } }
       onNotice({ type: 'error', text: error.message })
     } finally {
       setSaving(false)
@@ -63,8 +80,8 @@ function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
   async function handleDelete(item) {
     if (!window.confirm(`فایل «${item.title}» حذف شود؟`)) return
     try {
-      await supabase.remove('playlist_files', item.id)
       await supabase.removePlaylistFile(item.file_path)
+      await supabase.remove('playlist_files', item.id)
       onNotice({ type: 'success', text: 'فایل حذف شد.' })
       load()
     } catch (error) {
@@ -77,6 +94,7 @@ function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
       <div className="admin-panel-heading"><div><h2>فایل‌های PDF دوره: {playlistTitle}</h2><p>جزوه یا چک‌لیست اضافه کن؛ زیر لیست جلسات صفحهٔ ویدیو برای دانلود نمایش داده می‌شود. حداکثر ۲۰ مگابایت برای هر فایل.</p></div></div>
       {state === 'loading' && <div className="admin-empty">در حال بارگذاری...</div>}
       {state === 'missing' && <div className="admin-empty">جدول فایل‌ها پیدا نشد. فایل <code>supabase/playlist-files.sql</code> را در Supabase → SQL Editor اجرا کن.</div>}
+      {state === 'error' && <div className="admin-empty">ساخت لینک دانلود فایل‌ها ناموفق بود. دسترسی Storage را بررسی کن.</div>}
       {state === 'ready' && (
         <>
           {files.length === 0 ? <div className="admin-empty">هنوز فایلی برای این دوره آپلود نشده است.</div> : (
@@ -86,7 +104,7 @@ function AdminPlaylistFiles({ playlistId, playlistTitle, onNotice }) {
                   <span className="admin-playlist-position" aria-hidden="true">PDF</span>
                   <strong>{item.title} <small>({formatFileSize(item.file_size)})</small></strong>
                   <div className="admin-row-actions">
-                    <a href={playlistFileUrl(item)} target="_blank" rel="noopener noreferrer">مشاهده</a>
+                    <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer">مشاهده</a>
                     <button type="button" className="danger" onClick={() => handleDelete(item)}>حذف</button>
                   </div>
                 </div>

@@ -67,6 +67,103 @@ async function getValidSession() {
   return session
 }
 
+const USER_SESSION_KEY = 'chartmasters_user_session'
+const USER_CODE_VERIFIER_KEY = 'chartmasters_google_code_verifier'
+
+function getUserSession() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_SESSION_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
+function saveUserSession(session) {
+  if (session) {
+    const expiresAt = session.expires_at || Math.floor(Date.now() / 1000) + (session.expires_in || 3600)
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify({ ...session, expires_at: expiresAt }))
+  } else {
+    localStorage.removeItem(USER_SESSION_KEY)
+  }
+}
+
+function encodeBase64Url(bytes) {
+  let binary = ''
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte) })
+  return btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
+}
+
+async function createCodeChallenge(verifier) {
+  const bytes = new TextEncoder().encode(verifier)
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return encodeBase64Url(new Uint8Array(digest))
+}
+
+async function refreshUserSession(session) {
+  if (!session?.refresh_token) return null
+  const refreshed = await request('/auth/v1/token?grant_type=refresh_token', {
+    method: 'POST',
+    body: JSON.stringify({ refresh_token: session.refresh_token }),
+  })
+  saveUserSession(refreshed)
+  return getUserSession()
+}
+
+async function getValidUserSession() {
+  let session = getUserSession()
+  if (!session) return null
+
+  if (session.expires_at && session.expires_at * 1000 < Date.now() + 30000) {
+    try {
+      session = await refreshUserSession(session)
+    } catch {
+      saveUserSession(null)
+      return null
+    }
+  }
+  return session
+}
+
+// احراز هویت کاربران عادی؛ نشست آن کاملاً جدا از نشست پنل مدیریت است.
+export const userAuth = {
+  getSession: getUserSession,
+  async getValidSession() {
+    return getValidUserSession()
+  },
+  async signInWithGoogle() {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      throw new Error('تنظیمات اتصال Supabase در محیط پروژه وارد نشده است.')
+    }
+
+    const randomBytes = crypto.getRandomValues(new Uint8Array(32))
+    const verifier = encodeBase64Url(randomBytes)
+    const challenge = await createCodeChallenge(verifier)
+    sessionStorage.setItem(USER_CODE_VERIFIER_KEY, verifier)
+
+    const authorizeUrl = new URL('/auth/v1/authorize', SUPABASE_URL)
+    authorizeUrl.searchParams.set('provider', 'google')
+    authorizeUrl.searchParams.set('redirect_to', window.location.origin + '/login')
+    authorizeUrl.searchParams.set('code_challenge', challenge)
+    authorizeUrl.searchParams.set('code_challenge_method', 's256')
+    window.location.assign(authorizeUrl.toString())
+  },
+  async completeGoogleSignIn(code) {
+    const verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
+    if (!code || !verifier) {
+      throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
+    }
+
+    const session = await request('/auth/v1/token?grant_type=pkce', {
+      method: 'POST',
+      body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
+    })
+
+    sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
+    saveUserSession(session)
+    return getUserSession()
+  },
+}
+
 export const supabase = {
   getSession,
   async signIn(email, password) {

@@ -175,9 +175,10 @@ export const supabase = {
   async uploadPlaylistFile(file) {
     const session = await getValidSession()
     if (!session?.access_token) throw new Error('برای آپلود فایل باید دوباره وارد حساب مدیر شوید.')
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
-    if (!isPdf) throw new Error('فقط فایل PDF مجاز است.')
+    if (!file.name.toLowerCase().endsWith('.pdf')) throw new Error('نام فایل باید پسوند PDF داشته باشد.')
     if (file.size > PLAYLIST_FILE_MAX_BYTES) throw new Error('حجم فایل بیشتر از ۲۰ مگابایت است.')
+    const signature = await file.slice(0, 5).text()
+    if (signature !== '%PDF-') throw new Error('محتوای فایل معتبر PDF نیست.')
 
     const path = `files/${crypto.randomUUID()}.pdf`
     const response = await fetch(`${SUPABASE_URL}/storage/v1/object/playlist-files/${path}`, {
@@ -195,13 +196,37 @@ export const supabase = {
     if (!response.ok) throw new Error(result?.message || result?.error || 'آپلود PDF انجام نشد. SQL فایل supabase/playlist-files.sql اجرا شده است؟')
     return path
   },
+  async createPlaylistFileSignedUrl(path, fileName) {
+    if (!path) throw new Error('مسیر فایل PDF مشخص نیست.')
+    const session = await getValidSession()
+    const encodedPath = path.split('/').map(encodeURIComponent).join('/')
+    const response = await fetch(SUPABASE_URL + '/storage/v1/object/sign/playlist-files/' + encodedPath, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        ...(session?.access_token ? { Authorization: 'Bearer ' + session.access_token } : {}),
+      },
+      body: JSON.stringify({ expiresIn: 3600, download: fileName || true }),
+    })
+    const result = await response.json().catch(() => null)
+    if (!response.ok) throw new Error(result?.message || result?.error || 'ساخت لینک دانلود PDF انجام نشد.')
+    const signedUrl = result?.signedURL || result?.signedUrl
+    if (!signedUrl) throw new Error('لینک دانلود PDF از Storage دریافت نشد.')
+    return signedUrl.startsWith('http') ? signedUrl : SUPABASE_URL + '/storage/v1' + (signedUrl.startsWith('/') ? signedUrl : '/' + signedUrl)
+  },
   async removePlaylistFile(path) {
     const session = await getValidSession()
     if (!session?.access_token || !path) return
-    await fetch(`${SUPABASE_URL}/storage/v1/object/playlist-files/${path}`, {
+    const encodedPath = path.split('/').map(encodeURIComponent).join('/')
+    const response = await fetch(SUPABASE_URL + '/storage/v1/object/playlist-files/' + encodedPath, {
       method: 'DELETE',
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
-    }).catch(() => {})
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + session.access_token },
+    })
+    if (!response.ok && response.status !== 404) {
+      const result = await response.json().catch(() => null)
+      throw new Error(result?.message || result?.error || 'حذف فایل PDF از Storage انجام نشد.')
+    }
   },
   async uploadIndicatorFile(file) {
     const session = await getValidSession()

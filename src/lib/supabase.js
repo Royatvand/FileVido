@@ -207,13 +207,18 @@ export const supabase = {
         'Content-Type': 'application/json',
         ...(session?.access_token ? { Authorization: 'Bearer ' + session.access_token } : {}),
       },
-      body: JSON.stringify({ expiresIn: 3600, download: fileName || true }),
+      body: JSON.stringify({ expiresIn: 3600 }),
     })
     const result = await response.json().catch(() => null)
     if (!response.ok) throw new Error(result?.message || result?.error || 'ساخت لینک دانلود PDF انجام نشد.')
     const signedUrl = result?.signedURL || result?.signedUrl
     if (!signedUrl) throw new Error('لینک دانلود PDF از Storage دریافت نشد.')
-    return signedUrl.startsWith('http') ? signedUrl : SUPABASE_URL + '/storage/v1' + (signedUrl.startsWith('/') ? signedUrl : '/' + signedUrl)
+    const absoluteUrl = signedUrl.startsWith('http')
+      ? signedUrl
+      : SUPABASE_URL + '/storage/v1' + (signedUrl.startsWith('/') ? signedUrl : '/' + signedUrl)
+    const downloadUrl = new URL(absoluteUrl)
+    downloadUrl.searchParams.set('download', fileName || 'true')
+    return downloadUrl.toString()
   },
   async removePlaylistFile(path) {
     const session = await getValidSession()

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import AdminPlaylistFiles from './AdminPlaylistFiles'
 
 function slugify(value) {
   return value.trim().toLowerCase()
@@ -226,6 +227,15 @@ function AdminPlaylists({ onNotice }) {
             </div>
           )}
         </section>
+      )}
+
+      {selectedId && (
+        <AdminPlaylistFiles
+          key={selectedId}
+          playlistId={selectedId}
+          playlistTitle={playlists.find((item) => item.id === selectedId)?.title}
+          onNotice={onNotice}
+        />
       )}
     </div>
   )

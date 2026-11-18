@@ -62,3 +62,13 @@
   .lesson-navigation { gap: 8px; }
   .lesson-nav-card { padding: 12px 10px; }
 }
+
+/* فایل‌های PDF دوره زیر لیست جلسات */
+.playlist-files { display: grid; gap: 8px; padding: 16px; border-top: 1px solid var(--line); }
+.playlist-files h3 { margin: 0 0 4px; font-size: 13px; color: #c0cbc4; }
+.playlist-file { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.03); transition: border-color .2s ease, background .2s ease; }
+.playlist-file:hover, .playlist-file:focus-visible { border-color: rgba(140,242,177,.4); background: rgba(140,242,177,.06); outline: none; }
+.playlist-file-icon { display: grid; place-items: center; min-width: 38px; height: 38px; border-radius: 8px; color: #ff9b9b; background: rgba(255,90,90,.12); font-size: 11px; font-weight: 800; }
+.playlist-file-copy { display: grid; flex: 1; min-width: 0; }
+.playlist-file-copy strong { overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; }
+.playlist-file-copy small { color: var(--muted); font-size: 11px; }

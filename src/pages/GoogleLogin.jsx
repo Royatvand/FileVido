@@ -16,7 +16,7 @@ function GoogleLogin() {
 
       if (authError) {
         window.history.replaceState({}, document.title, '/login')
-        if (active) setError(decodeURIComponent(authError.replace(/\\+/g, ' ')))
+        if (active) setError(authError)
         return
       }
 

@@ -5,6 +5,8 @@ import NotFound from './NotFound'
 import { setPageSeo } from '../lib/seo'
 import { stripIconTokens } from '../lib/iconTokens'
 import RichText from '../components/RichText'
+import { playlistFileUrl } from '../lib/playlistFiles'
+import { formatFileSize } from '../lib/indicators'
 import './VideoPage.css'
 
 function VideoPage({ videoId }) {
@@ -38,7 +40,9 @@ function VideoPage({ videoId }) {
           const lessons = (entries || [])
             .filter((item) => item.videos && item.videos.status === 'published')
             .map((item) => ({ ...item.videos, id: item.videos.slug }))
-          return { ...membership.playlists, videos: lessons }
+          // فایل‌های PDF اختیاری‌اند؛ اگر جدول وجود نداشت یا خطا داد، فقط نمایش داده نمی‌شوند
+          const files = await supabase.select('playlist_files', '&playlist_id=eq.' + membership.playlist_id + '&order=position.asc,created_at.asc').catch(() => [])
+          return { ...membership.playlists, videos: lessons, files: files || [] }
         }))
         if (active) setDatabasePlaylists(details)
       } catch {
@@ -122,6 +126,18 @@ function VideoPage({ videoId }) {
             const isActive = item.id === video.id
             return <a key={item.id} href={'/video/' + item.id} className={'playlist-lesson ' + (isActive ? 'active' : '')} aria-current={isActive ? 'page' : undefined}><span className="playlist-lesson-number">{isActive ? '▶' : String(index + 1).padStart(2, '0')}</span><span className="playlist-lesson-copy"><strong>{item.playlistLabel || item.title}</strong><small>{item.duration || 'ویدیوی آموزشی'}</small></span>{isActive && <span className="playlist-now">در حال پخش</span>}</a>
           })}</div>
+          {playlist.files?.length > 0 && (
+            <div className="playlist-files">
+              <h3>جزوه‌ها و فایل‌های دوره</h3>
+              {playlist.files.map((file) => (
+                <a key={file.id} className="playlist-file" href={playlistFileUrl(file)} download={file.file_name || true}>
+                  <span className="playlist-file-icon" aria-hidden="true">PDF</span>
+                  <span className="playlist-file-copy"><strong>{file.title}</strong>{file.file_size > 0 && <small>{formatFileSize(file.file_size)}</small>}</span>
+                  <span aria-hidden="true">↓</span>
+                </a>
+              ))}
+            </div>
+          )}
         </aside>}
       </div>
       {related.length > 0 && <section className="related-videos"><div className="related-heading"><span className="section-kicker">ادامه یادگیری</span><h2>ویدیوهای مرتبط</h2></div><div className="related-list">{related.map((item) => <a key={item.id} className="related-item" href={'/video/' + item.id}><img src={item.cover} alt="" loading="lazy" /><span>{item.title}</span>{item.category && <small>{item.category}</small>}</a>)}</div></section>}

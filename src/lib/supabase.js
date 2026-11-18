@@ -1,4 +1,5 @@
 import { compressImage } from './imageCompress'
+import { PLAYLIST_FILE_MAX_BYTES } from './playlistFiles'
 import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, getIndicatorExtension } from './indicators'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
@@ -171,6 +172,37 @@ export const supabase = {
     return `${SUPABASE_URL}/storage/v1/object/public/video-covers/${path}`
   },
   // آپلود فایل اسکریپت یا اندیکاتور؛ مسیر فایل در bucket برمی‌گردد (نه آدرس کامل)
+  async uploadPlaylistFile(file) {
+    const session = await getValidSession()
+    if (!session?.access_token) throw new Error('برای آپلود فایل باید دوباره وارد حساب مدیر شوید.')
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    if (!isPdf) throw new Error('فقط فایل PDF مجاز است.')
+    if (file.size > PLAYLIST_FILE_MAX_BYTES) throw new Error('حجم فایل بیشتر از ۲۰ مگابایت است.')
+
+    const path = `files/${crypto.randomUUID()}.pdf`
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/playlist-files/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/pdf',
+        'Cache-Control': 'max-age=31536000',
+        'x-upsert': 'false',
+      },
+      body: file,
+    })
+    const result = await response.json().catch(() => null)
+    if (!response.ok) throw new Error(result?.message || result?.error || 'آپلود PDF انجام نشد. SQL فایل supabase/playlist-files.sql اجرا شده است؟')
+    return path
+  },
+  async removePlaylistFile(path) {
+    const session = await getValidSession()
+    if (!session?.access_token || !path) return
+    await fetch(`${SUPABASE_URL}/storage/v1/object/playlist-files/${path}`, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
+    }).catch(() => {})
+  },
   async uploadIndicatorFile(file) {
     const session = await getValidSession()
     if (!session?.access_token) throw new Error('برای آپلود فایل باید دوباره وارد حساب مدیر شوید.')

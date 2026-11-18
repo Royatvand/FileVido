@@ -90,7 +90,7 @@ function saveUserSession(session) {
 function encodeBase64Url(bytes) {
   let binary = ''
   bytes.forEach((byte) => { binary += String.fromCharCode(byte) })
-  return btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
 }
 
 async function createCodeChallenge(verifier) {

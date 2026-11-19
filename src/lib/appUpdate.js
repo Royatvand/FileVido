@@ -215,7 +215,7 @@ export function initAndroidPushNotifications(userId = null) {
     await PushNotifications.addListener('registrationError', (error) => {
       console.warn('[appUpdate] Push registration error', error)
     })
-    await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+    await PushNotifications.addListener('pushNotificationActionPerformed', async (action) => {
       const url = action?.notification?.data?.download_url
       if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
         await openExternalUrl(url)

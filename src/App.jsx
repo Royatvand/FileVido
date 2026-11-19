@@ -1,4 +1,5 @@
 import Header from './components/Header'
+import ThemeToggle from './components/ThemeToggle'
 import Footer from './components/Footer'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
@@ -74,7 +75,7 @@ function App() {
 
   if (isAdminLogin) return <AdminLogin />
   if (isUserLogin) return <GoogleLogin />
-  if (isUserDashboard || userDashboardSection) return <div className="app-shell"><Header /><main className="main-content">{userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}</main></div>
+  if (isUserDashboard || userDashboardSection) return <div className="app-shell"><Header /><ThemeToggle /><main className="main-content">{userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}</main></div>
   if (isAdmin) {
     const session = supabase.getSession()
     const isAdminUser = session?.user?.app_metadata?.role === 'admin'
@@ -87,6 +88,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <ThemeToggle />
       {!isChart && <Header />}
       {isHome ? (
         <main className="main-content" id="home">

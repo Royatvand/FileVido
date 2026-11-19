@@ -8,7 +8,7 @@ function wasDismissed() {
   try { return localStorage.getItem(STORAGE_KEY) === '1' } catch { return false }
 }
 
-// نوتیف راهنمای زیرنویس هنگام ورود به ویدیوهای یک پلی‌لیست؛ با «متوجه شدم» دیگر نمایش داده نمی‌شود
+// نوار باریک راهنمای زیرنویس بالای پلیر هنگام ورود به ویدیوهای یک پلی‌لیست؛ با «متوجه شدم» دیگر نمایش داده نمی‌شود
 function SubtitleTip() {
   const [visible, setVisible] = useState(false)
 
@@ -33,16 +33,14 @@ function SubtitleTip() {
   if (!visible) return null
 
   return (
-    <aside className="subtitle-tip" role="status" aria-live="polite">
+    <div className="subtitle-tip" role="status" aria-live="polite">
       <span className="subtitle-tip-icon" aria-hidden="true">CC</span>
-      <div className="subtitle-tip-body">
-        <strong>راهنمای زیرنویس</strong>
-        <p>اگر زیرنویس برایتان فعال نیست، از <b>تنظیمات پلیر</b> (آیکون چرخ‌دنده) آن را روشن کنید.</p>
-        <p>اگر فعال است ولی نمایش داده نمی‌شود، <b>رنگ زیرنویس</b> را از همان تنظیمات تغییر دهید.</p>
-        <button type="button" className="subtitle-tip-ok" onClick={() => dismiss(true)}>متوجه شدم</button>
-      </div>
+      <p>
+        زیرنویس فعال نیست؟ از <b>تنظیمات پلیر</b> (چرخ‌دنده) روشنش کنید. فعال است ولی دیده نمی‌شود؟ <b>رنگ زیرنویس</b> را همان‌جا تغییر دهید.
+      </p>
+      <button type="button" className="subtitle-tip-ok" onClick={() => dismiss(true)}>متوجه شدم</button>
       <button type="button" className="subtitle-tip-close" onClick={() => dismiss(false)} aria-label="بستن راهنما">×</button>
-    </aside>
+    </div>
   )
 }
 

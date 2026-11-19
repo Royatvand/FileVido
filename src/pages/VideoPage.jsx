@@ -103,6 +103,7 @@ function VideoPage({ videoId }) {
       <a className="back-link" href="/#videos">→ بازگشت به ویدیوها</a>
       <div className={'watch-layout ' + (playlist ? 'has-playlist' : '')}>
         <div className="watch-main">
+          {playlist && <SubtitleTip />}
           <div className="player-frame"><iframe src={getAparatEmbedUrl(video.aparatId)} title={video.title} allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin" /></div>
           <section className="video-info">
             <div className="video-title-row">
@@ -144,7 +145,6 @@ function VideoPage({ videoId }) {
           )}
         </aside>}
       </div>
-      {playlist && <SubtitleTip />}
       {related.length > 0 && <section className="related-videos"><div className="related-heading"><span className="section-kicker">ادامه یادگیری</span><h2>ویدیوهای مرتبط</h2></div><div className="related-list">{related.map((item) => <a key={item.id} className="related-item" href={'/video/' + item.id}><img src={item.cover} alt="" loading="lazy" /><span>{item.title}</span>{item.category && <small>{item.category}</small>}</a>)}</div></section>}
     </main>
   )

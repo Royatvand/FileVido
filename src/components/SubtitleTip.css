@@ -1,14 +1,12 @@
-.subtitle-tip { position: fixed; z-index: 60; bottom: 24px; left: 50%; width: min(440px, calc(100% - 32px)); display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border: 1px solid rgba(140,242,177,.28); border-radius: 16px; background: linear-gradient(160deg, rgba(20,34,26,.96), rgba(10,17,13,.97)); box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03) inset; backdrop-filter: blur(14px); transform: translateX(-50%); animation: subtitle-tip-in .45s cubic-bezier(.2,.8,.2,1) both; }
-.subtitle-tip-icon { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 12px; color: #07110b; background: var(--accent); font-size: 14px; font-weight: 800; letter-spacing: .5px; direction: ltr; }
-.subtitle-tip-body { flex: 1; min-width: 0; }
-.subtitle-tip-body strong { display: block; margin-bottom: 6px; font-size: 14px; }
-.subtitle-tip-body p { margin: 0 0 4px; color: #c0cbc4; font-size: 12.5px; line-height: 2; }
-.subtitle-tip-body b { color: var(--accent); font-weight: 700; }
-.subtitle-tip-ok { margin-top: 10px; min-height: 36px; padding: 0 18px; border: 0; border-radius: 999px; color: #07110b; background: var(--accent); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
-.subtitle-tip-ok:hover { filter: brightness(1.08); }
-.subtitle-tip-close { position: absolute; top: 8px; left: 10px; width: 30px; height: 30px; border: 0; border-radius: 50%; color: #9aa7a0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; }
+.subtitle-tip { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px 10px 8px 8px; border: 1px solid rgba(140,242,177,.22); border-radius: 12px; background: rgba(140,242,177,.07); animation: subtitle-tip-in .4s ease both; }
+.subtitle-tip-icon { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 8px; color: #07110b; background: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .4px; direction: ltr; }
+.subtitle-tip p { flex: 1; min-width: 0; margin: 0; color: #c0cbc4; font-size: 12.5px; line-height: 1.9; }
+.subtitle-tip b { color: var(--accent); font-weight: 700; }
+.subtitle-tip-ok { flex: none; min-height: 32px; padding: 0 14px; border: 1px solid rgba(140,242,177,.4); border-radius: 999px; color: var(--accent); background: transparent; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.subtitle-tip-ok:hover { color: #07110b; background: var(--accent); }
+.subtitle-tip-close { flex: none; width: 28px; height: 28px; border: 0; border-radius: 50%; color: #9aa7a0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; }
 .subtitle-tip-close:hover { color: #fff; background: rgba(255,255,255,.08); }
 .subtitle-tip button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@keyframes subtitle-tip-in { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
-@media (max-width: 600px) { .subtitle-tip { bottom: 14px; padding: 14px; } }
+@keyframes subtitle-tip-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 600px) { .subtitle-tip { flex-wrap: wrap; } .subtitle-tip p { flex-basis: calc(100% - 90px); } .subtitle-tip-ok { margin-inline-start: 42px; } }
 @media (prefers-reduced-motion: reduce) { .subtitle-tip { animation: none; } }

@@ -607,7 +607,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .user-dashboard-compact-empty { min-height:72px; display:flex; align-items:center; color:#829187; font-size:9px; line-height:2; }
 .user-dashboard-data-note { margin:15px 2px 0; color:#69786e; font-size:9px; line-height:2; }
 .user-dashboard-mobile-toggle { display:none; }
-.user-dashboard-loading { min-height:55vh; display:grid; place-items:center; color:#a8b8ad; font-size:13px; }
+.user-dashboard-loading { min-height:55vh; display:grid; place-items:center; }
+.user-dashboard-spinner { width:38px; height:38px; border:3px solid rgba(140,242,177,.16); border-top-color:var(--accent); border-radius:50%; animation:user-dashboard-spin .8s linear infinite; }
+@keyframes user-dashboard-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .user-dashboard-spinner { animation-duration:1.8s; } }
 @media(max-width:1050px) {
   .user-dashboard-layout { grid-template-columns:215px minmax(0,1fr); gap:16px; }
   .user-dashboard-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }

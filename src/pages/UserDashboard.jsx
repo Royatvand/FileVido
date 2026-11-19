@@ -46,7 +46,7 @@ function UserDashboard() {
     window.location.replace('/')
   }
 
-  if (loading || !user) return <div className="user-dashboard-loading">در حال بارگذاری حساب کاربری...</div>
+  if (loading || !user) return <div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری"><span className="user-dashboard-spinner" aria-hidden="true" /></div>
 
   const metadata = user.user_metadata || {}
   const displayName = metadata.full_name || metadata.name || user.email?.split('@')[0] || 'کاربر چارت مسترز'

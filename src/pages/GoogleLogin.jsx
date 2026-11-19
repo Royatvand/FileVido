@@ -8,19 +8,16 @@ function GoogleLogin() {
 
   useEffect(() => {
     let active = true
-
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search)
       const code = params.get('code')
       userAuth.rememberNext(params.get('next'))
       const authError = params.get('error_description') || params.get('error')
-
       if (authError) {
         window.history.replaceState({}, document.title, '/login')
         if (active) setError(authError)
         return
       }
-
       if (code) {
         setLoading(true)
         try {
@@ -38,13 +35,25 @@ function GoogleLogin() {
         }
         return
       }
-
       const session = await userAuth.getValidSession()
       if (active && session?.user) window.location.replace(userAuth.consumeNext() || '/dashboard')
     }
-
     handleCallback()
-    return (
+    return () => { active = false }
+  }, [])
+
+  async function handleGoogleLogin() {
+    setError('')
+    setLoading(true)
+    try {
+      await userAuth.signInWithGoogle()
+    } catch (err) {
+      setError(err.message || 'امکان شروع ورود با گوگل وجود ندارد.')
+      setLoading(false)
+    }
+  }
+
+  return (
     <main className="cm-auth-page" dir="rtl">
       <div className="cm-auth-backdrop" aria-hidden="true"><div className="cm-auth-grid" /><div className="cm-auth-glow" /></div>
       <a className="cm-auth-back" href="/"><span aria-hidden="true">→</span> بازگشت به سایت</a>
@@ -102,7 +111,6 @@ function GoogleLogin() {
       </div>
     </main>
   )
-
 }
 
 export default GoogleLogin

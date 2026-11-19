@@ -808,3 +808,152 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .user-device-signout-others { width:100%; }
 }
 @media(prefers-reduced-motion:reduce) { .user-device-refresh .is-spinning { animation-duration:2.5s; } }
+
+
+/* Theme switcher */
+.theme-toggle {
+  position: fixed;
+  z-index: 30;
+  left: 22px;
+  bottom: 22px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(140,242,177,.3);
+  border-radius: 50%;
+  color: #8cf2b1;
+  background: rgba(13,22,17,.94);
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: transform .2s ease, color .2s ease, border-color .2s ease, background .2s ease;
+}
+.theme-toggle:hover { transform: translateY(-3px) rotate(12deg); }
+.theme-toggle span { font-size: 24px; line-height: 1; }
+:root[data-theme="coral"] .theme-toggle {
+  border-color: rgba(255,113,130,.42);
+  color: #ff8795;
+  background: rgba(31,23,36,.96);
+}
+@media(max-width:540px) {
+  .theme-toggle { left: 14px; bottom: 14px; width: 44px; height: 44px; }
+}
+
+/* Optional coral theme — green remains the default */
+:root[data-theme="coral"] {
+  --bg: #0a0c16;
+  --panel: #141827;
+  --muted: #9298ad;
+  --accent: #ff7182;
+  --line: rgba(190,198,232,.11);
+  background: var(--bg);
+  color: #f4f3f8;
+}
+:root[data-theme="coral"] body { background: var(--bg); }
+:root[data-theme="coral"] .app-shell {
+  background:
+    radial-gradient(ellipse at 82% 12%, rgba(119,75,160,.14), transparent 35%),
+    radial-gradient(ellipse at 12% 58%, rgba(170,57,83,.10), transparent 38%),
+    #0a0c16;
+}
+:root[data-theme="coral"] .site-header { background: rgba(10,12,22,.82); }
+:root[data-theme="coral"] .header-action {
+  border-color: rgba(255,113,130,.3);
+  color: #ff8795;
+}
+:root[data-theme="coral"] .header-action:hover { background: rgba(255,113,130,.1); border-color: #ff7182; }
+:root[data-theme="coral"] .eyebrow { border-color: rgba(255,113,130,.18); background: rgba(255,113,130,.045); }
+:root[data-theme="coral"] .status-dot { box-shadow: 0 0 12px rgba(255,113,130,.7); }
+:root[data-theme="coral"] .hero-glow { background: radial-gradient(circle,rgba(255,113,130,.13),transparent 68%); }
+:root[data-theme="coral"] .visual-orbit { border-color: rgba(255,113,130,.1); }
+:root[data-theme="coral"] .orbit-two { border-color: rgba(189,154,255,.15); }
+:root[data-theme="coral"] .visual-card {
+  border-color: rgba(194,164,222,.2);
+  background: linear-gradient(145deg,rgba(47,35,57,.97),rgba(18,19,34,.98));
+}
+:root[data-theme="coral"] .floating-chip { background: #211927; }
+:root[data-theme="coral"] .primary-button { color:#190e18; }
+:root[data-theme="coral"] .primary-button:hover { box-shadow:0 8px 28px rgba(255,113,130,.2); }
+:root[data-theme="coral"] .secondary-button:hover { border-color:rgba(255,113,130,.35); }
+:root[data-theme="coral"] .site-footer { background:linear-gradient(180deg,#151321,#0c0e19); }
+:root[data-theme="coral"] .footer-note { border-color:rgba(255,113,130,.14); background:rgba(255,113,130,.035); }
+
+:root[data-theme="coral"] .user-dashboard-sidebar {
+  border-color:rgba(173,158,213,.13);
+  background:linear-gradient(165deg,rgba(25,25,43,.98),rgba(13,15,27,.99));
+}
+:root[data-theme="coral"] .user-dashboard-brand-mark {
+  border-color:rgba(255,113,130,.32); color:#ff8795; background:rgba(255,113,130,.11);
+}
+:root[data-theme="coral"] .user-dashboard-nav-link.active {
+  border-color:rgba(255,113,130,.22); color:#ff9aa5;
+  background:linear-gradient(90deg,rgba(255,113,130,.045),rgba(255,113,130,.13));
+}
+:root[data-theme="coral"] .user-dashboard-nav-indicator { background:#ff7182; box-shadow:0 0 12px rgba(255,113,130,.42); }
+:root[data-theme="coral"] .user-dashboard-welcome {
+  border-color:rgba(255,113,130,.2);
+  background:radial-gradient(ellipse at 12% 48%,rgba(255,113,130,.16),transparent 45%),
+    radial-gradient(ellipse at 78% 8%,rgba(130,94,190,.14),transparent 42%),
+    linear-gradient(110deg,#211927,#171827 62%,#171827);
+}
+:root[data-theme="coral"] .user-dashboard-welcome-tag { color:#e2b4c2; }
+:root[data-theme="coral"] .user-dashboard-welcome-tag i { background:#ff7182; box-shadow:0 0 10px rgba(255,113,130,.7); }
+:root[data-theme="coral"] .user-dashboard-primary-link { color:#190e18; background:linear-gradient(110deg,#ff7182,#ff9a86); }
+:root[data-theme="coral"] .user-dashboard-primary-link:hover { box-shadow:0 8px 24px rgba(255,113,130,.22); }
+:root[data-theme="coral"] .user-dashboard-art-orbit { border-color:rgba(255,113,130,.2); }
+:root[data-theme="coral"] .user-dashboard-art-chart {
+  border-color:rgba(194,164,222,.2);
+  background:linear-gradient(145deg,rgba(47,35,57,.97),rgba(18,19,34,.98));
+}
+:root[data-theme="coral"] .user-dashboard-art-chart path { stroke:#ff8292; }
+:root[data-theme="coral"] .user-dashboard-stat-card {
+  border-color:rgba(174,163,208,.12);
+  background:linear-gradient(145deg,rgba(27,27,44,.92),rgba(17,19,32,.94));
+}
+:root[data-theme="coral"] .user-dashboard-panel { border-color:rgba(174,163,208,.12); background:rgba(18,20,34,.88); }
+:root[data-theme="coral"] .user-dashboard-section-intro {
+  border-color:rgba(255,113,130,.18);
+  background:linear-gradient(110deg,rgba(255,113,130,.09),rgba(123,91,174,.055),rgba(255,255,255,.012));
+}
+:root[data-theme="coral"] .user-dashboard-empty-state {
+  border-color:rgba(183,157,218,.2);
+  background:radial-gradient(circle at 50% 25%,rgba(139,104,190,.09),transparent 60%);
+}
+:root[data-theme="coral"] .user-dashboard-progress-track span { background:linear-gradient(90deg,#ff7182,#b38aff); }
+:root[data-theme="coral"] .user-dashboard-mobile-toggle { border-color:rgba(255,113,130,.2); background:#171827; }
+:root[data-theme="coral"] .user-dashboard-mobile-toggle span { color:#ff8795; }
+:root[data-theme="coral"] .user-dashboard-avatar { border-color:rgba(255,113,130,.38); background:#292039; }
+:root[data-theme="coral"] .user-dashboard-avatar-fallback { color:#ff8795; }
+:root[data-theme="coral"] .user-dashboard-section-kicker,
+:root[data-theme="coral"] .user-dashboard-eyebrow { color:#ff8795; }
+:root[data-theme="coral"] .icon-tone-mint { color:#ff8795 !important; background:rgba(255,113,130,.14) !important; }
+:root[data-theme="coral"] .icon-tone-blue { color:#78aaff !important; background:rgba(91,139,255,.15) !important; }
+:root[data-theme="coral"] .icon-tone-rose { color:#ff82ae !important; background:rgba(255,91,153,.15) !important; }
+:root[data-theme="coral"] .icon-tone-amber { color:#ffc36f !important; background:rgba(255,174,64,.15) !important; }
+:root[data-theme="coral"] .icon-tone-violet { color:#bd9aff !important; background:rgba(155,112,255,.17) !important; }
+:root[data-theme="coral"] .icon-tone-cyan { color:#64ddeb !important; background:rgba(58,202,220,.15) !important; }
+:root[data-theme="coral"] .user-dashboard-nav-icon { background:rgba(255,255,255,.035); }
+:root[data-theme="coral"] .user-dashboard-item-arrow { color:#ff8795; }
+:root[data-theme="coral"] .user-device-panel {
+  border-color:rgba(255,113,130,.17);
+  background:linear-gradient(145deg,rgba(29,25,42,.88),rgba(16,18,31,.94));
+}
+:root[data-theme="coral"] .user-device-heading-icon { color:#ff8292; background:rgba(255,113,130,.13); }
+:root[data-theme="coral"] .user-device-refresh { border-color:rgba(255,113,130,.18); color:#ff9aa5; }
+:root[data-theme="coral"] .user-device-item { border-color:rgba(183,157,218,.12); }
+:root[data-theme="coral"] .user-device-item.is-current { border-color:rgba(255,113,130,.28); background:rgba(255,113,130,.055); }
+:root[data-theme="coral"] .user-device-icon { color:#ff91a0; background:rgba(255,113,130,.12); }
+:root[data-theme="coral"] .user-device-current-badge { color:#ff9aa5; background:rgba(255,113,130,.13); }
+:root[data-theme="coral"] .user-device-footer p svg { color:#bd9aff; }
+:root[data-theme="coral"] .user-dashboard-loading::before {
+  background:radial-gradient(circle,rgba(255,113,130,.14),rgba(150,112,210,.055) 48%,transparent 72%);
+}
+:root[data-theme="coral"] .user-dashboard-spinner {
+  border-color:rgba(255,113,130,.16); border-top-color:#ff7182; border-left-color:rgba(189,154,255,.7);
+  box-shadow:0 0 22px rgba(255,113,130,.14),inset 0 0 14px rgba(189,154,255,.06);
+}
+:root[data-theme="coral"] .user-dashboard-spinner::before {
+  border-right-color:#bd9aff; border-bottom-color:rgba(189,154,255,.35); box-shadow:0 0 12px rgba(189,154,255,.14);
+}
+:root[data-theme="coral"] .user-dashboard-spinner::after { background:#ffe0e5; box-shadow:0 0 10px 3px rgba(255,113,130,.55); }

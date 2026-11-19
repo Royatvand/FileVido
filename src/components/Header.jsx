@@ -37,6 +37,8 @@ function Header() {
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>
 
+        <a className="header-login" href="/login">ورود</a>
+
         <a className="header-action" href="/#videos">
           شروع یادگیری <span aria-hidden="true">↗</span>
         </a>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import AnimatedText from './animated/AnimatedText'
 import { userAuth } from '../lib/supabase'
+import ThemeToggle from './ThemeToggle'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -48,6 +49,7 @@ function Header() {
         </nav>
 
         <a className="header-login" href={signedIn ? '/dashboard' : '/login'}>{signedIn ? 'داشبورد من' : 'ورود'}</a>
+        <ThemeToggle />
 
         <a className="header-action" href="/#videos">
           شروع یادگیری <span aria-hidden="true">↗</span>

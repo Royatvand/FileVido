@@ -149,6 +149,13 @@ export const userAuth = {
     authorizeUrl.searchParams.set('code_challenge_method', 's256')
     window.location.assign(authorizeUrl.toString())
   },
+  async signOut() {
+    const session = await getValidUserSession()
+    if (session?.access_token) {
+      await request('/auth/v1/logout', { method: 'POST' }, session.access_token).catch(() => {})
+    }
+    saveUserSession(null)
+  },
   async completeGoogleSignIn(code) {
     if (googleCallbackPromise) return googleCallbackPromise
     googleCallbackPromise = (async () => {

@@ -763,3 +763,48 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .user-dashboard-nav-icon { width:33px; height:33px; }
   .user-dashboard-stat-icon { width:41px; height:41px; }
 }
+
+
+/* Connected devices and session management */
+.user-device-panel { margin-top:22px; padding:20px; border:1px solid rgba(143,176,157,.13); border-radius:18px; background:linear-gradient(145deg,rgba(18,29,24,.82),rgba(12,19,17,.9)); }
+.user-device-heading { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.user-device-heading-icon { width:42px; height:42px; display:grid; place-items:center; flex:none; border-radius:13px; color:#8cf2b1; background:rgba(140,242,177,.1); font-size:20px; }
+.user-device-heading h3 { margin:3px 0 4px; color:#eef8f0; font-size:15px; }
+.user-device-heading p { margin:0; color:#84958a; font-size:10px; line-height:1.8; }
+.user-device-refresh { margin-right:auto; width:36px; height:36px; display:grid; place-items:center; border:1px solid rgba(140,242,177,.15); border-radius:11px; color:#a8c9b3; background:rgba(255,255,255,.025); cursor:pointer; }
+.user-device-refresh:disabled { opacity:.45; cursor:default; }
+.user-device-refresh svg { font-size:16px; }
+.user-device-refresh .is-spinning { animation:user-device-spin .8s linear infinite; }
+.user-device-loading { min-height:100px; display:grid; place-items:center; }
+.user-device-loading .user-dashboard-spinner { transform:scale(.65); }
+.user-device-list { display:grid; gap:9px; }
+.user-device-item { display:flex; align-items:center; gap:12px; padding:13px; border:1px solid rgba(143,176,157,.1); border-radius:14px; background:rgba(255,255,255,.018); }
+.user-device-item.is-current { border-color:rgba(140,242,177,.25); background:rgba(140,242,177,.045); }
+.user-device-icon { width:42px; height:42px; display:grid; place-items:center; flex:none; border-radius:12px; color:#9bd9b0; background:rgba(140,242,177,.09); font-size:19px; }
+.user-device-copy { min-width:0; display:grid; gap:5px; }
+.user-device-name-row { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.user-device-name-row strong { color:#e7f1e9; font-size:11px; }
+.user-device-copy > span { color:#9aa99e; font-size:9px; }
+.user-device-copy small { display:flex; align-items:center; gap:5px; color:#728178; font-size:9px; }
+.user-device-copy small svg { font-size:11px; }
+.user-device-current-badge { padding:3px 7px; border-radius:20px; color:#9af0b8; background:rgba(140,242,177,.12); font-size:8px; }
+.user-device-kind { margin-right:auto; color:#829389; font-size:9px; white-space:nowrap; }
+.user-device-empty { padding:25px 12px; color:#8a9a8f; text-align:center; font-size:10px; }
+.user-device-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; padding-top:15px; border-top:1px solid rgba(143,176,157,.1); }
+.user-device-footer p { display:flex; align-items:center; gap:7px; margin:0; color:#7f9185; font-size:9px; line-height:1.8; }
+.user-device-footer p svg { flex:none; color:#8cf2b1; font-size:14px; }
+.user-device-signout-others { display:flex; align-items:center; justify-content:center; gap:7px; flex:none; padding:9px 12px; border:1px solid rgba(255,137,137,.2); border-radius:10px; color:#ffaaaa; background:rgba(255,105,105,.055); font:inherit; font-size:9px; cursor:pointer; transition:background .2s,border-color .2s; }
+.user-device-signout-others:hover:not(:disabled) { border-color:rgba(255,137,137,.4); background:rgba(255,105,105,.1); }
+.user-device-signout-others:disabled { opacity:.4; cursor:not-allowed; }
+.user-device-signout-others svg { font-size:13px; }
+.user-device-disclaimer { display:block; margin-top:12px; color:#66766c; font-size:8px; line-height:1.8; }
+@keyframes user-device-spin { to { transform:rotate(360deg); } }
+@media(max-width:600px) {
+  .user-device-panel { padding:14px; }
+  .user-device-item { gap:9px; padding:10px; }
+  .user-device-icon { width:36px; height:36px; font-size:17px; }
+  .user-device-kind { display:none; }
+  .user-device-footer { align-items:stretch; flex-direction:column; }
+  .user-device-signout-others { width:100%; }
+}
+@media(prefers-reduced-motion:reduce) { .user-device-refresh .is-spinning { animation-duration:2.5s; } }

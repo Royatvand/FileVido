@@ -25,7 +25,7 @@ function GoogleLogin() {
         try {
           const session = await userAuth.completeGoogleSignIn(code)
           window.history.replaceState({}, document.title, '/login')
-          if (active) setUser(session?.user || null)
+          if (active && session?.user) window.location.replace('/dashboard')
         } catch (err) {
           window.history.replaceState({}, document.title, '/login')
           if (active) setError(err.message || 'ورود با گوگل انجام نشد.')
@@ -36,7 +36,7 @@ function GoogleLogin() {
       }
 
       const session = await userAuth.getValidSession()
-      if (active && session?.user) setUser(session.user)
+      if (active && session?.user) window.location.replace('/dashboard')
     }
 
     handleCallback()

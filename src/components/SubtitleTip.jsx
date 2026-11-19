@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { RiCheckLine, RiCloseLine, RiClosedCaptionFill, RiPaletteFill, RiSettings3Fill } from 'react-icons/ri'
+import { MdCheck, MdClose, MdClosedCaption, MdPalette, MdSettings } from 'react-icons/md'
 import './SubtitleTip.css'
 
 const STORAGE_KEY = 'cm_subtitle_tip_v1'
@@ -37,30 +37,30 @@ function SubtitleTip() {
     <aside className="subtitle-tip" role="status" aria-live="polite" dir="rtl">
       <div className="subtitle-tip-header">
         <span className="subtitle-tip-icon" aria-hidden="true">
-          <RiClosedCaptionFill />
+          <MdClosedCaption />
         </span>
         <div className="subtitle-tip-heading">
           <span>راهنمای تماشا</span>
           <strong>زیرنویس فارسی</strong>
         </div>
         <button type="button" className="subtitle-tip-close" onClick={() => dismiss(false)} aria-label="بستن راهنما">
-          <RiCloseLine />
+          <MdClose />
         </button>
       </div>
 
       <div className="subtitle-tip-content">
         <div className="subtitle-tip-row">
-          <span className="subtitle-tip-row-icon subtitle-tip-settings" aria-hidden="true"><RiSettings3Fill /></span>
+          <span className="subtitle-tip-row-icon subtitle-tip-settings" aria-hidden="true"><MdSettings /></span>
           <p><strong>فعال‌کردن زیرنویس</strong><span>از تنظیمات پلیر، زیرنویس را روشن کنید.</span></p>
         </div>
         <div className="subtitle-tip-row">
-          <span className="subtitle-tip-row-icon subtitle-tip-palette" aria-hidden="true"><RiPaletteFill /></span>
+          <span className="subtitle-tip-row-icon subtitle-tip-palette" aria-hidden="true"><MdPalette /></span>
           <p><strong>اگر زیرنویس دیده نمی‌شود</strong><span>رنگ زیرنویس را از همان تنظیمات تغییر دهید.</span></p>
         </div>
       </div>
 
       <button type="button" className="subtitle-tip-ok" onClick={() => dismiss(true)}>
-        <RiCheckLine aria-hidden="true" />
+        <MdCheck aria-hidden="true" />
         متوجه شدم
       </button>
     </aside>

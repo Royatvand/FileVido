@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { videos as demoVideos } from '../src/data/videos.js'
 
-const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/login', '/admin', '/admin/login'])
+const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/login', '/dashboard', '/admin', '/admin/login'])
 const DEMO_SLUGS = new Set(demoVideos.map((video) => video.id))
 const SLUG_PATTERN = /^[^/\s]{1,200}$/
 

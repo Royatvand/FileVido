@@ -47,7 +47,7 @@ function UserDashboard() {
 
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">
-            <div><span className="user-dashboard-eyebrow">PERSONAL LEARNING SPACE</span><h1>داشبورد من</h1></div>
+            <div><h1>داشبورد من</h1></div>
             <div className="user-dashboard-top-user">
               {avatar ? <img className="user-dashboard-avatar" src={avatar} alt="" referrerPolicy="no-referrer" /> : <div className="user-dashboard-avatar user-dashboard-avatar-fallback">{displayName.slice(0, 1)}</div>}
               <div><strong>{displayName}</strong><span>{user.email}</span></div>
@@ -64,7 +64,7 @@ function UserDashboard() {
             <div className="user-dashboard-welcome-art" aria-hidden="true">
               <div className="user-dashboard-art-orbit" />
               <div className="user-dashboard-art-chart">
-                <span>YOUR NEXT LEVEL</span><strong>KEEP<br />LEARNING<span>.</span></strong>
+                
                 <svg viewBox="0 0 210 70"><path d="M2 59 L28 47 L48 52 L72 29 L92 39 L116 15 L137 27 L160 8 L181 18 L208 2" /></svg>
               </div>
             </div>
@@ -81,7 +81,7 @@ function UserDashboard() {
 
           <div className="user-dashboard-content-grid">
             <section className="user-dashboard-panel user-dashboard-continue" id="history">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">PICK UP WHERE YOU LEFT OFF</span><h3>ادامه یادگیری</h3></div><a href="/dashboard/history">تاریخچه کامل <span>←</span></a></div>
+              <div className="user-dashboard-panel-heading"><div><h3>ادامه یادگیری</h3></div><a href="/dashboard/history">تاریخچه کامل <span>←</span></a></div>
               {latestVideo ? (
                 <div className="user-dashboard-latest">
                   <a href={'/video/' + latestVideo.videos.slug} className="user-dashboard-latest-cover"><img src={latestVideo.videos.cover_url || '/covers/cover-1.svg'} alt="" /><span>▶</span></a>
@@ -99,7 +99,7 @@ function UserDashboard() {
             </section>
 
             <section className="user-dashboard-panel" id="courses">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR COURSES</span><h3>دوره‌های من</h3></div><a href="/dashboard/courses">همه دوره‌ها <span>←</span></a></div>
+              <div className="user-dashboard-panel-heading"><div><h3>دوره‌های من</h3></div><a href="/dashboard/courses">همه دوره‌ها <span>←</span></a></div>
               {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href={course.nextLesson ? '/video/' + course.nextLesson.slug : '/videos'} key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده · {courseActionLabel(course)}</small></span><span className="user-dashboard-item-arrow"><LuArrowLeft /></span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
             </section>
 

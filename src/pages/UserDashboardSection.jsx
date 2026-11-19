@@ -107,8 +107,8 @@ function UserDashboardSection({ section }) {
     window.location.replace('/')
   }
 
-  if (loading) return <div className="user-dashboard-loading">در حال بارگذاری فضای کاربری...</div>
-  if (!user) return <div className="user-dashboard-loading">{error || 'در حال انتقال به صفحه ورود...'}</div>
+  if (loading) return <div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری"><span className="user-dashboard-spinner" aria-hidden="true" /></div>
+  if (!user) return error ? <div className="user-dashboard-loading" role="alert">{error}</div> : <div className="user-dashboard-loading" role="status" aria-label="در حال انتقال به صفحه ورود"><span className="user-dashboard-spinner" aria-hidden="true" /></div>
 
   const current = sections[section]
   const favorites = data?.favorites || []

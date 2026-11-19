@@ -593,10 +593,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .user-dashboard-compact-empty { min-height:72px; display:flex; align-items:center; color:#829187; font-size:9px; line-height:2; }
 .user-dashboard-data-note { margin:15px 2px 0; color:#69786e; font-size:9px; line-height:2; }
 .user-dashboard-mobile-toggle { display:none; }
-.user-dashboard-loading { min-height:55vh; display:grid; place-items:center; }
-.user-dashboard-spinner { width:38px; height:38px; border:3px solid rgba(140,242,177,.16); border-top-color:var(--accent); border-radius:50%; animation:user-dashboard-spin .8s linear infinite; }
+.user-dashboard-loading { min-height:55vh; display:grid; place-items:center; position:relative; isolation:isolate; }
+.user-dashboard-loading::before { content:""; position:absolute; width:118px; height:118px; border-radius:50%; background:radial-gradient(circle,rgba(140,242,177,.12),rgba(140,242,177,.035) 48%,transparent 72%); filter:blur(5px); animation:user-dashboard-glow 2.4s ease-in-out infinite; }
+.user-dashboard-spinner { position:relative; display:block; width:58px; height:58px; border:2px solid rgba(140,242,177,.13); border-top-color:#8cf2b1; border-left-color:rgba(140,242,177,.55); border-radius:50%; box-shadow:0 0 22px rgba(140,242,177,.13),inset 0 0 14px rgba(140,242,177,.05); animation:user-dashboard-spin 1.15s cubic-bezier(.62,.05,.36,.95) infinite; }
+.user-dashboard-spinner::before,.user-dashboard-spinner::after { content:""; position:absolute; border-radius:50%; }
+.user-dashboard-spinner::before { inset:7px; border:2px solid transparent; border-right-color:#68cfff; border-bottom-color:rgba(104,207,255,.3); box-shadow:0 0 12px rgba(104,207,255,.12); animation:user-dashboard-spin-reverse 1.7s linear infinite; }
+.user-dashboard-spinner::after { width:7px; height:7px; top:2px; left:8px; background:#d9ffe7; box-shadow:0 0 10px 3px rgba(140,242,177,.55); }
 @keyframes user-dashboard-spin { to { transform:rotate(360deg); } }
-@media(prefers-reduced-motion:reduce) { .user-dashboard-spinner { animation-duration:1.8s; } }
+@keyframes user-dashboard-spin-reverse { to { transform:rotate(-360deg); } }
+@keyframes user-dashboard-glow { 0%,100% { opacity:.55; transform:scale(.88); } 50% { opacity:1; transform:scale(1.12); } }
+@media(prefers-reduced-motion:reduce) { .user-dashboard-spinner,.user-dashboard-spinner::before,.user-dashboard-loading::before { animation-duration:4s; } }
 @media(max-width:1050px) {
   .user-dashboard-layout { grid-template-columns:215px minmax(0,1fr); gap:16px; }
   .user-dashboard-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }

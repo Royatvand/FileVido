@@ -425,3 +425,120 @@ export const supabase = {
     }
   },
 }
+
+ 
+// User learning data uses the Google user session; database RLS isolates every account.
+export const userLearning = {
+  async getVideoStatus(videoId) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !videoId) return { isFavorite: false, progress: null }
+    const [favorites, progress] = await Promise.all([
+      request('/rest/v1/user_favorites?select=id&video_id=eq.' + encodeURIComponent(videoId) + '&limit=1', {}, session.access_token),
+      request('/rest/v1/user_video_progress?select=id,is_completed,completed_at,last_watched_at&video_id=eq.' + encodeURIComponent(videoId) + '&limit=1', {}, session.access_token),
+    ])
+    return { isFavorite: Boolean(favorites?.length), progress: progress?.[0] || null }
+  },
+
+  async addHistory(videoId) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session.user?.id) return null
+    const rows = await request('/rest/v1/user_video_progress?on_conflict=user_id,video_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify({ user_id: session.user.id, video_id: videoId, last_watched_at: new Date().toISOString() }),
+    }, session.access_token)
+    return rows?.[0] || null
+  },
+
+  async setFavorite(videoId, shouldFavorite) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session.user?.id) throw new Error('برای ذخیره علاقه‌مندی ابتدا وارد حساب کاربری شو.')
+    if (shouldFavorite) {
+      await request('/rest/v1/user_favorites?on_conflict=user_id,video_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+        body: JSON.stringify({ user_id: session.user.id, video_id: videoId }),
+      }, session.access_token)
+    } else {
+      await request('/rest/v1/user_favorites?user_id=eq.' + session.user.id + '&video_id=eq.' + encodeURIComponent(videoId), {
+        method: 'DELETE',
+        headers: { Prefer: 'return=minimal' },
+      }, session.access_token)
+    }
+    return shouldFavorite
+  },
+
+  async setCompleted(videoId, completed) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session.user?.id) throw new Error('برای ثبت پیشرفت ابتدا وارد حساب کاربری شو.')
+    await this.addHistory(videoId)
+    await request('/rest/v1/user_video_progress?user_id=eq.' + session.user.id + '&video_id=eq.' + encodeURIComponent(videoId), {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        is_completed: completed,
+        completed_at: completed ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      }),
+    }, session.access_token)
+    return completed
+  },
+
+  async getDashboardData() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) throw new Error('برای مشاهده داشبورد ابتدا وارد حساب کاربری شو.')
+    const token = session.access_token
+    const [progress, favorites] = await Promise.all([
+      request('/rest/v1/user_video_progress?select=id,last_watched_at,is_completed,completed_at,videos(id,slug,title,cover_url,duration)&order=last_watched_at.desc&limit=1000', {}, token),
+      request('/rest/v1/user_favorites?select=id,created_at,videos(id,slug,title,cover_url,duration)&order=created_at.desc&limit=1000', {}, token),
+    ])
+
+    const videoIds = [...new Set((progress || []).map((item) => item.videos?.id).filter(Boolean))]
+    let courses = []
+    if (videoIds.length) {
+      const viewedMemberships = await request(
+        '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&video_id=in.(' + videoIds.join(',') + ')',
+        {},
+        token,
+      )
+      const courseIds = [...new Set((viewedMemberships || [])
+        .filter((item) => item.playlists?.status === 'published')
+        .map((item) => item.playlist_id))]
+      if (courseIds.length) {
+        const allLessons = await request(
+          '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&playlist_id=in.(' + courseIds.join(',') + ')',
+          {},
+          token,
+        )
+        const completedIds = new Set((progress || []).filter((item) => item.is_completed).map((item) => item.videos?.id))
+        const courseMap = new Map()
+        for (const lesson of allLessons || []) {
+          const playlist = lesson.playlists
+          if (!playlist || playlist.status !== 'published') continue
+          if (!courseMap.has(lesson.playlist_id)) {
+            courseMap.set(lesson.playlist_id, { ...playlist, totalLessons: 0, completedLessons: 0 })
+          }
+          const course = courseMap.get(lesson.playlist_id)
+          course.totalLessons += 1
+          if (completedIds.has(lesson.video_id)) course.completedLessons += 1
+        }
+        courses = [...courseMap.values()].map((course) => ({
+          ...course,
+          progressPercent: course.totalLessons ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0,
+        }))
+      }
+    }
+
+    return {
+      progress: progress || [],
+      favorites: favorites || [],
+      courses,
+      stats: {
+        courseCount: courses.length,
+        viewedCount: (progress || []).length,
+        completedCount: (progress || []).filter((item) => item.is_completed).length,
+        favoriteCount: (favorites || []).length,
+      },
+    }
+  },
+}

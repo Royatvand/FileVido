@@ -181,7 +181,7 @@ export default async function handler(req, res) {
     changelog: typeof body.changelog === 'string' ? body.changelog : '',
     is_mandatory: body.is_mandatory === true,
   }
-  const title = body.is_mandatory
+  const title = versionPayload.is_mandatory
     ? `آپدیت اجباری ${versionName}`
     : `نسخه جدید ${versionName} آماده است`
   const changelog = versionPayload.changelog.trim()

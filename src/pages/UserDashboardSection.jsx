@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuBookmark, LuArrowLeft, LuGraduationCap, LuChartNoAxesCombined, LuClapperboard, LuUserRound, LuClock3 } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const sections = {
@@ -10,12 +11,12 @@ const sections = {
 }
 
 const navigation = [
-  { id: 'overview', label: 'نمای کلی', icon: '⌂', href: '/dashboard' },
-  { id: 'courses', label: 'دوره‌های من', icon: '▤', href: '/dashboard/courses' },
-  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: '♡', href: '/dashboard/favorites' },
-  { id: 'history', label: 'تاریخچه تماشا', icon: '◷', href: '/dashboard/history' },
-  { id: 'progress', label: 'پیشرفت یادگیری', icon: '↗', href: '/dashboard/progress' },
-  { id: 'profile', label: 'تنظیمات پروفایل', icon: '⚙', href: '/dashboard/profile' },
+  { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, color: 'mint', href: '/dashboard' },
+  { id: 'courses', label: 'دوره‌های من', icon: LuBookOpen, color: 'blue', href: '/dashboard/courses' },
+  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: LuHeart, color: 'rose', href: '/dashboard/favorites' },
+  { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, color: 'amber', href: '/dashboard/history' },
+  { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, color: 'violet', href: '/dashboard/progress' },
+  { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, color: 'cyan', href: '/dashboard/profile' },
 ]
 
 function formatDate(value) {
@@ -34,7 +35,7 @@ function VideoRow({ item, favorite, onRemove }) {
           <strong>{video.title}</strong>
           <small>{favorite ? 'ذخیره‌شده در علاقه‌مندی‌ها' : 'آخرین بازدید: ' + formatDate(item.last_watched_at)}</small>
         </span>
-        <span className="user-dashboard-item-arrow">←</span>
+        <span className="user-dashboard-item-arrow"><LuArrowLeft /></span>
       </a>
       {favorite && <button className="user-dashboard-remove-button" type="button" onClick={() => onRemove(item)} aria-label={'حذف ' + video.title + ' از علاقه‌مندی‌ها'}>حذف از ذخیره‌ها</button>}
     </article>
@@ -132,14 +133,14 @@ function UserDashboardSection({ section }) {
           <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
             {navigation.map((item) => (
               <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === section ? 'active' : '')}>
-                <span className="user-dashboard-nav-icon" aria-hidden="true">{item.icon}</span>{item.label}
+                <span className={"user-dashboard-nav-icon icon-tone-" + item.color} aria-hidden="true"><item.icon /></span>{item.label}
                 {item.id === section && <span className="user-dashboard-nav-indicator" />}
               </a>
             ))}
           </nav>
           <div className="user-dashboard-sidebar-bottom">
-            <div className="user-dashboard-help"><span>✦</span><strong>یادگیری رو ادامه بده</strong><p>هر جلسه تو رو به هدفت نزدیک‌تر می‌کنه.</p><a href="/videos">مشاهده آموزش‌ها ←</a></div>
-            <button className="user-dashboard-sidebar-logout" type="button" onClick={signOut}><span>↪</span> خروج از حساب</button>
+            <div className="user-dashboard-help"><span className="user-dashboard-help-icon"><LuSparkles /></span><strong>یادگیری رو ادامه بده</strong><p>هر جلسه تو رو به هدفت نزدیک‌تر می‌کنه.</p><a href="/videos">مشاهده آموزش‌ها ←</a></div>
+            <button className="user-dashboard-sidebar-logout" type="button" onClick={signOut}><span className="user-dashboard-logout-icon"><LuLogOut /></span> خروج از حساب</button>
           </div>
         </aside>
 
@@ -166,14 +167,14 @@ function UserDashboardSection({ section }) {
           {section === 'favorites' && (
             <section className="user-dashboard-panel user-dashboard-full-panel">
               <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR BOOKMARKS</span><h3>{favorites.length} ویدیوی ذخیره‌شده</h3></div></div>
-              {favorites.length ? <div className="user-dashboard-section-list">{favorites.map((item) => <VideoRow key={item.id} item={item} favorite onRemove={removeFavorite} />)}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon">♡</span><strong>هنوز ویدیویی ذخیره نکردی</strong><p>در صفحه هر ویدیو روی افزودن به علاقه‌مندی‌ها بزن تا بعداً راحت پیدایش کنی.</p><a href="/videos">گشت‌وگذار در آموزش‌ها</a></div>}
+              {favorites.length ? <div className="user-dashboard-section-list">{favorites.map((item) => <VideoRow key={item.id} item={item} favorite onRemove={removeFavorite} />)}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-rose"><LuHeart /></span><strong>هنوز ویدیویی ذخیره نکردی</strong><p>در صفحه هر ویدیو روی افزودن به علاقه‌مندی‌ها بزن تا بعداً راحت پیدایش کنی.</p><a href="/videos">گشت‌وگذار در آموزش‌ها</a></div>}
             </section>
           )}
 
           {section === 'history' && (
             <section className="user-dashboard-panel user-dashboard-full-panel">
               <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">RECENTLY WATCHED</span><h3>{history.length} ویدیو در تاریخچه</h3></div></div>
-              {history.length ? <div className="user-dashboard-section-list">{history.map((item) => <VideoRow key={item.id} item={item} />)}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon">◷</span><strong>تاریخچه‌ات هنوز خالیه</strong><p>با بازکردن ویدیوهای آموزشی، تاریخچه تماشای تو اینجا ثبت می‌شه.</p><a href="/videos">مشاهده ویدیوها</a></div>}
+              {history.length ? <div className="user-dashboard-section-list">{history.map((item) => <VideoRow key={item.id} item={item} />)}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-amber"><LuClock3 /></span><strong>تاریخچه‌ات هنوز خالیه</strong><p>با بازکردن ویدیوهای آموزشی، تاریخچه تماشای تو اینجا ثبت می‌شه.</p><a href="/videos">مشاهده ویدیوها</a></div>}
             </section>
           )}
 
@@ -186,17 +187,17 @@ function UserDashboardSection({ section }) {
                   <div className="user-dashboard-course-card-copy"><strong>{course.title}</strong><span>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</span><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div><small>{course.progressPercent}٪ پیشرفت</small></div>
                   <a href="/videos" className="user-dashboard-course-open">مشاهده دوره‌ها ←</a>
                 </article>
-              ))}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon">▤</span><strong>هنوز دوره‌ای شروع نکردی</strong><p>با تماشای اولین جلسه یک دوره، آن دوره به این بخش اضافه می‌شه.</p><a href="/videos">انتخاب یک دوره</a></div>}
+              ))}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-blue"><LuBookOpen /></span><strong>هنوز دوره‌ای شروع نکردی</strong><p>با تماشای اولین جلسه یک دوره، آن دوره به این بخش اضافه می‌شه.</p><a href="/videos">انتخاب یک دوره</a></div>}
             </section>
           )}
 
           {section === 'progress' && (
             <>
               <section className="user-dashboard-stats user-dashboard-section-stats">
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▶</span><div><span>ویدیوهای دیده‌شده</span><strong>{stats.viewedCount}</strong><small>در تاریخچه تماشا</small></div></article>
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">✓</span><div><span>تکمیل‌شده</span><strong>{stats.completedCount}</strong><small>با تأیید خودت</small></div></article>
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▤</span><div><span>دوره‌های فعال</span><strong>{stats.courseCount}</strong><small>دوره‌های شروع‌شده</small></div></article>
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">%</span><div><span>نرخ تکمیل بازدیدها</span><strong>{completion}٪</strong><small>از ویدیوهای ثبت‌شده</small></div></article>
+                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-cyan"><LuPlay /></span><div><span>ویدیوهای دیده‌شده</span><strong>{stats.viewedCount}</strong><small>در تاریخچه تماشا</small></div></article>
+                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-mint"><LuCircleCheck /></span><div><span>تکمیل‌شده</span><strong>{stats.completedCount}</strong><small>با تأیید خودت</small></div></article>
+                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-blue"><LuBookOpen /></span><div><span>دوره‌های فعال</span><strong>{stats.courseCount}</strong><small>دوره‌های شروع‌شده</small></div></article>
+                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-violet"><LuChartNoAxesCombined /></span><div><span>نرخ تکمیل بازدیدها</span><strong>{completion}٪</strong><small>از ویدیوهای ثبت‌شده</small></div></article>
               </section>
               <section className="user-dashboard-panel user-dashboard-full-panel">
                 <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">COURSE COMPLETION</span><h3>پیشرفت دوره‌ها</h3></div></div>

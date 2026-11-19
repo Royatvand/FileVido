@@ -1045,3 +1045,171 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .learning-heatmap-legend span{margin:0 3px}
 @media(max-width:1050px){.learning-metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.learning-metrics-grid{gap:9px}.learning-metric-card{padding:14px 13px;border-radius:13px}.learning-metric-top{font-size:9px}.learning-metric-icon{width:28px;height:28px}.learning-metric-card>strong{font-size:25px;margin:12px 0}.learning-metric-bottom{font-size:8px}.learning-activity-card{padding:17px 14px 14px;border-radius:13px}.learning-activity-heading{gap:8px}.learning-activity-heading h3{font-size:13px}.learning-activity-heading p{max-width:230px;font-size:9px}.learning-activity-totals strong{font-size:19px}.learning-activity-totals span{font-size:8px}.learning-activity-footer{font-size:8px}}
+
+
+/* Dashboard card system — unified premium SaaS treatment */
+.user-dashboard-stats { gap:14px; margin:20px 0 18px; }
+.user-dashboard-stat-card,
+.learning-metric-card,
+.learning-activity-card,
+.user-dashboard-panel,
+.user-dashboard-course-card,
+.user-dashboard-section-row,
+.user-device-panel,
+.user-device-item {
+  position:relative;
+  isolation:isolate;
+  border-color:rgba(148,163,184,.14);
+  box-shadow:0 12px 32px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.025);
+  transition:border-color .22s ease,background .22s ease,transform .22s ease,box-shadow .22s ease;
+}
+.user-dashboard-stat-card {
+  min-height:116px;
+  align-items:flex-start;
+  gap:14px;
+  padding:17px;
+  overflow:hidden;
+  background:linear-gradient(145deg,rgba(25,37,32,.98),rgba(13,21,18,.98));
+}
+.user-dashboard-stat-card::after,
+.user-dashboard-panel::after,
+.user-dashboard-course-card::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  border-radius:inherit;
+  background:radial-gradient(circle at 100% 0,rgba(140,242,177,.075),transparent 48%);
+  pointer-events:none;
+}
+.user-dashboard-stat-card:hover,
+.learning-metric-card:hover,
+.user-dashboard-course-card:hover,
+.user-device-item:hover {
+  transform:translateY(-3px);
+  border-color:rgba(140,242,177,.28);
+  box-shadow:0 16px 36px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.user-dashboard-stat-icon {
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  font-size:18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.user-dashboard-stat-card div span { color:#a8b7ad; font-size:10px; }
+.user-dashboard-stat-card div strong { margin:7px 0 4px; font-size:25px; letter-spacing:-.6px; }
+.user-dashboard-stat-card div small { color:#788a7e; font-size:9px; }
+.user-dashboard-panel {
+  overflow:hidden;
+  padding:22px;
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(19,30,25,.96),rgba(12,19,16,.98));
+}
+.user-dashboard-panel-heading { margin-bottom:20px; }
+.user-dashboard-panel-heading h3 { font-size:14px; }
+.user-dashboard-course-card {
+  overflow:hidden;
+  padding:14px;
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+}
+.user-dashboard-course-card>img { width:138px; border-radius:10px; }
+.user-dashboard-section-row {
+  padding:5px;
+  border:1px solid rgba(148,163,184,.1);
+  border-radius:13px;
+  background:rgba(255,255,255,.018);
+}
+.user-dashboard-section-row + .user-dashboard-section-row { margin-top:9px; }
+.user-dashboard-video-item { border-radius:10px; }
+.learning-metric-card {
+  min-height:145px;
+  padding:20px;
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(24,34,39,.98),rgba(12,20,24,.99));
+}
+.learning-metric-card>strong { font-size:34px; }
+.learning-activity-card {
+  overflow:hidden;
+  border-radius:18px;
+}
+.learning-activity-card::before {
+  content:"";
+  position:absolute;
+  top:-100px;
+  left:-70px;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background:rgba(108,185,139,.055);
+  filter:blur(45px);
+  pointer-events:none;
+}
+.user-device-panel {
+  overflow:hidden;
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(20,32,26,.98),rgba(12,19,16,.98));
+}
+.user-device-item { border-radius:13px; }
+.user-dashboard-empty-state,
+.user-dashboard-compact-empty {
+  border-radius:13px;
+  background:linear-gradient(145deg,rgba(140,242,177,.045),rgba(255,255,255,.012));
+}
+.admin-stats { gap:14px; }
+.admin-stats article {
+  position:relative;
+  overflow:hidden;
+  min-height:116px;
+  padding:19px;
+  border-color:rgba(148,163,184,.15);
+  border-radius:15px;
+  background:linear-gradient(145deg,rgba(25,37,32,.98),rgba(13,21,18,.98));
+  box-shadow:0 12px 32px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.025);
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.admin-stats article::after {
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  left:-45px;
+  bottom:-75px;
+  border-radius:50%;
+  background:rgba(140,242,177,.08);
+  filter:blur(25px);
+  pointer-events:none;
+}
+.admin-stats article:hover {
+  transform:translateY(-3px);
+  border-color:rgba(140,242,177,.28);
+  box-shadow:0 16px 36px rgba(0,0,0,.2);
+}
+.admin-stats article span { color:#a8b7ad; font-size:10px; }
+.admin-stats article strong { font-size:30px; letter-spacing:-.7px; }
+.admin-panel {
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(17,28,22,.98),rgba(11,18,14,.99));
+  box-shadow:0 12px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.02);
+}
+@media(max-width:760px) {
+  .user-dashboard-stat-card { min-height:108px; padding:14px; }
+  .user-dashboard-stat-card div strong { font-size:23px; }
+  .user-dashboard-panel { padding:17px; }
+  .learning-metric-card { min-height:132px; padding:16px; }
+}
+@media(max-width:520px) {
+  .user-dashboard-stats { gap:9px; }
+  .user-dashboard-stat-card { gap:10px; min-height:104px; padding:12px 10px; }
+  .user-dashboard-stat-icon { width:36px; height:36px; border-radius:11px; font-size:16px; }
+  .user-dashboard-stat-card div span { font-size:9px; white-space:normal; }
+  .user-dashboard-stat-card div strong { font-size:21px; }
+  .user-dashboard-stat-card div small { font-size:8px; white-space:normal; }
+  .user-dashboard-course-card { align-items:flex-start; flex-wrap:wrap; }
+  .user-dashboard-course-card>img { width:100%; max-height:180px; }
+  .user-dashboard-course-open { margin-inline-start:auto; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .user-dashboard-stat-card,.learning-metric-card,.user-dashboard-course-card,.user-device-item,.admin-stats article { transition:none; }
+}

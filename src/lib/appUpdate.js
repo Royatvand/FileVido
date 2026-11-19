@@ -124,6 +124,23 @@ export async function checkForAppUpdate() {
   }
 }
 
+/** Open a URL outside the Android WebView when running natively. */
+export async function openExternalUrl(url) {
+  if (typeof url !== 'string' || !/^https:\/\//i.test(url)) return
+  if (isAndroidNative()) {
+    try {
+      const { Browser } = await import('@capacitor/browser')
+      await Browser.open({ url })
+      return
+    } catch (error) {
+      console.warn('[appUpdate] Native browser unavailable', error)
+    }
+    window.open(url, '_system')
+    return
+  }
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
 /** Register / refresh FCM token for this Android device. */
 export async function registerFcmToken(token, userId = null) {
   if (!isAndroidNative() || !token || !SUPABASE_URL || !SUPABASE_KEY) return null
@@ -201,7 +218,7 @@ export function initAndroidPushNotifications(userId = null) {
     await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
       const url = action?.notification?.data?.download_url
       if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
-        window.open(url, '_system')
+        await openExternalUrl(url)
       }
     })
 

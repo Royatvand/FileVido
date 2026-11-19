@@ -539,11 +539,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .user-dashboard-nav-icon { width:23px; height:23px; display:grid; place-items:center; border-radius:7px; color:inherit; background:rgba(255,255,255,.045); font-size:15px; }
 .user-dashboard-nav-indicator { position:absolute; right:-17px; width:3px; height:20px; border-radius:4px 0 0 4px; background:var(--accent); box-shadow:0 0 12px rgba(140,242,177,.4); }
 .user-dashboard-sidebar-bottom { margin-top:auto; }
-.user-dashboard-help { margin:25px 0 15px; padding:15px 13px; border:1px solid rgba(140,242,177,.13); border-radius:12px; background:linear-gradient(145deg,rgba(140,242,177,.08),rgba(255,255,255,.015)); }
-.user-dashboard-help>span { color:var(--accent); font-size:17px; }
-.user-dashboard-help strong { display:block; margin-top:9px; color:#dce8df; font-size:10px; }
-.user-dashboard-help p { margin:6px 0 11px; color:#849389; font-size:9px; line-height:1.9; }
-.user-dashboard-help a { color:var(--accent); font-size:9px; font-weight:700; }
 .user-dashboard-sidebar-logout { width:100%; display:flex; align-items:center; gap:10px; padding:13px 10px 4px; border:0; border-top:1px solid var(--line); color:#a5b0a8; background:transparent; font:11px Vazirmatn,sans-serif; text-align:right; cursor:pointer; }
 .user-dashboard-sidebar-logout span { font-size:17px; }
 .user-dashboard-main { min-width:0; }
@@ -587,23 +582,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .user-dashboard-panel-heading h3 { margin:6px 0 0; color:#eaf2ec; font-size:13px; font-weight:800; }
 .user-dashboard-panel-heading>a { color:#9eaea3; font-size:9px; white-space:nowrap; }
 .user-dashboard-panel-heading>a span { color:var(--accent); margin-right:5px; }
-.user-dashboard-panel-symbol { color:var(--accent); font-size:18px; }
 .user-dashboard-continue { grid-row:span 2; }
 .user-dashboard-empty-state { min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:25px; border:1px dashed rgba(140,242,177,.15); border-radius:11px; text-align:center; background:radial-gradient(circle at 50% 25%,rgba(140,242,177,.055),transparent 58%); }
 .user-dashboard-empty-icon { width:45px; height:45px; display:grid; place-items:center; border:1px solid rgba(140,242,177,.2); border-radius:13px; color:var(--accent); background:rgba(140,242,177,.08); font-size:16px; }
 .user-dashboard-empty-state strong { margin-top:13px; color:#dce8df; font-size:11px; }
 .user-dashboard-empty-state p { max-width:290px; margin:7px 0 13px; color:#829187; font-size:9px; line-height:2; }
 .user-dashboard-empty-state a { color:var(--accent); font-size:9px; font-weight:700; }
-.user-dashboard-progress-visual { display:flex; align-items:center; gap:14px; min-height:105px; }
-.user-dashboard-progress-ring { width:76px; height:76px; flex:0 0 auto; display:grid; place-items:center; border-radius:50%; background:conic-gradient(var(--accent) 0deg,rgba(255,255,255,.08) 0deg); position:relative; }
-.user-dashboard-progress-ring::before { content:''; position:absolute; inset:6px; border-radius:50%; background:#111b14; }
-.user-dashboard-progress-ring>span { position:relative; color:#e8f1ea; font:700 20px Arial,sans-serif; }
-.user-dashboard-progress-ring small { font-size:9px; }
-.user-dashboard-progress-visual strong { color:#dce8df; font-size:10px; }
-.user-dashboard-progress-visual p { margin:5px 0 0; color:#819087; font-size:9px; line-height:1.9; }
 .user-dashboard-progress-track { height:5px; margin-top:13px; overflow:hidden; border-radius:10px; background:rgba(255,255,255,.07); }
 .user-dashboard-progress-track span { display:block; width:0; height:100%; border-radius:inherit; background:var(--accent); }
-.user-dashboard-progress-caption { display:block; margin-top:8px; color:#66766c; font-size:8px; line-height:1.8; }
 .user-dashboard-compact-empty { min-height:72px; display:flex; align-items:center; color:#829187; font-size:9px; line-height:2; }
 .user-dashboard-data-note { margin:15px 2px 0; color:#69786e; font-size:9px; line-height:2; }
 .user-dashboard-mobile-toggle { display:none; }
@@ -624,8 +610,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .user-dashboard-sidebar.is-open { display:flex; }
   .user-dashboard-side-brand { padding-bottom:15px; }
   .user-dashboard-sidebar-bottom { margin-top:12px; }
-  .user-dashboard-help { margin-top:12px; }
-  .user-dashboard-topbar { align-items:flex-start; }
+    .user-dashboard-topbar { align-items:flex-start; }
   .user-dashboard-topbar h1 { font-size:21px; }
   .user-dashboard-top-user { max-width:55%; }
   .user-dashboard-top-user span { max-width:125px; }
@@ -766,13 +751,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .user-dashboard-empty-icon svg { width:27px; height:27px; stroke-width:1.8; }
 .user-dashboard-help-icon { width:34px; height:34px; margin-bottom:10px; border-radius:11px; color:#c3a5ff; background:rgba(153,112,255,.15); }
-.user-dashboard-help-icon svg { width:18px; height:18px; }
 .user-dashboard-logout-icon { width:19px; height:19px; color:#ff9292; }
 .user-dashboard-logout-icon svg { width:16px; height:16px; }
 .user-dashboard-item-arrow { display:inline-flex; align-items:center; justify-content:center; color:#7eaa91; }
 .user-dashboard-item-arrow svg { width:16px; height:16px; }
-.user-dashboard-panel-symbol { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; color:#ff82a6; background:rgba(255,91,140,.13); }
-.user-dashboard-panel-symbol svg { width:18px; height:18px; }
 @media(max-width:760px) {
   .user-dashboard-nav-icon { width:33px; height:33px; }
   .user-dashboard-stat-icon { width:41px; height:41px; }

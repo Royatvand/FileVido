@@ -45,3 +45,6 @@ create policy "Users update own video progress" on public.user_video_progress fo
 
 grant select, insert, delete on public.user_favorites to authenticated;
 grant select, insert, update on public.user_video_progress to authenticated;
+
+create index if not exists user_favorites_video_id_idx on public.user_favorites (video_id);
+create index if not exists user_video_progress_video_id_idx on public.user_video_progress (video_id);

@@ -145,7 +145,7 @@ export async function registerFcmToken(token, userId = null) {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates,return=representation',
+        Prefer: 'resolution=ignore-duplicates,return=minimal',
       },
       body: JSON.stringify(payload),
     },
@@ -156,7 +156,7 @@ export async function registerFcmToken(token, userId = null) {
     console.warn('[appUpdate] FCM token registration failed', result)
     return null
   }
-  return result?.[0] || null
+  return true
 }
 
 /** Initialize Android push notifications once per app runtime. */

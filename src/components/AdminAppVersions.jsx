@@ -162,7 +162,7 @@ function AdminAppVersions({ onNotice }) {
       await loadData()
     } catch (error) {
       const duplicate = /app_versions_version_code|duplicate key/i.test(error.message || '')
-      onNotice?({
+      onNotice?.({
         type: 'error',
         text: duplicate
           ? 'این versionCode قبلاً ثبت شده است. مقدار دیگری انتخاب کنید.'

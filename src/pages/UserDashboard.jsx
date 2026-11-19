@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [
-  { id: 'overview', label: 'نمای کلی', icon: '⌂' },
-  { id: 'courses', label: 'دوره‌های من', icon: '▤' },
-  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: '♡' },
-  { id: 'history', label: 'تاریخچه تماشا', icon: '◷' },
-  { id: 'progress', label: 'پیشرفت یادگیری', icon: '↗' },
+  { id: 'overview', label: 'نمای کلی', icon: '⌂', href: '/dashboard' },
+  { id: 'courses', label: 'دوره‌های من', icon: '▤', href: '/dashboard/courses' },
+  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: '♡', href: '/dashboard/favorites' },
+  { id: 'history', label: 'تاریخچه تماشا', icon: '◷', href: '/dashboard/history' },
+  { id: 'progress', label: 'پیشرفت یادگیری', icon: '↗', href: '/dashboard/progress' },
+  { id: 'profile', label: 'تنظیمات پروفایل', icon: '⚙', href: '/dashboard/profile' },
 ]
 
 function UserDashboard() {
@@ -92,10 +93,10 @@ function UserDashboard() {
           <span className="user-dashboard-side-label">حساب کاربری</span>
           <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
             {navigation.map((item, index) => (
-              <a key={item.id} href={'#' + item.id} className={'user-dashboard-nav-link ' + (index === 0 ? 'active' : '')} onClick={() => setMenuOpen(false)}>
+              <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === 'overview' ? 'active' : '')} onClick={() => setMenuOpen(false)}>
                 <span className="user-dashboard-nav-icon" aria-hidden="true">{item.icon}</span>
                 {item.label}
-                {index === 0 && <span className="user-dashboard-nav-indicator" />}
+                {item.id === 'overview' && <span className="user-dashboard-nav-indicator" />}
               </a>
             ))}
           </nav>

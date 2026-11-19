@@ -57,7 +57,10 @@ async function listFcmTokens(adminToken) {
       },
     },
   )
-  if (!response.ok) return []
+  if (!response.ok) {
+    console.error('Unable to read FCM tokens from Supabase', { status: response.status })
+    throw new Error('خواندن توکن‌های اعلان از Supabase ناموفق بود.')
+  }
   return (await response.json().catch(() => [])) || []
 }
 
@@ -149,16 +152,49 @@ export default async function handler(req, res) {
   }
   body = body || {}
 
-  const versionName = body.version_name || 'نسخه جدید'
+  const versionName = typeof body.version_name === 'string' ? body.version_name.trim() : ''
+  const versionCode = Number(body.version_code)
+  let downloadUrl
+  try {
+    downloadUrl = new URL(body.download_url)
+  } catch {
+    return json(res, 400, { message: 'لینک دانلود نسخه معتبر نیست.' })
+  }
+  if (
+    !versionName ||
+    !Number.isInteger(versionCode) ||
+    versionCode < 1 ||
+    downloadUrl.protocol !== 'https:' ||
+    downloadUrl.username ||
+    downloadUrl.password
+  ) {
+    return json(res, 400, { message: 'اطلاعات نسخه یا لینک دانلود معتبر نیست.' })
+  }
+  if (typeof body.changelog === 'string' && body.changelog.length > 5000) {
+    return json(res, 400, { message: 'توضیحات تغییرات بیش از حد طولانی است.' })
+  }
+
+  const versionPayload = {
+    version_name: versionName,
+    version_code: versionCode,
+    download_url: downloadUrl.toString(),
+    changelog: typeof body.changelog === 'string' ? body.changelog : '',
+    is_mandatory: body.is_mandatory === true,
+  }
   const title = body.is_mandatory
     ? `آپدیت اجباری ${versionName}`
     : `نسخه جدید ${versionName} آماده است`
-  const changelog = (body.changelog || '').trim()
+  const changelog = versionPayload.changelog.trim()
   const bodyText = changelog
     ? changelog.slice(0, 180)
     : 'برای دریافت آخرین قابلیت‌ها، اپ چارت مسترز را به‌روز کنید.'
 
-  const tokens = await listFcmTokens(accessToken)
+  let tokens
+  try {
+    tokens = await listFcmTokens(accessToken)
+  } catch {
+    return json(res, 502, { message: 'دریافت فهرست دستگاه‌ها از Supabase ناموفق بود.' })
+  }
   if (!tokens.length) {
     return json(res, 200, {
       status: 'ok',

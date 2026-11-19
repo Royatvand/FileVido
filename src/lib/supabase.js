@@ -149,6 +149,17 @@ export const userAuth = {
     authorizeUrl.searchParams.set('code_challenge_method', 's256')
     window.location.assign(authorizeUrl.toString())
   },
+  async updateProfile(profile) {
+    const session = await getValidUserSession()
+    if (!session?.access_token) throw new Error('برای ویرایش پروفایل ابتدا وارد حساب کاربری شو.')
+    const result = await request('/auth/v1/user', {
+      method: 'PUT',
+      body: JSON.stringify({ data: profile }),
+    }, session.access_token)
+    const current = getUserSession()
+    if (current) saveUserSession({ ...current, user: result })
+    return result
+  },
   async signOut() {
     const session = await getValidUserSession()
     if (session?.access_token) {

@@ -98,7 +98,7 @@
 .app-update-secondary {
   min-height: 46px;
   border-radius: 10px;
-  font: 700 13px Vazirmatn, sans-serif;
+  font: 700 13px var(--cm-font);
   cursor: pointer;
 }
 

@@ -5,6 +5,7 @@ import NotFound from './NotFound'
 import { setPageSeo } from '../lib/seo'
 import { stripIconTokens } from '../lib/iconTokens'
 import RichText from '../components/RichText'
+import SubtitleTip from '../components/SubtitleTip'
 import { formatFileSize } from '../lib/indicators'
 import './VideoPage.css'
 
@@ -143,6 +144,7 @@ function VideoPage({ videoId }) {
           )}
         </aside>}
       </div>
+      {playlist && <SubtitleTip />}
       {related.length > 0 && <section className="related-videos"><div className="related-heading"><span className="section-kicker">ادامه یادگیری</span><h2>ویدیوهای مرتبط</h2></div><div className="related-list">{related.map((item) => <a key={item.id} className="related-item" href={'/video/' + item.id}><img src={item.cover} alt="" loading="lazy" /><span>{item.title}</span>{item.category && <small>{item.category}</small>}</a>)}</div></section>}
     </main>
   )

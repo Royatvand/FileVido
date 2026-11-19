@@ -24,17 +24,16 @@ create index if not exists app_versions_published_code_idx
 
 alter table public.app_versions enable row level security;
 
--- Anyone (including anonymous Android clients) can read published versions for update checks.
+-- Public clients read published versions; admins can also read drafts.
 drop policy if exists "Public can read published app versions" on public.app_versions;
-create policy "Public can read published app versions"
-  on public.app_versions for select
-  using (is_published = true);
-
--- Admin role can read every row (including drafts).
 drop policy if exists "Admins can read all app versions" on public.app_versions;
-create policy "Admins can read all app versions"
-  on public.app_versions for select to authenticated
-  using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
+drop policy if exists "Public and admins can read app versions" on public.app_versions;
+create policy "Public and admins can read app versions"
+  on public.app_versions for select
+  using (
+    is_published = true
+    or ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
+  );
 
 drop policy if exists "Admins can insert app versions" on public.app_versions;
 create policy "Admins can insert app versions"

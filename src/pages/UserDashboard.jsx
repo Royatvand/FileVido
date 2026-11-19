@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuBookmark, LuArrowLeft, LuGraduationCap, LuChartNoAxesCombined, LuClapperboard, LuUserRound, LuClock3 } from 'react-icons/lu'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [

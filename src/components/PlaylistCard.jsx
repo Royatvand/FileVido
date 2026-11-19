@@ -49,8 +49,11 @@ function PlaylistCard({ playlist }) {
         <h3>{playlist.title}</h3>
         {playlist.description && <p>{playlist.description}</p>}
         <div className="playlist-total-duration">
-          <span aria-hidden="true">◷</span>
-          <span>مدت‌زمان کل: {totalDuration}</span>
+          <span className="playlist-duration-icon" aria-hidden="true">◷</span>
+          <span className="playlist-duration-copy">
+            <span className="playlist-duration-label">مدت‌زمان کل دوره</span>
+            <strong>{totalDuration}</strong>
+          </span>
         </div>
         <span className="video-link liquid-glass-action">شروع دوره <span className="liquid-glass-action-arrow" aria-hidden="true">←</span></span>
       </div>

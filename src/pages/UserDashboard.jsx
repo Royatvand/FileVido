@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [

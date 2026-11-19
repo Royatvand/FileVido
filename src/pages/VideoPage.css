@@ -72,3 +72,11 @@
 .playlist-file-copy { display: grid; flex: 1; min-width: 0; }
 .playlist-file-copy strong { overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; }
 .playlist-file-copy small { color: var(--muted); font-size: 11px; }
+
+
+.video-user-actions { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:17px; }
+.video-user-action { padding:9px 13px; border:1px solid var(--line); border-radius:8px; color:#c5d2c9; background:rgba(255,255,255,.025); font:10px Vazirmatn,sans-serif; cursor:pointer; transition:border-color .2s,color .2s,background .2s; }
+.video-user-action:hover,.video-user-action.is-active { border-color:rgba(140,242,177,.3); color:var(--accent); background:rgba(140,242,177,.07); }
+.video-user-action:disabled { opacity:.55; cursor:wait; }
+.video-user-action-error { width:100%; color:#ffaaaa; font-size:9px; }
+@media(max-width:520px) { .video-user-actions { align-items:stretch; } .video-user-action { flex:1 1 100%; text-align:center; } }

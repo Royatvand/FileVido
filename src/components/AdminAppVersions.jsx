@@ -17,6 +17,7 @@ function AdminAppVersions({ onNotice }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [notifyingId, setNotifyingId] = useState(null)
+  const [publishingId, setPublishingId] = useState(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -143,10 +144,14 @@ function AdminAppVersions({ onNotice }) {
 
       let savedId = editingId
       if (editingId) {
-        await supabase.update('app_versions', editingId, payload)
+        const updated = await supabase.update('app_versions', editingId, payload)
+        if (!updated?.length) {
+          throw new Error('هیچ نسخه‌ای به‌روزرسانی نشد. دسترسی مدیر یا وضعیت نسخه را بررسی کنید.')
+        }
       } else {
         const inserted = await supabase.insert('app_versions', payload)
         savedId = inserted?.[0]?.id
+        if (!savedId) throw new Error('نسخه ثبت نشد؛ پاسخ دیتابیس خالی بود.')
       }
 
       onNotice?.({
@@ -182,6 +187,27 @@ function AdminAppVersions({ onNotice }) {
       await loadData()
     } catch (error) {
       onNotice?.({ type: 'error', text: error.message })
+    }
+  }
+
+  async function handlePublish(row) {
+    if (row.is_published || publishingId) return
+    setPublishingId(row.id)
+    try {
+      const updated = await supabase.update('app_versions', row.id, {
+        is_published: true,
+        published_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      if (!updated?.length || updated[0]?.is_published !== true) {
+        throw new Error('انتشار در دیتابیس تأیید نشد. نسخه همچنان پیش‌نویس است؛ دسترسی مدیر را بررسی کنید.')
+      }
+      onNotice?.({ type: 'success', text: `نسخه ${row.version_name} با موفقیت منتشر شد.` })
+      await loadData()
+    } catch (error) {
+      onNotice?.({ type: 'error', text: error.message })
+    } finally {
+      setPublishingId(null)
     }
   }
 
@@ -324,6 +350,15 @@ function AdminAppVersions({ onNotice }) {
                   <td>
                     <div className="admin-row-actions">
                       <button type="button" onClick={() => startEdit(row)}>ویرایش</button>
+                      {!row.is_published && (
+                        <button
+                          type="button"
+                          disabled={publishingId === row.id || Boolean(publishingId)}
+                          onClick={() => handlePublish(row)}
+                        >
+                          {publishingId === row.id ? 'در حال انتشار...' : 'انتشار نسخه'}
+                        </button>
+                      )}
                       {row.is_published && (
                         <button
                           type="button"

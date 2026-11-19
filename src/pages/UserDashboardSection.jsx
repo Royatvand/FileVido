@@ -23,6 +23,70 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' }).format(new Date(value))
 }
 
+
+const jalaliMonthName = (date) => new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'short' }).format(date)
+
+function LearningActivityHeatmap({ history }) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const start = new Date(today)
+  start.setDate(start.getDate() - 363)
+  // هفته‌ها از شنبه شروع می‌شوند؛ خانه‌های خالی ابتدای سال فقط برای تراز تقویم‌اند.
+  start.setDate(start.getDate() - ((start.getDay() + 1) % 7))
+
+  const activity = new Map()
+  history.forEach((item) => {
+    const value = item.last_watched_at || item.created_at
+    if (!value) return
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return
+    const key = date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate()
+    activity.set(key, (activity.get(key) || 0) + 1)
+  })
+
+  const days = []
+  const cursor = new Date(start)
+  while (cursor <= today) {
+    const key = cursor.getFullYear() + '-' + cursor.getMonth() + '-' + cursor.getDate()
+    days.push({ date: new Date(cursor), count: activity.get(key) || 0 })
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  while (days.length % 7) days.push({ date: null, count: 0 })
+
+  const weeks = Array.from({ length: days.length / 7 }, (_, index) => days.slice(index * 7, index * 7 + 7))
+  const activeDays = days.filter((day) => day.date && day.count > 0).length
+  const totalActivities = days.reduce((sum, day) => sum + day.count, 0)
+  const monthLabels = weeks.map((week, index) => {
+    const first = week.find((day) => day.date)
+    if (!first) return ''
+    const month = jalaliMonthName(first.date)
+    const previous = index ? weeks[index - 1].find((day) => day.date) : null
+    return !previous || jalaliMonthName(previous.date) !== month ? month : ''
+  })
+  const level = (count) => count === 0 ? 0 : count === 1 ? 1 : count <= 3 ? 2 : count <= 5 ? 3 : 4
+
+  return (
+    <section className="learning-activity-card">
+      <div className="learning-activity-heading">
+        <div><span className="learning-card-kicker">YOUR CONSISTENCY</span><h3>نقشه فعالیت روزانه</h3><p>هر خانه نشان‌دهنده تعداد ویدیوهایی است که در آن روز تماشا کرده‌ای.</p></div>
+        <div className="learning-activity-totals"><strong>{activeDays.toLocaleString('fa-IR')}</strong><span>روز فعال در یک سال اخیر</span></div>
+      </div>
+      <div className="learning-heatmap-scroll" dir="ltr">
+        <div className="learning-heatmap-months">{monthLabels.map((month, index) => <span key={index}>{month}</span>)}</div>
+        <div className="learning-heatmap-body">
+          <div className="learning-heatmap-weekdays"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div>
+          <div className="learning-heatmap-grid">
+            {weeks.map((week, weekIndex) => <div className="learning-heatmap-week" key={weekIndex}>
+              {week.map((day, dayIndex) => <span key={dayIndex} className={day.date ? 'learning-heatmap-cell level-' + level(day.count) : 'learning-heatmap-cell is-empty'} title={day.date ? new Intl.DateTimeFormat('fa-IR', { dateStyle: 'full' }).format(day.date) + ' · ' + day.count.toLocaleString('fa-IR') + ' ویدیو' : ''} />)}
+            </div>)}
+          </div>
+        </div>
+      </div>
+      <div className="learning-activity-footer"><span>{totalActivities.toLocaleString('fa-IR')} بازدید ثبت‌شده</span><div className="learning-heatmap-legend"><span>کم</span>{[0,1,2,3,4].map((value) => <i className={'level-' + value} key={value} />)}<span>زیاد</span></div></div>
+    </section>
+  )
+}
+
 function VideoRow({ item, favorite, onRemove }) {
   const video = item.videos
   if (!video) return null
@@ -146,12 +210,13 @@ function UserDashboardSection({ section }) {
 
           {section === 'progress' && (
             <>
-              <section className="user-dashboard-stats user-dashboard-section-stats">
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-cyan"><LuPlay /></span><div><span>ویدیوهای دیده‌شده</span><strong>{stats.viewedCount}</strong><small>در تاریخچه تماشا</small></div></article>
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-mint"><LuCircleCheck /></span><div><span>تکمیل‌شده</span><strong>{stats.completedCount}</strong><small>با تأیید خودت</small></div></article>
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-blue"><LuBookOpen /></span><div><span>دوره‌های فعال</span><strong>{stats.courseCount}</strong><small>دوره‌های شروع‌شده</small></div></article>
-                <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-violet"><LuChartNoAxesCombined /></span><div><span>نرخ تکمیل بازدیدها</span><strong>{completion}٪</strong><small>از ویدیوهای ثبت‌شده</small></div></article>
+              <section className="learning-metrics-grid" aria-label="خلاصه پیشرفت یادگیری">
+                <article className="learning-metric-card metric-views"><div className="learning-metric-top"><span>ویدیوهای دیده‌شده</span><span className="learning-metric-icon"><LuPlay /></span></div><strong>{stats.viewedCount.toLocaleString('fa-IR')}</strong><div className="learning-metric-bottom"><span>کل بازدیدهای ثبت‌شده</span><i className="learning-mini-bars"><b/><b/><b/><b/><b/><b/><b/></i></div></article>
+                <article className="learning-metric-card metric-completed"><div className="learning-metric-top"><span>ویدیوهای تکمیل‌شده</span><span className="learning-metric-icon"><LuCircleCheck /></span></div><strong>{stats.completedCount.toLocaleString('fa-IR')}</strong><div className="learning-metric-bottom"><span>با تأیید خودت</span><i className="learning-metric-track"><b style={{ width: completion + '%' }} /></i></div></article>
+                <article className="learning-metric-card metric-courses"><div className="learning-metric-top"><span>دوره‌های فعال</span><span className="learning-metric-icon"><LuBookOpen /></span></div><strong>{stats.courseCount.toLocaleString('fa-IR')}</strong><div className="learning-metric-bottom"><span>دوره‌های شروع‌شده</span><i className="learning-mini-bars"><b/><b/><b/><b/><b/><b/><b/></i></div></article>
+                <article className="learning-metric-card metric-rate"><div className="learning-metric-top"><span>نرخ تکمیل</span><span className="learning-metric-icon"><LuChartNoAxesCombined /></span></div><strong>{completion.toLocaleString('fa-IR')}<small>٪</small></strong><div className="learning-metric-bottom"><span>از کل ویدیوهای دیده‌شده</span><i className="learning-metric-track"><b style={{ width: completion + '%' }} /></i></div></article>
               </section>
+              <LearningActivityHeatmap history={history} />
               <section className="user-dashboard-panel user-dashboard-full-panel">
                 <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">COURSE COMPLETION</span><h3>پیشرفت دوره‌ها</h3></div></div>
                 {courses.length ? <div className="user-dashboard-course-progress user-dashboard-course-progress-expanded">{courses.map((course) => <div className="user-dashboard-course-progress-item" key={course.id}><div><strong>{course.title}</strong><span>{course.completedLessons}/{course.totalLessons} جلسه · {course.progressPercent}٪</span></div><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div></div>)}</div> : <div className="user-dashboard-compact-empty">بعد از شروع یک دوره، میزان پیشرفت آن در این قسمت نمایش داده می‌شود.</div>}

@@ -1,12 +1,180 @@
-.subtitle-tip { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px 10px 8px 8px; border: 1px solid rgba(140,242,177,.22); border-radius: 12px; background: rgba(140,242,177,.07); animation: subtitle-tip-in .4s ease both; }
-.subtitle-tip-icon { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 8px; color: #07110b; background: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .4px; direction: ltr; }
-.subtitle-tip p { flex: 1; min-width: 0; margin: 0; color: #c0cbc4; font-size: 12.5px; line-height: 1.9; }
-.subtitle-tip b { color: var(--accent); font-weight: 700; }
-.subtitle-tip-ok { flex: none; min-height: 32px; padding: 0 14px; border: 1px solid rgba(140,242,177,.4); border-radius: 999px; color: var(--accent); background: transparent; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
-.subtitle-tip-ok:hover { color: #07110b; background: var(--accent); }
-.subtitle-tip-close { flex: none; width: 28px; height: 28px; border: 0; border-radius: 50%; color: #9aa7a0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; }
-.subtitle-tip-close:hover { color: #fff; background: rgba(255,255,255,.08); }
-.subtitle-tip button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@keyframes subtitle-tip-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-@media (max-width: 600px) { .subtitle-tip { flex-wrap: wrap; } .subtitle-tip p { flex-basis: calc(100% - 90px); } .subtitle-tip-ok { margin-inline-start: 42px; } }
-@media (prefers-reduced-motion: reduce) { .subtitle-tip { animation: none; } }
+.subtitle-tip {
+  position: fixed;
+  z-index: 1000;
+  right: 24px;
+  bottom: 24px;
+  width: min(360px, calc(100% - 32px));
+  padding: 17px;
+  direction: rtl;
+  border: 1px solid rgba(148, 163, 184, .2);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(24, 31, 39, .98), rgba(12, 18, 25, .98));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .48), 0 0 0 1px rgba(255, 255, 255, .025) inset;
+  backdrop-filter: blur(18px);
+  animation: subtitle-tip-in .38s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.subtitle-tip-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 16px;
+}
+
+.subtitle-tip-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(56, 189, 248, .2);
+  border-radius: 13px;
+  color: #38bdf8;
+  background: linear-gradient(145deg, rgba(56, 189, 248, .2), rgba(99, 102, 241, .16));
+  font-size: 24px;
+}
+
+.subtitle-tip-heading {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.subtitle-tip-heading span {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.subtitle-tip-heading strong {
+  color: #f1f5f9;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.subtitle-tip-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, .05);
+  font-size: 19px;
+  cursor: pointer;
+  transition: color .2s ease, background .2s ease;
+}
+
+.subtitle-tip-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .12);
+}
+
+.subtitle-tip-content {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.subtitle-tip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.subtitle-tip-row-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 17px;
+}
+
+.subtitle-tip-settings {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, .13);
+}
+
+.subtitle-tip-palette {
+  color: #fb923c;
+  background: rgba(251, 146, 60, .13);
+}
+
+.subtitle-tip-row p {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.8;
+}
+
+.subtitle-tip-row p strong {
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.subtitle-tip-row p span {
+  color: #a8b3c2;
+  font-size: 11px;
+}
+
+.subtitle-tip-ok {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid rgba(134, 239, 172, .25);
+  border-radius: 11px;
+  color: #bbf7d0;
+  background: linear-gradient(100deg, rgba(34, 197, 94, .2), rgba(16, 185, 129, .12));
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.subtitle-tip-ok:hover {
+  border-color: rgba(134, 239, 172, .48);
+  background: linear-gradient(100deg, rgba(34, 197, 94, .3), rgba(16, 185, 129, .2));
+}
+
+.subtitle-tip-ok:active {
+  transform: scale(.985);
+}
+
+.subtitle-tip button:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 3px;
+}
+
+@keyframes subtitle-tip-in {
+  from { opacity: 0; transform: translateY(16px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 600px) {
+  .subtitle-tip {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100% - 24px);
+    padding: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subtitle-tip,
+  .subtitle-tip-close,
+  .subtitle-tip-ok {
+    animation: none;
+    transition: none;
+  }
+}

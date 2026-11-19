@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { RiCheckLine, RiCloseLine, RiClosedCaptionFill, RiPaletteFill, RiSettings3Fill } from 'react-icons/ri'
 import './SubtitleTip.css'
 
 const STORAGE_KEY = 'cm_subtitle_tip_v1'
@@ -8,7 +9,7 @@ function wasDismissed() {
   try { return localStorage.getItem(STORAGE_KEY) === '1' } catch { return false }
 }
 
-// نوار باریک راهنمای زیرنویس بالای پلیر هنگام ورود به ویدیوهای یک پلی‌لیست؛ با «متوجه شدم» دیگر نمایش داده نمی‌شود
+// پنجره شناور راهنمای زیرنویس هنگام ورود به ویدیوهای یک پلی‌لیست
 function SubtitleTip() {
   const [visible, setVisible] = useState(false)
 
@@ -33,14 +34,36 @@ function SubtitleTip() {
   if (!visible) return null
 
   return (
-    <div className="subtitle-tip" role="status" aria-live="polite">
-      <span className="subtitle-tip-icon" aria-hidden="true">CC</span>
-      <p>
-        زیرنویس فعال نیست؟ از <b>تنظیمات پلیر</b> (چرخ‌دنده) روشنش کنید. فعال است ولی دیده نمی‌شود؟ <b>رنگ زیرنویس</b> را همان‌جا تغییر دهید.
-      </p>
-      <button type="button" className="subtitle-tip-ok" onClick={() => dismiss(true)}>متوجه شدم</button>
-      <button type="button" className="subtitle-tip-close" onClick={() => dismiss(false)} aria-label="بستن راهنما">×</button>
-    </div>
+    <aside className="subtitle-tip" role="status" aria-live="polite" dir="rtl">
+      <div className="subtitle-tip-header">
+        <span className="subtitle-tip-icon" aria-hidden="true">
+          <RiClosedCaptionFill />
+        </span>
+        <div className="subtitle-tip-heading">
+          <span>راهنمای تماشا</span>
+          <strong>زیرنویس فارسی</strong>
+        </div>
+        <button type="button" className="subtitle-tip-close" onClick={() => dismiss(false)} aria-label="بستن راهنما">
+          <RiCloseLine />
+        </button>
+      </div>
+
+      <div className="subtitle-tip-content">
+        <div className="subtitle-tip-row">
+          <span className="subtitle-tip-row-icon subtitle-tip-settings" aria-hidden="true"><RiSettings3Fill /></span>
+          <p><strong>فعال‌کردن زیرنویس</strong><span>از تنظیمات پلیر، زیرنویس را روشن کنید.</span></p>
+        </div>
+        <div className="subtitle-tip-row">
+          <span className="subtitle-tip-row-icon subtitle-tip-palette" aria-hidden="true"><RiPaletteFill /></span>
+          <p><strong>اگر زیرنویس دیده نمی‌شود</strong><span>رنگ زیرنویس را از همان تنظیمات تغییر دهید.</span></p>
+        </div>
+      </div>
+
+      <button type="button" className="subtitle-tip-ok" onClick={() => dismiss(true)}>
+        <RiCheckLine aria-hidden="true" />
+        متوجه شدم
+      </button>
+    </aside>
   )
 }
 

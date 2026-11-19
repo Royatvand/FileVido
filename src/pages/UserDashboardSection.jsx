@@ -6,11 +6,11 @@ import UserDeviceSessions from '../components/UserDeviceSessions'
 import useUserDashboard from '../hooks/useUserDashboard'
 
 const sections = {
-  favorites: { title: 'علاقه‌مندی‌های من', kicker: 'SAVED VIDEOS', description: 'ویدیوهایی که برای تماشای دوباره ذخیره کرده‌ای.' },
-  history: { title: 'تاریخچه تماشا', kicker: 'WATCH HISTORY', description: 'ویدیوهایی که باز کرده‌ای؛ از آخرین بازدید به قدیمی‌تر.' },
-  courses: { title: 'دوره‌های من', kicker: 'MY COURSES', description: 'دوره‌هایی که با تماشای یکی از جلسه‌هایشان شروع کرده‌ای.' },
-  progress: { title: 'پیشرفت یادگیری', kicker: 'LEARNING PROGRESS', description: 'نمای کلی از جلسه‌های تکمیل‌شده و مسیر دوره‌ها.' },
-  profile: { title: 'تنظیمات پروفایل', kicker: 'ACCOUNT SETTINGS', description: 'اطلاعات نمایشی حساب کاربری‌ات را مدیریت کن.' },
+  favorites: { title: 'علاقه‌مندی‌های من', description: 'ویدیوهایی که برای تماشای دوباره ذخیره کرده‌ای.' },
+  history: { title: 'تاریخچه تماشا', description: 'ویدیوهایی که باز کرده‌ای؛ از آخرین بازدید به قدیمی‌تر.' },
+  courses: { title: 'دوره‌های من', description: 'دوره‌هایی که با تماشای یکی از جلسه‌هایشان شروع کرده‌ای.' },
+  progress: { title: 'پیشرفت یادگیری', description: 'نمای کلی از جلسه‌های تکمیل‌شده و مسیر دوره‌ها.' },
+  profile: { title: 'تنظیمات پروفایل', description: 'اطلاعات نمایشی حساب کاربری‌ات را مدیریت کن.' },
 }
 
 function courseActionLabel(course) {
@@ -68,7 +68,7 @@ function LearningActivityHeatmap({ history }) {
   return (
     <section className="learning-activity-card">
       <div className="learning-activity-heading">
-        <div><span className="learning-card-kicker">YOUR CONSISTENCY</span><h3>نقشه فعالیت روزانه</h3><p>هر خانه نشان‌دهنده تعداد ویدیوهایی است که در آن روز تماشا کرده‌ای.</p></div>
+        <div><h3>نقشه فعالیت روزانه</h3><p>هر خانه نشان‌دهنده تعداد ویدیوهایی است که در آن روز تماشا کرده‌ای.</p></div>
         <div className="learning-activity-totals"><strong>{activeDays.toLocaleString('fa-IR')}</strong><span>روز فعال در یک سال اخیر</span></div>
       </div>
       <div className="learning-heatmap-scroll" dir="ltr">
@@ -163,7 +163,7 @@ function UserDashboardSection({ section }) {
 
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">
-            <div><span className="user-dashboard-eyebrow">PERSONAL LEARNING SPACE</span><h1>{current.title}</h1></div>
+            <div><h1>{current.title}</h1></div>
             <div className="user-dashboard-top-user">
               {user.user_metadata?.avatar_url || user.user_metadata?.picture
                 ? <img className="user-dashboard-avatar" src={user.user_metadata.avatar_url || user.user_metadata.picture} alt="" referrerPolicy="no-referrer" />
@@ -173,7 +173,7 @@ function UserDashboardSection({ section }) {
           </header>
 
           <section className="user-dashboard-section-intro">
-            <span className="user-dashboard-section-kicker">{current.kicker}</span>
+            
             <h2>{current.title}</h2>
             <p>{current.description}</p>
           </section>
@@ -183,21 +183,21 @@ function UserDashboardSection({ section }) {
 
           {section === 'favorites' && (
             <section className="user-dashboard-panel user-dashboard-full-panel">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR BOOKMARKS</span><h3>{favorites.length} ویدیوی ذخیره‌شده</h3></div></div>
+              <div className="user-dashboard-panel-heading"><div><h3>{favorites.length} ویدیوی ذخیره‌شده</h3></div></div>
               {favorites.length ? <div className="user-dashboard-section-list">{favorites.map((item) => <VideoRow key={item.id} item={item} favorite onRemove={removeFavorite} />)}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-rose"><LuHeart /></span><strong>هنوز ویدیویی ذخیره نکردی</strong><p>در صفحه هر ویدیو روی افزودن به علاقه‌مندی‌ها بزن تا بعداً راحت پیدایش کنی.</p><a href="/videos">گشت‌وگذار در آموزش‌ها</a></div>}
             </section>
           )}
 
           {section === 'history' && (
             <section className="user-dashboard-panel user-dashboard-full-panel">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">RECENTLY WATCHED</span><h3>{history.length} ویدیو در تاریخچه</h3></div></div>
+              <div className="user-dashboard-panel-heading"><div><h3>{history.length} ویدیو در تاریخچه</h3></div></div>
               {history.length ? <div className="user-dashboard-section-list">{history.map((item) => <VideoRow key={item.id} item={item} />)}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-amber"><LuClock3 /></span><strong>تاریخچه‌ات هنوز خالیه</strong><p>با بازکردن ویدیوهای آموزشی، تاریخچه تماشای تو اینجا ثبت می‌شه.</p><a href="/videos">مشاهده ویدیوها</a></div>}
             </section>
           )}
 
           {section === 'courses' && (
             <section className="user-dashboard-panel user-dashboard-full-panel">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">COURSE LIBRARY</span><h3>{courses.length} دوره شروع‌شده</h3></div></div>
+              <div className="user-dashboard-panel-heading"><div><h3>{courses.length} دوره شروع‌شده</h3></div></div>
               {courses.length ? <div className="user-dashboard-section-list">{courses.map((course) => (
                 <article className="user-dashboard-course-card" key={course.id}>
                   <img src={course.cover_url || '/covers/cover-1.svg'} alt="" loading="lazy" />
@@ -218,11 +218,11 @@ function UserDashboardSection({ section }) {
               </section>
               <LearningActivityHeatmap history={history} />
               <section className="user-dashboard-panel user-dashboard-full-panel">
-                <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">COURSE COMPLETION</span><h3>پیشرفت دوره‌ها</h3></div></div>
+                <div className="user-dashboard-panel-heading"><div><h3>پیشرفت دوره‌ها</h3></div></div>
                 {courses.length ? <div className="user-dashboard-course-progress user-dashboard-course-progress-expanded">{courses.map((course) => <div className="user-dashboard-course-progress-item" key={course.id}><div><strong>{course.title}</strong><span>{course.completedLessons}/{course.totalLessons} جلسه · {course.progressPercent}٪</span></div><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div></div>)}</div> : <div className="user-dashboard-compact-empty">بعد از شروع یک دوره، میزان پیشرفت آن در این قسمت نمایش داده می‌شود.</div>}
               </section>
               <section className="user-dashboard-panel user-dashboard-full-panel">
-                <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">COMPLETED VIDEOS</span><h3>ویدیوهای تکمیل‌شده</h3></div></div>
+                <div className="user-dashboard-panel-heading"><div><h3>ویدیوهای تکمیل‌شده</h3></div></div>
                 {history.filter((item) => item.is_completed).length ? <div className="user-dashboard-section-list">{history.filter((item) => item.is_completed).map((item) => <VideoRow key={item.id} item={item} />)}</div> : <div className="user-dashboard-compact-empty">هنوز ویدیویی را به‌عنوان تکمیل‌شده علامت نزده‌ای.</div>}
               </section>
             </>
@@ -230,7 +230,7 @@ function UserDashboardSection({ section }) {
 
           {section === 'profile' && (
             <section className="user-dashboard-panel user-dashboard-full-panel">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">PROFILE INFORMATION</span><h3>اطلاعات حساب</h3></div></div>
+              <div className="user-dashboard-panel-heading"><div><h3>اطلاعات حساب</h3></div></div>
               <form className="user-dashboard-profile-form" onSubmit={saveProfile}>
                 <label htmlFor="profile-name">نام نمایشی</label>
                 <input id="profile-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="نامی که در داشبورد نمایش داده می‌شود" />

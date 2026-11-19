@@ -714,7 +714,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .user-dashboard-nav-icon,
 .user-dashboard-stat-icon,
 .user-dashboard-empty-icon,
-.user-dashboard-help-icon,
 .user-dashboard-logout-icon {
   display:inline-flex;
   align-items:center;
@@ -750,7 +749,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius:18px;
 }
 .user-dashboard-empty-icon svg { width:27px; height:27px; stroke-width:1.8; }
-.user-dashboard-help-icon { width:34px; height:34px; margin-bottom:10px; border-radius:11px; color:#c3a5ff; background:rgba(153,112,255,.15); }
 .user-dashboard-logout-icon { width:19px; height:19px; color:#ff9292; }
 .user-dashboard-logout-icon svg { width:16px; height:16px; }
 .user-dashboard-item-arrow { display:inline-flex; align-items:center; justify-content:center; color:#7eaa91; }

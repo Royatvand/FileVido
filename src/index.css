@@ -720,3 +720,57 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .user-dashboard-course-card>img { width:82px; }
   .user-dashboard-course-card-copy strong { font-size:10px; }
 }
+
+
+/* Colorful Lucide icons for the user dashboard */
+.user-dashboard-nav-icon,
+.user-dashboard-stat-icon,
+.user-dashboard-empty-icon,
+.user-dashboard-help-icon,
+.user-dashboard-logout-icon {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+.user-dashboard-nav-icon {
+  width:36px;
+  height:36px;
+  border-radius:11px;
+  transition:transform .22s ease, box-shadow .22s ease;
+}
+.user-dashboard-nav-icon svg { width:18px; height:18px; stroke-width:2.1; }
+.user-dashboard-nav-link:hover .user-dashboard-nav-icon { transform:translateY(-2px) scale(1.04); }
+.user-dashboard-nav-link.active .user-dashboard-nav-icon { box-shadow:0 5px 18px currentColor; }
+.icon-tone-mint { color:#70e6a0 !important; background:rgba(75,220,135,.13) !important; }
+.icon-tone-blue { color:#72b7ff !important; background:rgba(65,145,255,.14) !important; }
+.icon-tone-rose { color:#ff82a6 !important; background:rgba(255,91,140,.14) !important; }
+.icon-tone-amber { color:#ffc56c !important; background:rgba(255,177,64,.14) !important; }
+.icon-tone-violet { color:#b69aff !important; background:rgba(153,112,255,.15) !important; }
+.icon-tone-cyan { color:#62dce9 !important; background:rgba(58,202,220,.14) !important; }
+.user-dashboard-stat-icon {
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  box-shadow:inset 0 1px rgba(255,255,255,.07);
+}
+.user-dashboard-stat-icon svg { width:21px; height:21px; stroke-width:2; }
+.user-dashboard-empty-icon {
+  width:58px;
+  height:58px;
+  margin:0 auto 13px;
+  border-radius:18px;
+}
+.user-dashboard-empty-icon svg { width:27px; height:27px; stroke-width:1.8; }
+.user-dashboard-help-icon { width:34px; height:34px; margin-bottom:10px; border-radius:11px; color:#c3a5ff; background:rgba(153,112,255,.15); }
+.user-dashboard-help-icon svg { width:18px; height:18px; }
+.user-dashboard-logout-icon { width:19px; height:19px; color:#ff9292; }
+.user-dashboard-logout-icon svg { width:16px; height:16px; }
+.user-dashboard-item-arrow { display:inline-flex; align-items:center; justify-content:center; color:#7eaa91; }
+.user-dashboard-item-arrow svg { width:16px; height:16px; }
+.user-dashboard-panel-symbol { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; color:#ff82a6; background:rgba(255,91,140,.13); }
+.user-dashboard-panel-symbol svg { width:18px; height:18px; }
+@media(max-width:760px) {
+  .user-dashboard-nav-icon { width:33px; height:33px; }
+  .user-dashboard-stat-icon { width:41px; height:41px; }
+}

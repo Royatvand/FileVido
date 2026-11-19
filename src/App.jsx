@@ -12,6 +12,7 @@ import Indicators from './pages/Indicators'
 import IndicatorPage from './pages/IndicatorPage'
 import AdminLogin from './pages/AdminLogin'
 import GoogleLogin from './pages/GoogleLogin'
+import UserDashboard from './pages/UserDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
@@ -27,6 +28,7 @@ function App() {
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators'
   const isUserLogin = path === '/login'
+  const isUserDashboard = path === '/dashboard'
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
@@ -70,6 +72,7 @@ function App() {
 
   if (isAdminLogin) return <AdminLogin />
   if (isUserLogin) return <GoogleLogin />
+  if (isUserDashboard) return <div className="app-shell"><Header /><main className="main-content"><UserDashboard /></main><Footer /></div>
   if (isAdmin) {
     const session = supabase.getSession()
     const isAdminUser = session?.user?.app_metadata?.role === 'admin'

@@ -42,7 +42,7 @@ function VideoRow({ item, favorite, onRemove }) {
 }
 
 function UserDashboardSection({ section }) {
-  const { user, data, setData, loading, error, setError, signOut } = useUserDashboard()
+  const { user, setUser, data, setData, loading, error, setError, signOut } = useUserDashboard()
   const [notice, setNotice] = useState('')
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState('')

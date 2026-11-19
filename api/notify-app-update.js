@@ -151,7 +151,6 @@ async function sendFcmMessage(accessToken, token, payload) {
             priority: 'HIGH',
             notification: {
               channelId: 'app_updates',
-              clickAction: 'FLUTTER_NOTIFICATION_CLICK',
             },
           },
         },

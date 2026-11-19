@@ -54,7 +54,6 @@ async function publicRequest(path) {
   const response = await fetch(`${SUPABASE_URL}${path}`, {
     headers: {
       apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
       'Content-Type': 'application/json',
     },
   })
@@ -143,7 +142,6 @@ export async function registerFcmToken(token, userId = null) {
       method: 'POST',
       headers: {
         apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
         Prefer: 'resolution=ignore-duplicates,return=minimal',
       },

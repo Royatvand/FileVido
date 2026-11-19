@@ -40,5 +40,5 @@ export default function useUserDashboard() {
     window.location.replace('/')
   }
 
-  return { user, data, setData, loading, error, setError, signOut }
+  return { user, setUser, data, setData, loading, error, setError, signOut }
 }

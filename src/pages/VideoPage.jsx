@@ -5,6 +5,7 @@ import NotFound from './NotFound'
 import { setPageSeo } from '../lib/seo'
 import { stripIconTokens } from '../lib/iconTokens'
 import RichText from '../components/RichText'
+import SubtitleTip from '../components/SubtitleTip'
 import { formatFileSize } from '../lib/indicators'
 import './VideoPage.css'
 
@@ -102,6 +103,7 @@ function VideoPage({ videoId }) {
       <a className="back-link" href="/#videos">→ بازگشت به ویدیوها</a>
       <div className={'watch-layout ' + (playlist ? 'has-playlist' : '')}>
         <div className="watch-main">
+          {playlist && <SubtitleTip />}
           <div className="player-frame"><iframe src={getAparatEmbedUrl(video.aparatId)} title={video.title} allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin" /></div>
           <section className="video-info">
             <div className="video-title-row">

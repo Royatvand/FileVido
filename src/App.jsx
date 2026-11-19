@@ -13,6 +13,7 @@ import IndicatorPage from './pages/IndicatorPage'
 import AdminLogin from './pages/AdminLogin'
 import GoogleLogin from './pages/GoogleLogin'
 import UserDashboard from './pages/UserDashboard'
+import UserDashboardSection from './pages/UserDashboardSection'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
@@ -29,6 +30,7 @@ function App() {
   const isIndicators = path === '/indicators'
   const isUserLogin = path === '/login'
   const isUserDashboard = path === '/dashboard'
+  const userDashboardSection = path.match(/^\/dashboard\/(favorites|history|courses|progress|profile)$/)?.[1] || null
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
@@ -72,7 +74,7 @@ function App() {
 
   if (isAdminLogin) return <AdminLogin />
   if (isUserLogin) return <GoogleLogin />
-  if (isUserDashboard) return <div className="app-shell"><Header /><main className="main-content"><UserDashboard /></main><Footer /></div>
+  if (isUserDashboard || userDashboardSection) return <div className="app-shell"><Header /><main className="main-content">{userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}</main><Footer /></div>
   if (isAdmin) {
     const session = supabase.getSession()
     const isAdminUser = session?.user?.app_metadata?.role === 'admin'

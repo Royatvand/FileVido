@@ -60,6 +60,51 @@ function AdminAppVersions({ onNotice }) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  async function maybeNotifyUsers(versionId, versionPayload) {
+    const session = supabase.getSession()
+    if (!session?.access_token) return
+
+    setNotifyingId(versionId)
+    try {
+      const response = await fetch('/api/notify-app-update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          version_id: versionId,
+          version_name: versionPayload.version_name,
+          version_code: versionPayload.version_code,
+          changelog: versionPayload.changelog,
+          download_url: versionPayload.download_url,
+          is_mandatory: versionPayload.is_mandatory,
+        }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (response.status === 501 || result?.status === 'not_configured') {
+        onNotice?.({
+          type: 'error',
+          text:
+            result?.message ||
+            'زیرساخت اعلان آماده است، اما کلیدهای Firebase هنوز تنظیم نشده‌اند. به README مراجعه کنید.',
+        })
+        return
+      }
+      if (!response.ok) {
+        throw new Error(result?.message || 'ارسال اعلان با خطا مواجه شد.')
+      }
+      onNotice?.({
+        type: 'success',
+        text: result?.message || `اعلان برای ${result?.sent || 0} دستگاه ارسال شد.`,
+      })
+    } catch (error) {
+      onNotice?.({ type: 'error', text: error.message })
+    } finally {
+      setNotifyingId(null)
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     setSaving(true)
@@ -109,7 +154,6 @@ function AdminAppVersions({ onNotice }) {
         text: editingId ? 'نسخه با موفقیت به‌روزرسانی شد.' : 'نسخه جدید ثبت شد.',
       })
 
-      // When a version is newly published, offer to send FCM (server-side only).
       if (willPublish && !wasPublished && savedId) {
         await maybeNotifyUsers(savedId, payload)
       }
@@ -118,7 +162,7 @@ function AdminAppVersions({ onNotice }) {
       await loadData()
     } catch (error) {
       const duplicate = /app_versions_version_code|duplicate key/i.test(error.message || '')
-      onNotice?.({
+      onNotice?({
         type: 'error',
         text: duplicate
           ? 'این versionCode قبلاً ثبت شده است. مقدار دیگری انتخاب کنید.'
@@ -126,51 +170,6 @@ function AdminAppVersions({ onNotice }) {
       })
     } finally {
       setSaving(false)
-    }
-  }
-
-  async function maybeNotifyUsers(versionId, versionPayload) {
-    const session = supabase.getSession()
-    if (!session?.access_token) return
-
-    setNotifyingId(versionId)
-    try {
-      const response = await fetch('/api/notify-app-update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          version_id: versionId,
-          version_name: versionPayload.version_name,
-          version_code: versionPayload.version_code,
-          changelog: versionPayload.changelog,
-          download_url: versionPayload.download_url,
-          is_mandatory: versionPayload.is_mandatory,
-        }),
-      })
-      const result = await response.json().catch(() => ({}))
-      if (response.status === 501 || result?.status === 'not_configured') {
-        onNotice?.({
-          type: 'error',
-          text:
-            result?.message ||
-            'زیرساخت اعلان آماده است، اما کلیدهای Firebase هنوز تنظیم نشده‌اند. به بخش «موارد نیازمند تنظیمات خارجی» در README مراجعه کنید.',
-        })
-        return
-      }
-      if (!response.ok) {
-        throw new Error(result?.message || 'ارسال اعلان با خطا مواجه شد.')
-      }
-      onNotice?({
-        type: 'success',
-        text: result?.message || `اعلان برای ${result?.sent || 0} دستگاه ارسال شد.`,
-      })
-    } catch (error) {
-      onNotice?.({ type: 'error', text: error.message })
-    } finally {
-      setNotifyingId(null)
     }
   }
 
@@ -305,7 +304,11 @@ function AdminAppVersions({ onNotice }) {
                   <td dir="ltr">{row.version_code}</td>
                   <td>
                     <strong>{row.version_name}</strong>
-                    {row.changelog ? <small style={{ display: 'block', color: '#7f8d84' }}>{row.changelog.slice(0, 80)}{row.changelog.length > 80 ? '…' : ''}</small> : null}
+                    {row.changelog ? (
+                      <small style={{ display: 'block', color: '#7f8d84' }}>
+                        {row.changelog.slice(0, 80)}{row.changelog.length > 80 ? '…' : ''}
+                      </small>
+                    ) : null}
                   </td>
                   <td>
                     <span className={`admin-status ${row.is_published ? 'published' : 'draft'}`}>

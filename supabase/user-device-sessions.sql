@@ -29,7 +29,7 @@ create policy "Users can register their current device session"
   on public.user_device_sessions for insert to authenticated
   with check (
     (select auth.uid()) = user_id
-    and session_id = ((select auth.jwt() ->> 'session_id')::uuid)
+    and session_id = (((select auth.jwt()) ->> 'session_id')::uuid)
   );
 
 drop policy if exists "Users can update their current device session" on public.user_device_sessions;
@@ -37,11 +37,11 @@ create policy "Users can update their current device session"
   on public.user_device_sessions for update to authenticated
   using (
     (select auth.uid()) = user_id
-    and session_id = ((select auth.jwt() ->> 'session_id')::uuid)
+    and session_id = (((select auth.jwt()) ->> 'session_id')::uuid)
   )
   with check (
     (select auth.uid()) = user_id
-    and session_id = ((select auth.jwt() ->> 'session_id')::uuid)
+    and session_id = (((select auth.jwt()) ->> 'session_id')::uuid)
   );
 
 drop policy if exists "Users can remove their own device records" on public.user_device_sessions;

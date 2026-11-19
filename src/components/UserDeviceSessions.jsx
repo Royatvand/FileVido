@@ -58,8 +58,6 @@ function UserDeviceSessions() {
   }, [loadDevices])
 
   async function handleSignOutOthers() {
-    const otherCount = devices.filter((device) => !device.is_current).length
-    if (!otherCount) return
     const confirmed = window.confirm('از تمام دستگاه‌های دیگر خارج شوی؟ دستگاه فعلی متصل می‌ماند.')
     if (!confirmed) return
 
@@ -76,8 +74,6 @@ function UserDeviceSessions() {
       setSigningOut(false)
     }
   }
-
-  const otherDevices = devices.filter((device) => !device.is_current).length
 
   return (
     <section className="user-device-panel" aria-labelledby="user-device-title">
@@ -134,14 +130,14 @@ function UserDeviceSessions() {
           type="button"
           className="user-device-signout-others"
           onClick={handleSignOutOthers}
-          disabled={signingOut || loading || otherDevices === 0}
+          disabled={signingOut || loading}
         >
           <LuLogOut />
           {signingOut ? 'در حال خروج...' : 'خروج از سایر دستگاه‌ها'}
         </button>
       </div>
       <small className="user-device-disclaimer">
-        اطلاعات دستگاه از مرورگر دریافت می‌شود و ممکن است دقیقاً مدل سخت‌افزار را مشخص نکند.
+        اطلاعات دستگاه از مرورگر دریافت می‌شود و ممکن است دقیقاً مدل سخت‌افزار را مشخص نکند. نشست‌های قدیمی ممکن است تا اولین بازدید در فهرست دیده نشوند؛ خروج از سایر دستگاه‌ها همه نشست‌های دیگر را لغو می‌کند.
       </small>
     </section>
   )

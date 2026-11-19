@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft } from 'react-icons/lu'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [
@@ -52,14 +52,10 @@ function UserDashboard() {
   const displayName = metadata.full_name || metadata.name || user.email?.split('@')[0] || 'کاربر چارت مسترز'
   const avatar = metadata.avatar_url || metadata.picture || ''
   const progress = dashboard?.progress || []
-  const favorites = dashboard?.favorites || []
   const courses = dashboard?.courses || []
   const stats = dashboard?.stats || { courseCount: 0, viewedCount: 0, completedCount: 0, favoriteCount: 0 }
   const latestUnfinished = progress.find((item) => !item.is_completed && item.videos)
   const latestVideo = latestUnfinished || progress.find((item) => item.videos)
-  const completionPercent = courses.length
-    ? Math.round(courses.reduce((sum, course) => sum + course.progressPercent, 0) / courses.length)
-    : (stats.viewedCount ? Math.round((stats.completedCount / stats.viewedCount) * 100) : 0)
 
   const formatDate = (value) => value
     ? new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' }).format(new Date(value))
@@ -102,12 +98,6 @@ function UserDashboard() {
             ))}
           </nav>
           <div className="user-dashboard-sidebar-bottom">
-            <div className="user-dashboard-help">
-              <span className="user-dashboard-help-icon"><LuSparkles /></span>
-              <strong>مسیر یادگیریت رو ادامه بده</strong>
-              <p>هر قدم کوچیک، تو رو به تسلط نزدیک‌تر می‌کنه.</p>
-              <a href="/videos">مشاهده آموزش‌ها ←</a>
-            </div>
             <button className="user-dashboard-sidebar-logout" type="button" onClick={handleSignOut}><span className="user-dashboard-logout-icon"><LuLogOut /></span> خروج از حساب</button>
           </div>
         </aside>
@@ -148,7 +138,7 @@ function UserDashboard() {
 
           <div className="user-dashboard-content-grid">
             <section className="user-dashboard-panel user-dashboard-continue" id="history">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">PICK UP WHERE YOU LEFT OFF</span><h3>ادامه یادگیری و تاریخچه</h3></div><a href="/videos">همه آموزش‌ها <span>←</span></a></div>
+              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">PICK UP WHERE YOU LEFT OFF</span><h3>ادامه یادگیری</h3></div><a href="/dashboard/history">تاریخچه کامل <span>←</span></a></div>
               {latestVideo ? (
                 <div className="user-dashboard-latest">
                   <a href={'/video/' + latestVideo.videos.slug} className="user-dashboard-latest-cover"><img src={latestVideo.videos.cover_url || '/covers/cover-1.svg'} alt="" /><span>▶</span></a>
@@ -165,23 +155,11 @@ function UserDashboard() {
               {progress.filter((item) => item !== latestVideo).length > 0 && <div className="user-dashboard-list">{progress.filter((item) => item !== latestVideo).slice(0, 4).map((item) => renderVideoItem(item))}</div>}
             </section>
 
-            <section className="user-dashboard-panel user-dashboard-progress" id="progress">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR LEARNING JOURNEY</span><h3>پیشرفت یادگیری</h3></div></div>
-              <div className="user-dashboard-progress-visual"><div className="user-dashboard-progress-ring" style={{ background: 'conic-gradient(var(--accent) ' + completionPercent * 3.6 + 'deg, rgba(255,255,255,.08) 0deg)' }}><span>{completionPercent}<small>٪</small></span></div><div><strong>{completionPercent ? 'خوبه! همین‌طور ادامه بده' : 'مسیرت تازه شروع شده'}</strong><p>{stats.completedCount} ویدیو از {stats.viewedCount} ویدیوی بازدیدشده رو تکمیل کردی.</p></div></div>
-              <div className="user-dashboard-progress-track"><span style={{ width: completionPercent + '%' }} /></div>
-              <small className="user-dashboard-progress-caption">برای ثبت تکمیل هر ویدیو، از دکمه «تکمیل آموزش» در صفحه همان ویدیو استفاده کن.</small>
-              {courses.length > 0 && <div className="user-dashboard-course-progress">{courses.slice(0, 3).map((course) => <div className="user-dashboard-course-progress-item" key={course.id}><div><strong>{course.title}</strong><span>{course.completedLessons}/{course.totalLessons} جلسه</span></div><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div></div>)}</div>}
-            </section>
-
             <section className="user-dashboard-panel" id="courses">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR COURSES</span><h3>دوره‌های من</h3></div><span className="user-dashboard-panel-symbol">▤</span></div>
+              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR COURSES</span><h3>دوره‌های من</h3></div><a href="/dashboard/courses">همه دوره‌ها <span>←</span></a></div>
               {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href="/videos" key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</small></span><span className="user-dashboard-item-arrow"><LuArrowLeft /></span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
             </section>
 
-            <section className="user-dashboard-panel" id="favorites">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">SAVED FOR LATER</span><h3>علاقه‌مندی‌ها</h3></div><span className="user-dashboard-panel-symbol">♡</span></div>
-              {favorites.length ? <div className="user-dashboard-list">{favorites.slice(0, 5).map((item) => renderVideoItem(item, true))}</div> : <div className="user-dashboard-compact-empty">در صفحه هر ویدیو روی «افزودن به علاقه‌مندی‌ها» بزن تا اینجا ذخیره بشه.</div>}
-            </section>
           </div>
           <p className="user-dashboard-data-note">اطلاعات این صفحه از فعالیت‌های ثبت‌شده در حساب کاربری تو دریافت می‌شه.</p>
         </div>

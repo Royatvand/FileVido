@@ -1,14 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import AnimatedText from './animated/AnimatedText'
+import { userAuth } from '../lib/supabase'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [signedIn, setSignedIn] = useState(false)
   const headerRef = useRef(null)
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isAbout = path === '/about'
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators' || path.startsWith('/indicator/')
   const isVideos = path === '/videos' || path.startsWith('/video/')
+
+  useEffect(() => {
+    let active = true
+    userAuth.getValidSession().then((session) => {
+      if (active) setSignedIn(Boolean(session?.user))
+    }).catch(() => {})
+    return () => { active = false }
+  }, [])
 
   // منوی موبایل: با Escape یا کلیک بیرون از هدر بسته می‌شود
   useEffect(() => {
@@ -37,7 +47,7 @@ function Header() {
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>
 
-        <a className="header-login" href="/login">ورود</a>
+        <a className="header-login" href={signedIn ? '/dashboard' : '/login'}>{signedIn ? 'داشبورد من' : 'ورود'}</a>
 
         <a className="header-action" href="/#videos">
           شروع یادگیری <span aria-hidden="true">↗</span>

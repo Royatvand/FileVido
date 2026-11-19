@@ -1,0 +1,55 @@
+/* Dastkhat v1.210 — SIL OFL 1.1, Dastyar (https://github.com/dastyar-io/dastkhat-font). See /fonts/dastkhat/OFL.txt */
+
+@font-face {
+  font-family: 'Dastkhat FaNum';
+  src: url('/fonts/dastkhat/DastkhatFaNum-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dastkhat Diamond FaNum';
+  src: url('/fonts/dastkhat/DastkhatDiamondFaNum-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dastkhat Dots FaNum';
+  src: url('/fonts/dastkhat/DastkhatDotsFaNum-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dastkhat Bar FaNum';
+  src: url('/fonts/dastkhat/DastkhatBarFaNum-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dastkhat BarDots FaNum';
+  src: url('/fonts/dastkhat/DastkhatBarDotsFaNum-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dastkhat Mono';
+  src: url('/fonts/dastkhat/DastkhatMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --cm-font: 'Vazirmatn', sans-serif;
+}
+
+html[data-font='dastkhat'] { --cm-font: 'Dastkhat FaNum', 'Vazirmatn', sans-serif; }
+html[data-font='diamond'] { --cm-font: 'Dastkhat Diamond FaNum', 'Vazirmatn', sans-serif; }
+html[data-font='dots'] { --cm-font: 'Dastkhat Dots FaNum', 'Vazirmatn', sans-serif; }
+html[data-font='bar'] { --cm-font: 'Dastkhat Bar FaNum', 'Vazirmatn', sans-serif; }
+html[data-font='bardots'] { --cm-font: 'Dastkhat BarDots FaNum', 'Vazirmatn', sans-serif; }
+html[data-font='mono'] { --cm-font: 'Dastkhat Mono', 'Vazirmatn', sans-serif; }

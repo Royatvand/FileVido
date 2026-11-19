@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { userAuth, userLearning } from '../lib/supabase'
+import { applyAccountFont } from '../lib/siteFont'
 
 // منطق مشترک احراز هویت، دریافت اطلاعات داشبورد و خروج از حساب
 export default function useUserDashboard() {
@@ -21,7 +22,15 @@ export default function useUserDashboard() {
           return
         }
 
-        setUser(session.user)
+        let currentUser = session.user
+        try {
+          currentUser = await userAuth.fetchCurrentUser() || currentUser
+        } catch {
+          // نشست ذخیره‌شده کافی است؛ فونت همان انتخاب قبلی دستگاه می‌ماند.
+        }
+        if (!active) return
+        applyAccountFont(currentUser?.user_metadata)
+        setUser(currentUser)
         const dashboardData = await userLearning.getDashboardData()
         if (active) setData(dashboardData)
       } catch (err) {

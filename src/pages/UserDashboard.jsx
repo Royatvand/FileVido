@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuBookmark, LuArrowLeft, LuGraduationCap, LuChartNoAxesCombined, LuClapperboard, LuUserRound, LuClock3 } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [
-  { id: 'overview', label: 'نمای کلی', icon: '⌂', href: '/dashboard' },
-  { id: 'courses', label: 'دوره‌های من', icon: '▤', href: '/dashboard/courses' },
-  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: '♡', href: '/dashboard/favorites' },
-  { id: 'history', label: 'تاریخچه تماشا', icon: '◷', href: '/dashboard/history' },
-  { id: 'progress', label: 'پیشرفت یادگیری', icon: '↗', href: '/dashboard/progress' },
-  { id: 'profile', label: 'تنظیمات پروفایل', icon: '⚙', href: '/dashboard/profile' },
+  { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, color: 'mint', href: '/dashboard' },
+  { id: 'courses', label: 'دوره‌های من', icon: LuBookOpen, color: 'blue', href: '/dashboard/courses' },
+  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: LuHeart, color: 'rose', href: '/dashboard/favorites' },
+  { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, color: 'amber', href: '/dashboard/history' },
+  { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, color: 'violet', href: '/dashboard/progress' },
+  { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, color: 'cyan', href: '/dashboard/profile' },
 ]
 
 function UserDashboard() {
@@ -74,7 +75,7 @@ function UserDashboard() {
           <strong>{video.title}</strong>
           <small>{isFavorite ? 'ذخیره‌شده در علاقه‌مندی‌ها' : formatDate(item.last_watched_at || item.created_at)}</small>
         </span>
-        <span className="user-dashboard-item-arrow">←</span>
+        <span className="user-dashboard-item-arrow"><LuArrowLeft /></span>
       </a>
     )
   }
@@ -94,7 +95,7 @@ function UserDashboard() {
           <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
             {navigation.map((item, index) => (
               <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === 'overview' ? 'active' : '')} onClick={() => setMenuOpen(false)}>
-                <span className="user-dashboard-nav-icon" aria-hidden="true">{item.icon}</span>
+                <span className={"user-dashboard-nav-icon icon-tone-" + item.color} aria-hidden="true"><item.icon /></span>
                 {item.label}
                 {item.id === 'overview' && <span className="user-dashboard-nav-indicator" />}
               </a>
@@ -102,12 +103,12 @@ function UserDashboard() {
           </nav>
           <div className="user-dashboard-sidebar-bottom">
             <div className="user-dashboard-help">
-              <span>✦</span>
+              <span className="user-dashboard-help-icon"><LuSparkles /></span>
               <strong>مسیر یادگیریت رو ادامه بده</strong>
               <p>هر قدم کوچیک، تو رو به تسلط نزدیک‌تر می‌کنه.</p>
               <a href="/videos">مشاهده آموزش‌ها ←</a>
             </div>
-            <button className="user-dashboard-sidebar-logout" type="button" onClick={handleSignOut}><span>↪</span> خروج از حساب</button>
+            <button className="user-dashboard-sidebar-logout" type="button" onClick={handleSignOut}><span className="user-dashboard-logout-icon"><LuLogOut /></span> خروج از حساب</button>
           </div>
         </aside>
 
@@ -139,10 +140,10 @@ function UserDashboard() {
           {loadError && <div className="user-dashboard-error" role="alert">{loadError}</div>}
 
           <section className="user-dashboard-stats" aria-label="آمار یادگیری">
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▤</span><div><span>دوره‌های فعال</span><strong>{stats.courseCount}</strong><small>دوره‌هایی که شروع کردی</small></div></article>
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▶</span><div><span>ویدیوهای بازدیدشده</span><strong>{stats.viewedCount}</strong><small>ویدیوهای ثبت‌شده در تاریخچه</small></div></article>
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">✓</span><div><span>ویدیوهای تکمیل‌شده</span><strong>{stats.completedCount}</strong><small>تکمیل‌شده توسط خودت</small></div></article>
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">♡</span><div><span>علاقه‌مندی‌ها</span><strong>{stats.favoriteCount}</strong><small>ویدیوهای ذخیره‌شده</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-blue"><LuBookOpen /></span><div><span>دوره‌های فعال</span><strong>{stats.courseCount}</strong><small>دوره‌هایی که شروع کردی</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-cyan"><LuPlay /></span><div><span>ویدیوهای بازدیدشده</span><strong>{stats.viewedCount}</strong><small>ویدیوهای ثبت‌شده در تاریخچه</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-mint"><LuCircleCheck /></span><div><span>ویدیوهای تکمیل‌شده</span><strong>{stats.completedCount}</strong><small>تکمیل‌شده توسط خودت</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon icon-tone-rose"><LuHeart /></span><div><span>علاقه‌مندی‌ها</span><strong>{stats.favoriteCount}</strong><small>ویدیوهای ذخیره‌شده</small></div></article>
           </section>
 
           <div className="user-dashboard-content-grid">
@@ -159,7 +160,7 @@ function UserDashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon">▶</span><strong>هنوز آموزشی رو شروع نکردی</strong><p>با بازکردن یک ویدیو، سابقه بازدیدت از اینجا ثبت می‌شه.</p><a href="/videos">رفتن به کتابخانه آموزش‌ها</a></div>
+                <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-mint"><LuPlay /></span><strong>هنوز آموزشی رو شروع نکردی</strong><p>با بازکردن یک ویدیو، سابقه بازدیدت از اینجا ثبت می‌شه.</p><a href="/videos">رفتن به کتابخانه آموزش‌ها</a></div>
               )}
               {progress.length > 0 && <div className="user-dashboard-list">{progress.slice(0, 5).map((item) => renderVideoItem(item))}</div>}
             </section>
@@ -174,7 +175,7 @@ function UserDashboard() {
 
             <section className="user-dashboard-panel" id="courses">
               <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR COURSES</span><h3>دوره‌های من</h3></div><span className="user-dashboard-panel-symbol">▤</span></div>
-              {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href="/videos" key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</small></span><span className="user-dashboard-item-arrow">←</span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
+              {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href="/videos" key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</small></span><span className="user-dashboard-item-arrow"><LuArrowLeft /></span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
             </section>
 
             <section className="user-dashboard-panel" id="favorites">

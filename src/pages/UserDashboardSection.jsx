@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined, LuClock3 } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 import UserDashboardSidebar from '../components/UserDashboardSidebar'
+import useUserDashboard from '../hooks/useUserDashboard'
 
 const sections = {
   favorites: { title: 'علاقه‌مندی‌های من', kicker: 'SAVED VIDEOS', description: 'ویدیوهایی که برای تماشای دوباره ذخیره کرده‌ای.' },
@@ -40,37 +41,14 @@ function VideoRow({ item, favorite, onRemove }) {
 }
 
 function UserDashboardSection({ section }) {
-  const [user, setUser] = useState(null)
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { user, data, setData, loading, error, setError, signOut } = useUserDashboard()
   const [notice, setNotice] = useState('')
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState('')
 
   useEffect(() => {
-    let active = true
-    async function load() {
-      try {
-        const session = await userAuth.getValidSession()
-        if (!session?.user) {
-          window.location.replace('/login?next=' + encodeURIComponent(window.location.pathname))
-          return
-        }
-        const dashboard = await userLearning.getDashboardData()
-        if (!active) return
-        setUser(session.user)
-        setData(dashboard)
-        setName(session.user.user_metadata?.full_name || session.user.user_metadata?.name || '')
-      } catch (err) {
-        if (active) setError(err.message || 'دریافت اطلاعات انجام نشد.')
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    load()
-    return () => { active = false }
-  }, [section])
+    if (user) setName(user.user_metadata?.full_name || user.user_metadata?.name || '')
+  }, [user])
 
   async function removeFavorite(item) {
     try {
@@ -100,11 +78,6 @@ function UserDashboardSection({ section }) {
     } finally {
       setSaving(false)
     }
-  }
-
-  async function signOut() {
-    await userAuth.signOut()
-    window.location.replace('/')
   }
 
   if (loading) return <div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری"><span className="user-dashboard-spinner" aria-hidden="true" /></div>

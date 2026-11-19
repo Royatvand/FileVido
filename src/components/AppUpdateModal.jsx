@@ -1,4 +1,4 @@
-import { setDismissedVersionCode } from '../lib/appUpdate'
+import { openExternalUrl, setDismissedVersionCode } from '../lib/appUpdate'
 
 function AppUpdateModal({ update, onDismiss }) {
   if (!update?.latest) return null
@@ -7,9 +7,7 @@ function AppUpdateModal({ update, onDismiss }) {
   const mandatory = Boolean(latest.isMandatory)
 
   function handleDownload() {
-    if (latest.downloadUrl) {
-      window.open(latest.downloadUrl, '_system')
-    }
+    if (latest.downloadUrl) openExternalUrl(latest.downloadUrl)
   }
 
   function handleLater() {

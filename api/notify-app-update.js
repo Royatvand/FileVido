@@ -72,16 +72,55 @@ function firebaseConfigured() {
   )
 }
 
+function base64Url(value) {
+  return Buffer.from(value).toString('base64url')
+}
+
 async function getGoogleAccessToken() {
-  const { google } = await import('googleapis')
-  const privateKey = String(process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
-  const jwt = new google.auth.JWT({
-    email: process.env.FIREBASE_CLIENT_EMAIL,
-    key: privateKey,
-    scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+  const privateKey = String(process.env.FIREBASE_PRIVATE_KEY || '')
+    .replace(/\\n/g, '\n')
+    .replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, '')
+  if (!privateKey) throw new Error('Firebase private key is empty')
+
+  const keyBytes = Buffer.from(privateKey, 'base64')
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    keyBytes,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+
+  const now = Math.floor(Date.now() / 1000)
+  const assertionHeader = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+  const assertionClaims = base64Url(JSON.stringify({
+    iss: process.env.FIREBASE_CLIENT_EMAIL,
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+  }))
+  const unsignedAssertion = `${assertionHeader}.${assertionClaims}`
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    new TextEncoder().encode(unsignedAssertion),
+  )
+  const assertion = `${unsignedAssertion}.${base64Url(Buffer.from(signature))}`
+
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
+    }),
   })
-  const tokens = await jwt.authorize()
-  return tokens.access_token
+  const result = await response.json().catch(() => ({}))
+  if (!response.ok || !result.access_token) {
+    throw new Error('Google OAuth token exchange failed')
+  }
+  return result.access_token
 }
 
 async function sendFcmMessage(accessToken, token, payload) {

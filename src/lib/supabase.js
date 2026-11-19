@@ -67,6 +67,15 @@ async function getValidSession() {
   return session
 }
 
+// هر ۵۰ شناسه (حدود ۲ کیلوبایت آدرس) یک درخواست
+const ID_CHUNK_SIZE = 50
+
+function chunkList(list, size) {
+  const chunks = []
+  for (let index = 0; index < list.length; index += size) chunks.push(list.slice(index, index + size))
+  return chunks
+}
+
 const USER_SESSION_KEY = 'chartmasters_user_session'
 const USER_CODE_VERIFIER_KEY = 'chartmasters_google_code_verifier'
 
@@ -525,20 +534,22 @@ export const userLearning = {
     const videoIds = [...new Set((progress || []).map((item) => item.videos?.id).filter(Boolean))]
     let courses = []
     if (videoIds.length) {
-      const viewedMemberships = await request(
-        '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&video_id=in.(' + videoIds.join(',') + ')',
+      // آدرس درخواست محدودیت طول دارد؛ شناسه‌ها را دسته‌های کوچک می‌فرستیم تا برای کاربر پرفعالیت خطا ندهد
+      const viewedMemberships = (await Promise.all(chunkList(videoIds, ID_CHUNK_SIZE).map((ids) => request(
+        '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&video_id=in.(' + ids.join(',') + ')',
         {},
         token,
-      )
+      )))).flat()
       const courseIds = [...new Set((viewedMemberships || [])
         .filter((item) => item.playlists?.status === 'published')
         .map((item) => item.playlist_id))]
       if (courseIds.length) {
-        const allLessons = await request(
-          '/rest/v1/playlist_videos?select=playlist_id,video_id,position,videos(slug),playlists(id,title,cover_url,status)&order=position.asc&playlist_id=in.(' + courseIds.join(',') + ')',
+        const lessonPages = await Promise.all(chunkList(courseIds, ID_CHUNK_SIZE).map((ids) => request(
+          '/rest/v1/playlist_videos?select=playlist_id,video_id,position,videos(slug),playlists(id,title,cover_url,status)&order=position.asc&playlist_id=in.(' + ids.join(',') + ')',
           {},
           token,
-        )
+        )))
+        const allLessons = lessonPages.flat()
         const completedIds = new Set((progress || []).filter((item) => item.is_completed).map((item) => item.videos?.id))
         const courseMap = new Map()
         for (const lesson of allLessons || []) {

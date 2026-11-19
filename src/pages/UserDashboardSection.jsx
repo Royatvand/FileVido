@@ -185,7 +185,7 @@ function UserDashboardSection({ section }) {
                 <article className="user-dashboard-course-card" key={course.id}>
                   <img src={course.cover_url || '/covers/cover-1.svg'} alt="" loading="lazy" />
                   <div className="user-dashboard-course-card-copy"><strong>{course.title}</strong><span>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</span><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div><small>{course.progressPercent}٪ پیشرفت</small></div>
-                  <a href="/videos" className="user-dashboard-course-open">مشاهده دوره‌ها ←</a>
+                  <a href={course.firstVideoSlug ? '/video/' + encodeURIComponent(course.firstVideoSlug) : '/videos'} className="user-dashboard-course-open">مشاهده دوره ←</a>
                 </article>
               ))}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-blue"><LuBookOpen /></span><strong>هنوز دوره‌ای شروع نکردی</strong><p>با تماشای اولین جلسه یک دوره، آن دوره به این بخش اضافه می‌شه.</p><a href="/videos">انتخاب یک دوره</a></div>}
             </section>

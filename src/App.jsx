@@ -17,7 +17,15 @@ import UserDashboardSection from './pages/UserDashboardSection'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
-import { useEffect } from 'react'
+import ThemeToggle from './components/ThemeToggle'
+import AppUpdateModal from './components/AppUpdateModal'
+import {
+  checkForAppUpdate,
+  initAndroidPushNotifications,
+  isAndroidNative,
+  onAppResume,
+} from './lib/appUpdate'
+import { useEffect, useState } from 'react'
 import { setPageSeo } from './lib/seo'
 import './admin.css'
 
@@ -37,6 +45,8 @@ function App() {
   const videoId = videoMatch ? decodeURIComponent(videoMatch[1]) : null
   const indicatorMatch = path.match(/^\/indicator\/([^/]+)$/)
   const indicatorSlug = indicatorMatch ? decodeURIComponent(indicatorMatch[1]) : null
+
+  const [appUpdate, setAppUpdate] = useState(null)
 
   useEffect(() => {
     if (isHome) {
@@ -72,9 +82,66 @@ function App() {
     }
   }, [path, isHome, isVideos, isChart, isIndicators, isAbout])
 
-  if (isAdminLogin) return <AdminLogin />
-  if (isUserLogin) return <GoogleLogin />
-  if (isUserDashboard || userDashboardSection) return <div className="app-shell"><Header /><main className="main-content">{userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}</main></div>
+  // Android-only: check version on launch / resume and register for FCM.
+  useEffect(() => {
+    if (!isAndroidNative()) return undefined
+
+    let cancelled = false
+
+    async function runCheck() {
+      try {
+        const result = await checkForAppUpdate()
+        if (!cancelled) setAppUpdate(result)
+      } catch (error) {
+        console.warn('[appUpdate] check failed', error)
+      }
+    }
+
+    runCheck()
+    initAndroidPushNotifications().catch(() => {})
+
+    let removeResume = () => {}
+    onAppResume(() => {
+      runCheck()
+    }).then((dispose) => {
+      removeResume = dispose || (() => {})
+    })
+
+    return () => {
+      cancelled = true
+      removeResume()
+    }
+  }, [])
+
+  const updateOverlay = appUpdate ? (
+    <AppUpdateModal
+      update={appUpdate}
+      onDismiss={() => setAppUpdate(null)}
+    />
+  ) : null
+
+  // Mandatory update blocks the whole app on Android.
+  if (appUpdate?.latest?.isMandatory) {
+    return (
+      <>
+        {updateOverlay}
+      </>
+    )
+  }
+
+  if (isAdminLogin) return <><AdminLogin />{updateOverlay}</>
+  if (isUserLogin) return <><GoogleLogin />{updateOverlay}</>
+  if (isUserDashboard || userDashboardSection) {
+    return (
+      <div className="app-shell">
+        <Header />
+        <main className="main-content">
+          {userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}
+        </main>
+        {updateOverlay}
+      </div>
+    )
+  }
   if (isAdmin) {
     const session = supabase.getSession()
     const isAdminUser = session?.user?.app_metadata?.role === 'admin'
@@ -82,7 +149,7 @@ function App() {
       window.location.replace('/admin/login')
       return null
     }
-    return <AdminDashboard />
+    return <><AdminDashboard />{updateOverlay}</>
   }
 
   return (
@@ -136,6 +203,7 @@ function App() {
         <IndicatorPage slug={indicatorSlug} />
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       {!isChart && <Footer />}
+      {updateOverlay}
     </div>
   )
 }

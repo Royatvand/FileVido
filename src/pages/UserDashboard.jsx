@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { userAuth } from '../lib/supabase'
+import { useEffect, useMemo, useState } from 'react'
+import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [
   { id: 'overview', label: 'نمای کلی', icon: '⌂' },
@@ -11,26 +11,31 @@ const navigation = [
 
 function UserDashboard() {
   const [user, setUser] = useState(null)
+  const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     let active = true
-    userAuth.getValidSession()
-      .then((session) => {
+    async function loadDashboard() {
+      try {
+        const session = await userAuth.getValidSession()
         if (!active) return
         if (!session?.user) {
           window.location.replace('/login?next=/dashboard')
           return
         }
         setUser(session.user)
-      })
-      .catch(() => {
-        if (active) window.location.replace('/login?next=/dashboard')
-      })
-      .finally(() => {
+        const data = await userLearning.getDashboardData()
+        if (active) setDashboard(data)
+      } catch (error) {
+        if (active) setLoadError(error.message || 'دریافت اطلاعات داشبورد انجام نشد.')
+      } finally {
         if (active) setLoading(false)
-      })
+      }
+    }
+    loadDashboard()
     return () => { active = false }
   }, [])
 
@@ -44,6 +49,34 @@ function UserDashboard() {
   const metadata = user.user_metadata || {}
   const displayName = metadata.full_name || metadata.name || user.email?.split('@')[0] || 'کاربر چارت مسترز'
   const avatar = metadata.avatar_url || metadata.picture || ''
+  const progress = dashboard?.progress || []
+  const favorites = dashboard?.favorites || []
+  const courses = dashboard?.courses || []
+  const stats = dashboard?.stats || { courseCount: 0, viewedCount: 0, completedCount: 0, favoriteCount: 0 }
+  const latestUnfinished = progress.find((item) => !item.is_completed && item.videos)
+  const latestVideo = latestUnfinished || progress.find((item) => item.videos)
+  const completionPercent = courses.length
+    ? Math.round(courses.reduce((sum, course) => sum + course.progressPercent, 0) / courses.length)
+    : (stats.viewedCount ? Math.round((stats.completedCount / stats.viewedCount) * 100) : 0)
+
+  const formatDate = (value) => value
+    ? new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' }).format(new Date(value))
+    : 'به‌تازگی'
+
+  const renderVideoItem = (item, isFavorite = false) => {
+    const video = item.videos
+    if (!video) return null
+    return (
+      <a className="user-dashboard-video-item" href={'/video/' + video.slug} key={item.id}>
+        <img src={video.cover_url || '/covers/cover-1.svg'} alt="" loading="lazy" />
+        <span className="user-dashboard-video-copy">
+          <strong>{video.title}</strong>
+          <small>{isFavorite ? 'ذخیره‌شده در علاقه‌مندی‌ها' : formatDate(item.last_watched_at || item.created_at)}</small>
+        </span>
+        <span className="user-dashboard-item-arrow">←</span>
+      </a>
+    )
+  }
 
   return (
     <section className="user-dashboard" dir="rtl">
@@ -102,34 +135,53 @@ function UserDashboard() {
             </div>
           </section>
 
+          {loadError && <div className="user-dashboard-error" role="alert">{loadError}</div>}
+
           <section className="user-dashboard-stats" aria-label="آمار یادگیری">
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▤</span><div><span>دوره‌های من</span><strong>—</strong><small>به‌زودی با اطلاعات واقعی</small></div></article>
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▶</span><div><span>ویدیوهای تماشا‌شده</span><strong>—</strong><small>به‌زودی با اطلاعات واقعی</small></div></article>
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">◷</span><div><span>زمان یادگیری</span><strong>—</strong><small>به‌زودی با اطلاعات واقعی</small></div></article>
-            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">♡</span><div><span>علاقه‌مندی‌ها</span><strong>—</strong><small>به‌زودی با اطلاعات واقعی</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▤</span><div><span>دوره‌های فعال</span><strong>{stats.courseCount}</strong><small>دوره‌هایی که شروع کردی</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">▶</span><div><span>ویدیوهای بازدیدشده</span><strong>{stats.viewedCount}</strong><small>ویدیوهای ثبت‌شده در تاریخچه</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">✓</span><div><span>ویدیوهای تکمیل‌شده</span><strong>{stats.completedCount}</strong><small>تکمیل‌شده توسط خودت</small></div></article>
+            <article className="user-dashboard-stat-card"><span className="user-dashboard-stat-icon">♡</span><div><span>علاقه‌مندی‌ها</span><strong>{stats.favoriteCount}</strong><small>ویدیوهای ذخیره‌شده</small></div></article>
           </section>
 
           <div className="user-dashboard-content-grid">
-            <section className="user-dashboard-panel user-dashboard-continue" id="courses">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">PICK UP WHERE YOU LEFT OFF</span><h3>ادامه یادگیری</h3></div><a href="/videos">همه آموزش‌ها <span>←</span></a></div>
-              <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon">▶</span><strong>هنوز آموزشی برای نمایش نداریم</strong><p>وقتی تماشای یک ویدیو رو شروع کنی، ادامه اون رو اینجا پیدا می‌کنی.</p><a href="/videos">رفتن به کتابخانه آموزش‌ها</a></div>
+            <section className="user-dashboard-panel user-dashboard-continue" id="history">
+              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">PICK UP WHERE YOU LEFT OFF</span><h3>ادامه یادگیری و تاریخچه</h3></div><a href="/videos">همه آموزش‌ها <span>←</span></a></div>
+              {latestVideo ? (
+                <div className="user-dashboard-latest">
+                  <a href={'/video/' + latestVideo.videos.slug} className="user-dashboard-latest-cover"><img src={latestVideo.videos.cover_url || '/covers/cover-1.svg'} alt="" /><span>▶</span></a>
+                  <div className="user-dashboard-latest-copy">
+                    <small>{latestVideo.is_completed ? 'آخرین ویدیوی تکمیل‌شده' : 'آخرین ویدیوی بازدیدشده'}</small>
+                    <strong>{latestVideo.videos.title}</strong>
+                    <span>آخرین بازدید: {formatDate(latestVideo.last_watched_at)}</span>
+                    <a href={'/video/' + latestVideo.videos.slug}>{latestVideo.is_completed ? 'مشاهده دوباره' : 'ادامه آموزش'} ←</a>
+                  </div>
+                </div>
+              ) : (
+                <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon">▶</span><strong>هنوز آموزشی رو شروع نکردی</strong><p>با بازکردن یک ویدیو، سابقه بازدیدت از اینجا ثبت می‌شه.</p><a href="/videos">رفتن به کتابخانه آموزش‌ها</a></div>
+              )}
+              {progress.length > 0 && <div className="user-dashboard-list">{progress.slice(0, 5).map((item) => renderVideoItem(item))}</div>}
             </section>
+
             <section className="user-dashboard-panel user-dashboard-progress" id="progress">
               <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR LEARNING JOURNEY</span><h3>پیشرفت یادگیری</h3></div></div>
-              <div className="user-dashboard-progress-visual"><div className="user-dashboard-progress-ring"><span>—<small>٪</small></span></div><div><strong>مسیرت تازه شروع شده</strong><p>با شروع اولین آموزش، میزان پیشرفتت اینجا نمایش داده می‌شه.</p></div></div>
-              <div className="user-dashboard-progress-track"><span /></div>
-              <small className="user-dashboard-progress-caption">اطلاعات پیشرفت پس از فعال‌شدن تاریخچه تماشا ثبت می‌شه.</small>
+              <div className="user-dashboard-progress-visual"><div className="user-dashboard-progress-ring" style={{ background: 'conic-gradient(var(--accent) ' + completionPercent * 3.6 + 'deg, rgba(255,255,255,.08) 0deg)' }}><span>{completionPercent}<small>٪</small></span></div><div><strong>{completionPercent ? 'خوبه! همین‌طور ادامه بده' : 'مسیرت تازه شروع شده'}</strong><p>{stats.completedCount} ویدیو از {stats.viewedCount} ویدیوی بازدیدشده رو تکمیل کردی.</p></div></div>
+              <div className="user-dashboard-progress-track"><span style={{ width: completionPercent + '%' }} /></div>
+              <small className="user-dashboard-progress-caption">برای ثبت تکمیل هر ویدیو، از دکمه «تکمیل آموزش» در صفحه همان ویدیو استفاده کن.</small>
+              {courses.length > 0 && <div className="user-dashboard-course-progress">{courses.slice(0, 3).map((course) => <div className="user-dashboard-course-progress-item" key={course.id}><div><strong>{course.title}</strong><span>{course.completedLessons}/{course.totalLessons} جلسه</span></div><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div></div>)}</div>}
             </section>
+
+            <section className="user-dashboard-panel" id="courses">
+              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR COURSES</span><h3>دوره‌های من</h3></div><span className="user-dashboard-panel-symbol">▤</span></div>
+              {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href="/videos" key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</small></span><span className="user-dashboard-item-arrow">←</span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
+            </section>
+
             <section className="user-dashboard-panel" id="favorites">
               <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">SAVED FOR LATER</span><h3>علاقه‌مندی‌ها</h3></div><span className="user-dashboard-panel-symbol">♡</span></div>
-              <div className="user-dashboard-compact-empty">ویدیوهای موردعلاقه‌ات رو ذخیره کن تا همیشه اینجا در دسترست باشن.</div>
-            </section>
-            <section className="user-dashboard-panel" id="history">
-              <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">RECENT ACTIVITY</span><h3>فعالیت‌های اخیر</h3></div><span className="user-dashboard-panel-symbol">◷</span></div>
-              <div className="user-dashboard-compact-empty">بعد از تماشای اولین ویدیو، فعالیت‌های اخیرت اینجا نمایش داده می‌شن.</div>
+              {favorites.length ? <div className="user-dashboard-list">{favorites.slice(0, 5).map((item) => renderVideoItem(item, true))}</div> : <div className="user-dashboard-compact-empty">در صفحه هر ویدیو روی «افزودن به علاقه‌مندی‌ها» بزن تا اینجا ذخیره بشه.</div>}
             </section>
           </div>
-          <p className="user-dashboard-data-note">اطلاعات آماری و بخش‌های شخصی پس از اتصال تاریخچه تماشا و علاقه‌مندی‌ها به حساب کاربری، به‌صورت واقعی نمایش داده خواهند شد.</p>
+          <p className="user-dashboard-data-note">اطلاعات این صفحه از فعالیت‌های ثبت‌شده در حساب کاربری تو دریافت می‌شه.</p>
         </div>
       </div>
     </section>

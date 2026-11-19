@@ -18,6 +18,9 @@ create unique index if not exists fcm_tokens_token_uidx
 create index if not exists fcm_tokens_last_seen_idx
   on public.fcm_tokens (last_seen_at desc);
 
+create index if not exists fcm_tokens_user_id_idx
+  on public.fcm_tokens (user_id);
+
 alter table public.fcm_tokens enable row level security;
 
 -- Devices may register a token, but anonymous callers cannot assign it to a user.
@@ -38,17 +41,16 @@ create policy "Users can update their own FCM tokens"
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
--- Authenticated users can bind their user_id to a token they already own.
+-- Users can read their own tokens; admins can list all devices for notifications.
 drop policy if exists "Users can view their own FCM tokens" on public.fcm_tokens;
-create policy "Users can view their own FCM tokens"
-  on public.fcm_tokens for select to authenticated
-  using ((select auth.uid()) = user_id);
-
--- Admins can list tokens (used by the notify endpoint after auth checks).
 drop policy if exists "Admins can read all FCM tokens" on public.fcm_tokens;
-create policy "Admins can read all FCM tokens"
+drop policy if exists "Users and admins can read FCM tokens" on public.fcm_tokens;
+create policy "Users and admins can read FCM tokens"
   on public.fcm_tokens for select to authenticated
-  using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
+  using (
+    (select auth.uid()) = user_id
+    or ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
+  );
 
 drop policy if exists "Admins can delete FCM tokens" on public.fcm_tokens;
 create policy "Admins can delete FCM tokens"

@@ -159,14 +159,14 @@ export async function registerFcmToken(token, userId = null) {
   return result?.[0] || null
 }
 
-/**
- * Initialize push notifications on Android.
- * Safe no-op when the Push Notifications plugin or google-services is missing.
- */
-export async function initAndroidPushNotifications(userId = null) {
-  if (!isAndroidNative()) return
+/** Initialize Android push notifications once per app runtime. */
+let pushInitialization = null
 
-  try {
+export function initAndroidPushNotifications(userId = null) {
+  if (!isAndroidNative()) return Promise.resolve()
+  if (pushInitialization) return pushInitialization
+
+  pushInitialization = (async () => {
     const { PushNotifications } = await import('@capacitor/push-notifications')
 
     const permission = await PushNotifications.checkPermissions()
@@ -177,32 +177,43 @@ export async function initAndroidPushNotifications(userId = null) {
     }
     if (status !== 'granted') {
       console.info('[appUpdate] Notification permission not granted')
+      pushInitialization = null
       return
     }
 
-    await PushNotifications.register()
-
-    PushNotifications.addListener('registration', async (event) => {
-      if (event?.value) {
-        await registerFcmToken(event.value, userId)
-      }
+    // Create the channel referenced by the server's FCM notification payload.
+    await PushNotifications.createChannel({
+      id: 'app_updates',
+      name: 'به‌روزرسانی چارت مسترز',
+      description: 'اعلان نسخه‌های جدید اپلیکیشن',
+      importance: 5,
+      visibility: 1,
+      sound: 'default',
+    }).catch((error) => {
+      console.warn('[appUpdate] Notification channel creation failed', error)
     })
 
-    PushNotifications.addListener('registrationError', (error) => {
+    // Register listeners BEFORE register(); otherwise the registration event can be missed.
+    await PushNotifications.addListener('registration', async (event) => {
+      if (event?.value) await registerFcmToken(event.value, userId)
+    })
+    await PushNotifications.addListener('registrationError', (error) => {
       console.warn('[appUpdate] Push registration error', error)
     })
-
-    // Tapping an update notification can open the download URL when present.
-    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+    await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
       const url = action?.notification?.data?.download_url
       if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
         window.open(url, '_system')
       }
     })
-  } catch (error) {
-    // Plugin not installed or google-services.json missing — infrastructure only.
+
+    await PushNotifications.register()
+  })().catch((error) => {
+    pushInitialization = null
     console.info('[appUpdate] Push notifications unavailable:', error?.message || error)
-  }
+  })
+
+  return pushInitialization
 }
 
 /** Listen for app resume and re-check for updates. */

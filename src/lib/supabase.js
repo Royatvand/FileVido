@@ -292,6 +292,50 @@ export const userAuth = {
     authorizeUrl.searchParams.set('code_challenge_method', 's256')
     window.location.assign(authorizeUrl.toString())
   },
+  async sendPhoneOtp(phone, shouldCreateUser = true) {
+    const digits = String(phone || '').replace(/\D/g, '')
+    const normalized = digits.startsWith('0098')
+      ? '+' + digits.slice(2)
+      : digits.startsWith('98')
+        ? '+' + digits
+        : digits.startsWith('0')
+          ? '+98' + digits.slice(1)
+          : digits.startsWith('9') && digits.length === 10
+            ? '+98' + digits
+            : ''
+    if (!/^\+989\d{9}$/.test(normalized)) {
+      throw new Error('شماره موبایل معتبر ایران را وارد کن؛ مثل 09123456789.')
+    }
+    await request('/auth/v1/otp', {
+      method: 'POST',
+      body: JSON.stringify({ phone: normalized, create_user: shouldCreateUser }),
+    })
+    return normalized
+  },
+  async verifyPhoneOtp(phone, token) {
+    const digits = String(phone || '').replace(/\D/g, '')
+    const normalized = digits.startsWith('0098')
+      ? '+' + digits.slice(2)
+      : digits.startsWith('98')
+        ? '+' + digits
+        : digits.startsWith('0')
+          ? '+98' + digits.slice(1)
+          : digits.startsWith('9') && digits.length === 10
+            ? '+98' + digits
+            : ''
+    if (!/^\+989\d{9}$/.test(normalized)) throw new Error('شماره موبایل معتبر نیست.')
+    if (!/^\d{6}$/.test(String(token || ''))) throw new Error('کد تأیید باید ۶ رقم باشد.')
+    const session = await request('/auth/v1/verify', {
+      method: 'POST',
+      body: JSON.stringify({ phone: normalized, token: String(token), type: 'sms' }),
+    })
+    if (!session?.access_token || !session?.refresh_token || !session?.user) {
+      throw new Error('پاسخ احراز هویت معتبر نبود. دوباره تلاش کن.')
+    }
+    saveUserSession(session)
+    await registerDeviceSession(getUserSession()).catch(() => {})
+    return getUserSession()
+  },
   async updateProfile(profile) {
     const session = await getValidUserSession()
     if (!session?.access_token) throw new Error('برای ویرایش پروفایل ابتدا وارد حساب کاربری شو.')

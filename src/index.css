@@ -810,6 +810,20 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media(prefers-reduced-motion:reduce) { .user-device-refresh .is-spinning { animation-duration:2.5s; } }
 
 
+/* Theme switcher in the main header */
+.site-header .header-inner > .theme-toggle {
+  position: static;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+@media(max-width:540px) {
+  .site-header .header-inner > .theme-toggle { width: 36px; height: 36px; flex-basis: 36px; }
+}
+
 /* Theme switcher */
 .theme-toggle {
   position: fixed;

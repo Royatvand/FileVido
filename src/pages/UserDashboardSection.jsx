@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined, LuClock3 } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 import UserDashboardSidebar from '../components/UserDashboardSidebar'
+import UserDeviceSessions from '../components/UserDeviceSessions'
 import useUserDashboard from '../hooks/useUserDashboard'
 
 const sections = {
@@ -173,6 +174,7 @@ function UserDashboardSection({ section }) {
                 <small>ایمیل از حساب گوگل دریافت می‌شود و از این قسمت قابل تغییر نیست.</small>
                 <button type="submit" disabled={saving || !name.trim()}>{saving ? 'در حال ذخیره...' : 'ذخیره تغییرات'}</button>
               </form>
+              <UserDeviceSessions />
             </section>
           )}
 

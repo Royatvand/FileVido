@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined } from 'react-icons/lu'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 
 const navigation = [
@@ -93,7 +93,7 @@ function UserDashboard() {
           </div>
           <span className="user-dashboard-side-label">حساب کاربری</span>
           <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
-            {navigation.map((item, index) => (
+            {navigation.map((item) => (
               <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === 'overview' ? 'active' : '')} onClick={() => setMenuOpen(false)}>
                 <span className={"user-dashboard-nav-icon icon-tone-" + item.color} aria-hidden="true"><item.icon /></span>
                 {item.label}
@@ -162,7 +162,7 @@ function UserDashboard() {
               ) : (
                 <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-mint"><LuPlay /></span><strong>هنوز آموزشی رو شروع نکردی</strong><p>با بازکردن یک ویدیو، سابقه بازدیدت از اینجا ثبت می‌شه.</p><a href="/videos">رفتن به کتابخانه آموزش‌ها</a></div>
               )}
-              {progress.length > 0 && <div className="user-dashboard-list">{progress.slice(0, 5).map((item) => renderVideoItem(item))}</div>}
+              {progress.filter((item) => item !== latestVideo).length > 0 && <div className="user-dashboard-list">{progress.filter((item) => item !== latestVideo).slice(0, 4).map((item) => renderVideoItem(item))}</div>}
             </section>
 
             <section className="user-dashboard-panel user-dashboard-progress" id="progress">

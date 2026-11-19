@@ -74,7 +74,7 @@ function App() {
 
   if (isAdminLogin) return <AdminLogin />
   if (isUserLogin) return <GoogleLogin />
-  if (isUserDashboard || userDashboardSection) return <div className="app-shell"><Header /><main className="main-content">{userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}</main><Footer /></div>
+  if (isUserDashboard || userDashboardSection) return <div className="app-shell"><Header /><main className="main-content">{userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}</main></div>
   if (isAdmin) {
     const session = supabase.getSession()
     const isAdminUser = session?.user?.app_metadata?.role === 'admin'

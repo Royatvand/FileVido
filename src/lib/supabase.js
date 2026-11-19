@@ -126,9 +126,27 @@ async function getValidUserSession() {
 
 // احراز هویت کاربران عادی؛ نشست آن کاملاً جدا از نشست پنل مدیریت است.
 let googleCallbackPromise = null
+const USER_NEXT_KEY = 'chartmasters_login_next'
+
+// فقط مسیرهای داخلی سایت پذیرفته می‌شود (جلوگیری از open redirect)
+export function safeNextPath(value) {
+  if (typeof value !== 'string') return ''
+  return /^\/(?![/\\])[^\s]*$/.test(value) && !value.startsWith('/login') ? value : ''
+}
 
 export const userAuth = {
   getSession: getUserSession,
+  rememberNext(value) {
+    const next = safeNextPath(value)
+    try { if (next) sessionStorage.setItem(USER_NEXT_KEY, next) } catch { /* ذخیره نشد؛ به داشبورد می‌رود */ }
+  },
+  consumeNext() {
+    try {
+      const next = safeNextPath(sessionStorage.getItem(USER_NEXT_KEY) || '')
+      sessionStorage.removeItem(USER_NEXT_KEY)
+      return next
+    } catch { return '' }
+  },
   async getValidSession() {
     return getValidUserSession()
   },

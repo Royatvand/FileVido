@@ -12,6 +12,7 @@ function GoogleLogin() {
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search)
       const code = params.get('code')
+      userAuth.rememberNext(params.get('next'))
       const authError = params.get('error_description') || params.get('error')
 
       if (authError) {
@@ -27,7 +28,7 @@ function GoogleLogin() {
           window.history.replaceState({}, document.title, '/login')
           if (active && session?.user) {
             setUser(session.user)
-            window.location.replace('/dashboard')
+            window.location.replace(userAuth.consumeNext() || '/dashboard')
           }
         } catch (err) {
           window.history.replaceState({}, document.title, '/login')
@@ -39,7 +40,7 @@ function GoogleLogin() {
       }
 
       const session = await userAuth.getValidSession()
-      if (active && session?.user) window.location.replace('/dashboard')
+      if (active && session?.user) window.location.replace(userAuth.consumeNext() || '/dashboard')
     }
 
     handleCallback()

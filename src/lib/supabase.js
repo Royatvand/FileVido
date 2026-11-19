@@ -535,7 +535,7 @@ export const userLearning = {
         .map((item) => item.playlist_id))]
       if (courseIds.length) {
         const allLessons = await request(
-          '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&playlist_id=in.(' + courseIds.join(',') + ')',
+          '/rest/v1/playlist_videos?select=playlist_id,video_id,position,videos(slug),playlists(id,title,cover_url,status)&order=position.asc&playlist_id=in.(' + courseIds.join(',') + ')',
           {},
           token,
         )
@@ -549,10 +549,18 @@ export const userLearning = {
           }
           const course = courseMap.get(lesson.playlist_id)
           course.totalLessons += 1
-          if (completedIds.has(lesson.video_id)) course.completedLessons += 1
+          const done = completedIds.has(lesson.video_id)
+          if (done) course.completedLessons += 1
+          // جلسهٔ بعدی = اولین جلسهٔ تکمیل‌نشده (ترتیب position)؛ اگر همه تمام شده‌اند، اولین جلسه برای مرور
+          if (lesson.videos?.slug) {
+            const entry = { slug: lesson.videos.slug, number: course.totalLessons }
+            if (!course.firstLesson) course.firstLesson = entry
+            if (!done && !course.pendingLesson) course.pendingLesson = entry
+          }
         }
-        courses = [...courseMap.values()].map((course) => ({
+        courses = [...courseMap.values()].map(({ firstLesson, pendingLesson, ...course }) => ({
           ...course,
+          nextLesson: pendingLesson || firstLesson || null,
           progressPercent: course.totalLessons ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0,
         }))
       }

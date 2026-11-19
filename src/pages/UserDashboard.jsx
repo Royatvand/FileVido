@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft } from 'react-icons/lu'
+import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
+import UserDashboardSidebar from '../components/UserDashboardSidebar'
 
-const navigation = [
-  { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, color: 'mint', href: '/dashboard' },
-  { id: 'courses', label: 'دوره‌های من', icon: LuBookOpen, color: 'blue', href: '/dashboard/courses' },
-  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: LuHeart, color: 'rose', href: '/dashboard/favorites' },
-  { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, color: 'amber', href: '/dashboard/history' },
-  { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, color: 'violet', href: '/dashboard/progress' },
-  { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, color: 'cyan', href: '/dashboard/profile' },
-]
+function courseActionLabel(course) {
+  if (!course.nextLesson) return 'مشاهده دوره'
+  return course.completedLessons >= course.totalLessons ? 'مرور دوباره' : 'ادامه از جلسهٔ ' + course.nextLesson.number
+}
 
 function UserDashboard() {
   const [user, setUser] = useState(null)
   const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
@@ -78,29 +74,8 @@ function UserDashboard() {
 
   return (
     <section className="user-dashboard" dir="rtl">
-      <button className="user-dashboard-mobile-toggle" type="button" aria-expanded={menuOpen} aria-controls="user-dashboard-sidebar" onClick={() => setMenuOpen((open) => !open)}>
-        <span>☰</span> منوی داشبورد
-      </button>
       <div className="user-dashboard-layout">
-        <aside id="user-dashboard-sidebar" className={'user-dashboard-sidebar ' + (menuOpen ? 'is-open' : '')}>
-          <div className="user-dashboard-side-brand">
-            <span className="user-dashboard-brand-mark">CM</span>
-            <div><strong>CHARTMASTERS</strong><small>فضای یادگیری تو</small></div>
-          </div>
-          <span className="user-dashboard-side-label">حساب کاربری</span>
-          <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
-            {navigation.map((item) => (
-              <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === 'overview' ? 'active' : '')} onClick={() => setMenuOpen(false)}>
-                <span className={"user-dashboard-nav-icon icon-tone-" + item.color} aria-hidden="true"><item.icon /></span>
-                {item.label}
-                {item.id === 'overview' && <span className="user-dashboard-nav-indicator" />}
-              </a>
-            ))}
-          </nav>
-          <div className="user-dashboard-sidebar-bottom">
-            <button className="user-dashboard-sidebar-logout" type="button" onClick={handleSignOut}><span className="user-dashboard-logout-icon"><LuLogOut /></span> خروج از حساب</button>
-          </div>
-        </aside>
+        <UserDashboardSidebar active="overview" onSignOut={handleSignOut} />
 
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">
@@ -157,7 +132,7 @@ function UserDashboard() {
 
             <section className="user-dashboard-panel" id="courses">
               <div className="user-dashboard-panel-heading"><div><span className="user-dashboard-section-kicker">YOUR COURSES</span><h3>دوره‌های من</h3></div><a href="/dashboard/courses">همه دوره‌ها <span>←</span></a></div>
-              {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href="/videos" key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</small></span><span className="user-dashboard-item-arrow"><LuArrowLeft /></span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
+              {courses.length ? <div className="user-dashboard-list">{courses.map((course) => <a className="user-dashboard-video-item" href={course.nextLesson ? '/video/' + course.nextLesson.slug : '/videos'} key={course.id}><img src={course.cover_url || '/covers/cover-1.svg'} alt="" /><span className="user-dashboard-video-copy"><strong>{course.title}</strong><small>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده · {courseActionLabel(course)}</small></span><span className="user-dashboard-item-arrow"><LuArrowLeft /></span></a>)}</div> : <div className="user-dashboard-compact-empty">با بازدید از یکی از ویدیوهای یک دوره، آن دوره به این بخش اضافه می‌شه.</div>}
             </section>
 
           </div>

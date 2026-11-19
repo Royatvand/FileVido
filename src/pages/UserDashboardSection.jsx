@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuSparkles, LuLogOut, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined, LuClock3 } from 'react-icons/lu'
+import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined, LuClock3 } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
+import UserDashboardSidebar from '../components/UserDashboardSidebar'
 
 const sections = {
   favorites: { title: 'علاقه‌مندی‌های من', kicker: 'SAVED VIDEOS', description: 'ویدیوهایی که برای تماشای دوباره ذخیره کرده‌ای.' },
@@ -10,14 +11,10 @@ const sections = {
   profile: { title: 'تنظیمات پروفایل', kicker: 'ACCOUNT SETTINGS', description: 'اطلاعات نمایشی حساب کاربری‌ات را مدیریت کن.' },
 }
 
-const navigation = [
-  { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, color: 'mint', href: '/dashboard' },
-  { id: 'courses', label: 'دوره‌های من', icon: LuBookOpen, color: 'blue', href: '/dashboard/courses' },
-  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: LuHeart, color: 'rose', href: '/dashboard/favorites' },
-  { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, color: 'amber', href: '/dashboard/history' },
-  { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, color: 'violet', href: '/dashboard/progress' },
-  { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, color: 'cyan', href: '/dashboard/profile' },
-]
+function courseActionLabel(course) {
+  if (!course.nextLesson) return 'مشاهده دوره'
+  return course.completedLessons >= course.totalLessons ? 'مرور دوباره' : 'ادامه از جلسهٔ ' + course.nextLesson.number
+}
 
 function formatDate(value) {
   if (!value) return 'به‌تازگی'
@@ -124,25 +121,7 @@ function UserDashboardSection({ section }) {
   return (
     <section className="user-dashboard" dir="rtl">
       <div className="user-dashboard-layout">
-        <aside className="user-dashboard-sidebar">
-          <a className="user-dashboard-side-brand" href="/dashboard">
-            <span className="user-dashboard-brand-mark">CM</span>
-            <div><strong>CHARTMASTERS</strong><small>فضای یادگیری تو</small></div>
-          </a>
-          <span className="user-dashboard-side-label">حساب کاربری</span>
-          <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
-            {navigation.map((item) => (
-              <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === section ? 'active' : '')}>
-                <span className={"user-dashboard-nav-icon icon-tone-" + item.color} aria-hidden="true"><item.icon /></span>{item.label}
-                {item.id === section && <span className="user-dashboard-nav-indicator" />}
-              </a>
-            ))}
-          </nav>
-          <div className="user-dashboard-sidebar-bottom">
-            <div className="user-dashboard-help"><span className="user-dashboard-help-icon"><LuSparkles /></span><strong>یادگیری رو ادامه بده</strong><p>هر جلسه تو رو به هدفت نزدیک‌تر می‌کنه.</p><a href="/videos">مشاهده آموزش‌ها ←</a></div>
-            <button className="user-dashboard-sidebar-logout" type="button" onClick={signOut}><span className="user-dashboard-logout-icon"><LuLogOut /></span> خروج از حساب</button>
-          </div>
-        </aside>
+        <UserDashboardSidebar active={section} onSignOut={signOut} />
 
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">
@@ -185,7 +164,7 @@ function UserDashboardSection({ section }) {
                 <article className="user-dashboard-course-card" key={course.id}>
                   <img src={course.cover_url || '/covers/cover-1.svg'} alt="" loading="lazy" />
                   <div className="user-dashboard-course-card-copy"><strong>{course.title}</strong><span>{course.completedLessons} از {course.totalLessons} جلسه تکمیل‌شده</span><div className="user-dashboard-progress-track"><span style={{ width: course.progressPercent + '%' }} /></div><small>{course.progressPercent}٪ پیشرفت</small></div>
-                  <a href="/videos" className="user-dashboard-course-open">مشاهده دوره‌ها ←</a>
+                  <a href={course.nextLesson ? '/video/' + course.nextLesson.slug : '/videos'} className="user-dashboard-course-open">{courseActionLabel(course)} ←</a>
                 </article>
               ))}</div> : <div className="user-dashboard-empty-state"><span className="user-dashboard-empty-icon icon-tone-blue"><LuBookOpen /></span><strong>هنوز دوره‌ای شروع نکردی</strong><p>با تماشای اولین جلسه یک دوره، آن دوره به این بخش اضافه می‌شه.</p><a href="/videos">انتخاب یک دوره</a></div>}
             </section>

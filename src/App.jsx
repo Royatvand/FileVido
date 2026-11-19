@@ -100,15 +100,20 @@ function App() {
     runCheck()
     initAndroidPushNotifications().catch(() => {})
 
+    let disposed = false
     let removeResume = () => {}
     onAppResume(() => {
       runCheck()
+      initAndroidPushNotifications().catch(() => {})
     }).then((dispose) => {
-      removeResume = dispose || (() => {})
+      const cleanup = dispose || (() => {})
+      if (disposed) cleanup()
+      else removeResume = cleanup
     })
 
     return () => {
       cancelled = true
+      disposed = true
       removeResume()
     }
   }, [])

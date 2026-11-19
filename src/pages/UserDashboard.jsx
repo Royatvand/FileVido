@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
 import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft } from 'react-icons/lu'
-import { userAuth, userLearning } from '../lib/supabase'
 import UserDashboardSidebar from '../components/UserDashboardSidebar'
+import useUserDashboard from '../hooks/useUserDashboard'
 
 function courseActionLabel(course) {
   if (!course.nextLesson) return 'مشاهده دوره'
@@ -9,38 +8,7 @@ function courseActionLabel(course) {
 }
 
 function UserDashboard() {
-  const [user, setUser] = useState(null)
-  const [dashboard, setDashboard] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState('')
-
-  useEffect(() => {
-    let active = true
-    async function loadDashboard() {
-      try {
-        const session = await userAuth.getValidSession()
-        if (!active) return
-        if (!session?.user) {
-          window.location.replace('/login?next=/dashboard')
-          return
-        }
-        setUser(session.user)
-        const data = await userLearning.getDashboardData()
-        if (active) setDashboard(data)
-      } catch (error) {
-        if (active) setLoadError(error.message || 'دریافت اطلاعات داشبورد انجام نشد.')
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    loadDashboard()
-    return () => { active = false }
-  }, [])
-
-  async function handleSignOut() {
-    await userAuth.signOut()
-    window.location.replace('/')
-  }
+  const { user, data: dashboard, loading, error: loadError, signOut } = useUserDashboard()
 
   if (loading || !user) return <div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری"><span className="user-dashboard-spinner" aria-hidden="true" /></div>
 
@@ -75,7 +43,7 @@ function UserDashboard() {
   return (
     <section className="user-dashboard" dir="rtl">
       <div className="user-dashboard-layout">
-        <UserDashboardSidebar active="overview" onSignOut={handleSignOut} />
+        <UserDashboardSidebar active="overview" onSignOut={signOut} />
 
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">

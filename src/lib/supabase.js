@@ -535,7 +535,7 @@ export const userLearning = {
         .map((item) => item.playlist_id))]
       if (courseIds.length) {
         const allLessons = await request(
-          '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&playlist_id=in.(' + courseIds.join(',') + ')',
+          '/rest/v1/playlist_videos?select=playlist_id,video_id,position,videos(slug,status),playlists(id,title,cover_url,status)&playlist_id=in.(' + courseIds.join(',') + ')&order=position.asc',
           {},
           token,
         )
@@ -545,10 +545,13 @@ export const userLearning = {
           const playlist = lesson.playlists
           if (!playlist || playlist.status !== 'published') continue
           if (!courseMap.has(lesson.playlist_id)) {
-            courseMap.set(lesson.playlist_id, { ...playlist, totalLessons: 0, completedLessons: 0 })
+            courseMap.set(lesson.playlist_id, { ...playlist, totalLessons: 0, completedLessons: 0, firstVideoSlug: '' })
           }
           const course = courseMap.get(lesson.playlist_id)
           course.totalLessons += 1
+          if (!course.firstVideoSlug && lesson.videos?.status === 'published' && lesson.videos?.slug) {
+            course.firstVideoSlug = lesson.videos.slug
+          }
           if (completedIds.has(lesson.video_id)) course.completedLessons += 1
         }
         courses = [...courseMap.values()].map((course) => ({

@@ -133,6 +133,82 @@ async function getValidUserSession() {
   return session
 }
 
+
+// Device metadata is descriptive only; authorization is always enforced by Supabase RLS.
+const USER_DEVICE_KEY = 'chartmasters_device_key'
+
+function getJwtClaims(token) {
+  try {
+    const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=')
+    return JSON.parse(atob(padded))
+  } catch {
+    return null
+  }
+}
+
+function getCurrentDeviceKey() {
+  let key = localStorage.getItem(USER_DEVICE_KEY)
+  if (!key) {
+    key = crypto.randomUUID()
+    localStorage.setItem(USER_DEVICE_KEY, key)
+  }
+  return key
+}
+
+function getDeviceMetadata() {
+  const ua = navigator.userAgent || ''
+  const platform = navigator.userAgentData?.platform || navigator.platform || ''
+  const deviceType = /ipad|tablet|kindle|playbook/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
+    ? 'tablet'
+    : /android|iphone|ipod|mobile/i.test(ua)
+      ? 'mobile'
+      : 'desktop'
+
+  let operatingSystem = 'سیستم‌عامل نامشخص'
+  if (/android/i.test(ua)) operatingSystem = 'Android'
+  else if (/iphone|ipad|ipod/i.test(ua)) operatingSystem = 'iOS'
+  else if (/windows/i.test(platform + ua)) operatingSystem = 'Windows'
+  else if (/mac/i.test(platform + ua)) operatingSystem = 'macOS'
+  else if (/cros/i.test(ua)) operatingSystem = 'ChromeOS'
+  else if (/linux/i.test(platform + ua)) operatingSystem = 'Linux'
+
+  let browser = 'مرورگر نامشخص'
+  if (/edg\//i.test(ua)) browser = 'Microsoft Edge'
+  else if (/opr\//i.test(ua)) browser = 'Opera'
+  else if (/firefox\//i.test(ua)) browser = 'Firefox'
+  else if (/chrome\//i.test(ua) && !/edg\//i.test(ua)) browser = 'Chrome'
+  else if (/safari\//i.test(ua) && !/chrome\//i.test(ua)) browser = 'Safari'
+
+  const typeLabel = deviceType === 'mobile' ? 'موبایل' : deviceType === 'tablet' ? 'تبلت' : 'کامپیوتر'
+  return {
+    device_key: getCurrentDeviceKey(),
+    device_label: typeLabel + ' · ' + operatingSystem,
+    device_type: deviceType,
+    browser,
+    operating_system: operatingSystem,
+  }
+}
+
+async function registerDeviceSession(session) {
+  if (!session?.access_token || !session?.user?.id) return null
+  const claims = getJwtClaims(session.access_token)
+  if (!claims?.session_id) return null
+  const now = new Date().toISOString()
+  const metadata = getDeviceMetadata()
+  const rows = await request('/rest/v1/user_device_sessions?on_conflict=session_id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      session_id: claims.session_id,
+      ...metadata,
+      last_seen_at: now,
+    }),
+  }, session.access_token)
+  return rows?.[0] || null
+}
+
 // احراز هویت کاربران عادی؛ نشست آن کاملاً جدا از نشست پنل مدیریت است.
 let googleCallbackPromise = null
 const USER_NEXT_KEY = 'chartmasters_login_next'
@@ -158,6 +234,46 @@ export const userAuth = {
   },
   async getValidSession() {
     return getValidUserSession()
+  },
+  async registerCurrentDevice() {
+    return registerDeviceSession(await getValidUserSession())
+  },
+  async getDeviceSessions() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) throw new Error('برای مشاهده دستگاه‌های متصل ابتدا وارد حساب کاربری شو.')
+    const claims = getJwtClaims(session.access_token)
+    const rows = await request(
+      '/rest/v1/user_device_sessions?select=id,session_id,device_key,device_label,device_type,browser,operating_system,created_at,last_seen_at&order=last_seen_at.desc',
+      {},
+      session.access_token,
+    )
+    return (rows || []).map((device) => ({ ...device, is_current: device.session_id === claims?.session_id }))
+  },
+  async touchCurrentDevice() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) return null
+    const claims = getJwtClaims(session.access_token)
+    if (!claims?.session_id) return null
+    const rows = await request(
+      '/rest/v1/user_device_sessions?session_id=eq.' + encodeURIComponent(claims.session_id),
+      { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ last_seen_at: new Date().toISOString() }) },
+      session.access_token,
+    )
+    if (!rows?.length) return registerDeviceSession(session)
+    return rows[0]
+  },
+  async signOutOtherDevices() {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session?.user?.id) throw new Error('نشست کاربری معتبر نیست؛ دوباره وارد حساب شو.')
+    const claims = getJwtClaims(session.access_token)
+    if (!claims?.session_id) throw new Error('شناسه نشست فعلی پیدا نشد؛ دوباره وارد حساب شو.')
+    await request('/auth/v1/logout?scope=others', { method: 'POST' }, session.access_token)
+    await request(
+      '/rest/v1/user_device_sessions?user_id=eq.' + encodeURIComponent(session.user.id) + '&session_id=neq.' + encodeURIComponent(claims.session_id),
+      { method: 'DELETE', headers: { Prefer: 'return=minimal' } },
+      session.access_token,
+    )
+    return true
   },
   async signInWithGoogle() {
     if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -190,7 +306,15 @@ export const userAuth = {
   async signOut() {
     const session = await getValidUserSession()
     if (session?.access_token) {
-      await request('/auth/v1/logout', { method: 'POST' }, session.access_token).catch(() => {})
+      const claims = getJwtClaims(session.access_token)
+      if (claims?.session_id) {
+        await request(
+          '/rest/v1/user_device_sessions?session_id=eq.' + encodeURIComponent(claims.session_id),
+          { method: 'DELETE', headers: { Prefer: 'return=minimal' } },
+          session.access_token,
+        ).catch(() => {})
+      }
+      await request('/auth/v1/logout?scope=local', { method: 'POST' }, session.access_token).catch(() => {})
     }
     saveUserSession(null)
   },
@@ -209,6 +333,7 @@ export const userAuth = {
 
       sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
       saveUserSession(session)
+      await registerDeviceSession(getUserSession()).catch(() => {})
       return getUserSession()
     })()
     try {

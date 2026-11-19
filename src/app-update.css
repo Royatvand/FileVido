@@ -1,0 +1,115 @@
+/* Android app update overlay — not shown on web */
+.app-update-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: rgba(4, 10, 8, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.app-update-overlay.mandatory {
+  background: rgba(4, 10, 8, 0.92);
+}
+
+.app-update-card {
+  width: min(100%, 420px);
+  padding: 28px 24px;
+  border: 1px solid rgba(140, 242, 177, 0.2);
+  border-radius: 18px;
+  background: linear-gradient(160deg, #142019, #0c130f);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+  color: #e8f0ea;
+}
+
+.app-update-badge {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(140, 242, 177, 0.12);
+  color: #8cf2b1;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.app-update-card h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  line-height: 1.7;
+  color: #f2f7f3;
+}
+
+.app-update-versions {
+  margin: 0 0 16px;
+  color: #9aaba1;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.app-update-versions strong {
+  color: #dce8df;
+}
+
+.app-update-sep {
+  margin: 0 8px;
+  opacity: 0.5;
+}
+
+.app-update-changelog {
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.app-update-changelog strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #c5d5cb;
+  font-size: 12px;
+}
+
+.app-update-changelog p {
+  margin: 0;
+  color: #a7b7ae;
+  font-size: 12px;
+  line-height: 1.95;
+  white-space: pre-wrap;
+}
+
+.app-update-lock-note {
+  margin: 0 0 18px;
+  color: #e6c98a;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.app-update-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.app-update-primary,
+.app-update-secondary {
+  min-height: 46px;
+  border-radius: 10px;
+  font: 700 13px Vazirmatn, sans-serif;
+  cursor: pointer;
+}
+
+.app-update-primary {
+  border: 0;
+  color: #07110b;
+  background: #8cf2b1;
+}
+
+.app-update-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #c5d1c8;
+  background: transparent;
+}

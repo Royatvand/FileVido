@@ -9,7 +9,9 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { videos as demoVideos } from '../src/data/videos.js'
 
-const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/admin', '/admin/login'])
+// صفحه‌های حساب کاربری و مدیریت نباید ایندکس شوند
+const PRIVATE_PATH = /^\/(login|dashboard(\/|$)|admin)/
+const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/login', '/dashboard', '/dashboard/favorites', '/dashboard/history', '/dashboard/courses', '/dashboard/progress', '/dashboard/profile', '/admin', '/admin/login'])
 const DEMO_SLUGS = new Set(demoVideos.map((video) => video.id))
 const SLUG_PATTERN = /^[^/\s]{1,200}$/
 
@@ -67,12 +69,13 @@ export async function resolveStatus(rawPath) {
 
 export default async function handler(request, response) {
   try {
-    const status = await resolveStatus(request.query?.path)
+    const path = request.query?.path
+    const status = await resolveStatus(path)
     const html = await loadIndexHtml(request)
     response.setHeader('Content-Type', 'text/html; charset=utf-8')
     response.setHeader('Cache-Control', status === 200 ? 'public, s-maxage=60, stale-while-revalidate=300' : 'public, s-maxage=60')
     // صفحهٔ ۴۰۴ نباید ایندکس شود
-    if (status === 404) response.setHeader('X-Robots-Tag', 'noindex')
+    if (status === 404 || PRIVATE_PATH.test(`/${String(path || '').replace(/^\/+/, '')}`)) response.setHeader('X-Robots-Tag', 'noindex')
     response.status(status).send(html)
   } catch (error) {
     console.error('Page handler failed:', error)

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import AdminBanners from '../components/AdminBanners'
 import AdminPlaylists from '../components/AdminPlaylists'
 import AdminIndicators from '../components/AdminIndicators'
+import AdminAppVersions from '../components/AdminAppVersions'
 import { extractAparatId } from '../lib/aparat'
 
 const emptyForm = {
@@ -139,7 +140,6 @@ function AdminDashboard() {
 
       const payload = {
         title: form.title.trim(),
-        // اگر Slug دستی وارد نشده، یک پسوند یکتا اضافه می‌شود؛ چون عنوان‌های فارسی بعد از حذف حروف فارسی اغلب یکسان می‌شوند
         slug: form.slug.trim() || `${slugify(form.title) || 'video'}-${Date.now().toString(36)}`,
         description: form.description.trim(),
         aparat_id: form.aparat_id.trim(),
@@ -204,6 +204,15 @@ function AdminDashboard() {
     window.location.href = '/admin/login'
   }
 
+  const tabTitle =
+    activeTab === 'videos' ? 'ویدیوها'
+      : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید')
+        : activeTab === 'banners' ? 'اسلایدر صفحه اصلی'
+          : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها'
+            : activeTab === 'indicators' ? 'اندیکاتورها و اسکریپت‌ها'
+              : activeTab === 'app-versions' ? 'نسخه‌های اپ اندروید'
+                : 'دسته‌بندی‌ها'
+
   return (
     <main className="admin-page" dir="rtl">
       <aside className="admin-sidebar">
@@ -215,6 +224,7 @@ function AdminDashboard() {
         <button className={activeTab === 'playlists' ? 'active' : ''} onClick={() => setActiveTab('playlists')}>▤ <span>پلی‌لیست‌ها</span></button>
         <button className={activeTab === 'banners' ? 'active' : ''} onClick={() => setActiveTab('banners')}>▣ <span>اسلایدر</span></button>
         <button className={activeTab === 'indicators' ? 'active' : ''} onClick={() => setActiveTab('indicators')}>ƒ <span>اندیکاتورها</span></button>
+        <button className={activeTab === 'app-versions' ? 'active' : ''} onClick={() => setActiveTab('app-versions')}>↑ <span>نسخه اپ</span></button>
         <div className="admin-sidebar-bottom">
           <a href="/" target="_blank" rel="noreferrer">مشاهده سایت ↗</a>
           <button onClick={handleLogout}>خروج از حساب <span>↗</span></button>
@@ -223,7 +233,7 @@ function AdminDashboard() {
 
       <section className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{activeTab === 'videos' ? 'ویدیوها' : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید') : activeTab === 'banners' ? 'اسلایدر صفحه اصلی' : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها' : activeTab === 'indicators' ? 'اندیکاتورها و اسکریپت‌ها' : 'دسته‌بندی‌ها'}</h1></div>
+          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{tabTitle}</h1></div>
           <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
         </header>
 
@@ -297,6 +307,7 @@ function AdminDashboard() {
         {activeTab === 'playlists' && <AdminPlaylists onNotice={setNotice} />}
         {activeTab === 'banners' && <AdminBanners videos={videos} onNotice={setNotice} />}
         {activeTab === 'indicators' && <AdminIndicators onNotice={setNotice} />}
+        {activeTab === 'app-versions' && <AdminAppVersions onNotice={setNotice} />}
 
         {activeTab === 'categories' && (
           <div className="admin-panel">

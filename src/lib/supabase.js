@@ -67,6 +67,283 @@ async function getValidSession() {
   return session
 }
 
+// هر ۵۰ شناسه (حدود ۲ کیلوبایت آدرس) یک درخواست
+const ID_CHUNK_SIZE = 50
+
+function chunkList(list, size) {
+  const chunks = []
+  for (let index = 0; index < list.length; index += size) chunks.push(list.slice(index, index + size))
+  return chunks
+}
+
+const USER_SESSION_KEY = 'chartmasters_user_session'
+const USER_CODE_VERIFIER_KEY = 'chartmasters_google_code_verifier'
+
+function getUserSession() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_SESSION_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
+function saveUserSession(session) {
+  if (session) {
+    const expiresAt = session.expires_at || Math.floor(Date.now() / 1000) + (session.expires_in || 3600)
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify({ ...session, expires_at: expiresAt }))
+  } else {
+    localStorage.removeItem(USER_SESSION_KEY)
+  }
+}
+
+function encodeBase64Url(bytes) {
+  let binary = ''
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte) })
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+}
+
+async function createCodeChallenge(verifier) {
+  const bytes = new TextEncoder().encode(verifier)
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return encodeBase64Url(new Uint8Array(digest))
+}
+
+async function refreshUserSession(session) {
+  if (!session?.refresh_token) return null
+  const refreshed = await request('/auth/v1/token?grant_type=refresh_token', {
+    method: 'POST',
+    body: JSON.stringify({ refresh_token: session.refresh_token }),
+  })
+  saveUserSession(refreshed)
+  return getUserSession()
+}
+
+async function getValidUserSession() {
+  let session = getUserSession()
+  if (!session) return null
+
+  if (session.expires_at && session.expires_at * 1000 < Date.now() + 30000) {
+    try {
+      session = await refreshUserSession(session)
+    } catch {
+      saveUserSession(null)
+      return null
+    }
+  }
+  return session
+}
+
+
+// Device metadata is descriptive only; authorization is always enforced by Supabase RLS.
+const USER_DEVICE_KEY = 'chartmasters_device_key'
+
+function getJwtClaims(token) {
+  try {
+    const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=')
+    return JSON.parse(atob(padded))
+  } catch {
+    return null
+  }
+}
+
+function getCurrentDeviceKey() {
+  let key = localStorage.getItem(USER_DEVICE_KEY)
+  if (!key) {
+    key = crypto.randomUUID()
+    localStorage.setItem(USER_DEVICE_KEY, key)
+  }
+  return key
+}
+
+function getDeviceMetadata() {
+  const ua = navigator.userAgent || ''
+  const platform = navigator.userAgentData?.platform || navigator.platform || ''
+  const deviceType = /ipad|tablet|kindle|playbook/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
+    ? 'tablet'
+    : /android|iphone|ipod|mobile/i.test(ua)
+      ? 'mobile'
+      : 'desktop'
+
+  let operatingSystem = 'سیستم‌عامل نامشخص'
+  if (/android/i.test(ua)) operatingSystem = 'Android'
+  else if (/iphone|ipad|ipod/i.test(ua)) operatingSystem = 'iOS'
+  else if (/windows/i.test(platform + ua)) operatingSystem = 'Windows'
+  else if (/mac/i.test(platform + ua)) operatingSystem = 'macOS'
+  else if (/cros/i.test(ua)) operatingSystem = 'ChromeOS'
+  else if (/linux/i.test(platform + ua)) operatingSystem = 'Linux'
+
+  let browser = 'مرورگر نامشخص'
+  if (/edg\//i.test(ua)) browser = 'Microsoft Edge'
+  else if (/opr\//i.test(ua)) browser = 'Opera'
+  else if (/firefox\//i.test(ua)) browser = 'Firefox'
+  else if (/chrome\//i.test(ua) && !/edg\//i.test(ua)) browser = 'Chrome'
+  else if (/safari\//i.test(ua) && !/chrome\//i.test(ua)) browser = 'Safari'
+
+  const typeLabel = deviceType === 'mobile' ? 'موبایل' : deviceType === 'tablet' ? 'تبلت' : 'کامپیوتر'
+  return {
+    device_key: getCurrentDeviceKey(),
+    device_label: typeLabel + ' · ' + operatingSystem,
+    device_type: deviceType,
+    browser,
+    operating_system: operatingSystem,
+  }
+}
+
+async function registerDeviceSession(session) {
+  if (!session?.access_token || !session?.user?.id) return null
+  const claims = getJwtClaims(session.access_token)
+  if (!claims?.session_id) return null
+  const now = new Date().toISOString()
+  const metadata = getDeviceMetadata()
+  const rows = await request('/rest/v1/user_device_sessions?on_conflict=session_id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      session_id: claims.session_id,
+      ...metadata,
+      last_seen_at: now,
+    }),
+  }, session.access_token)
+  return rows?.[0] || null
+}
+
+// احراز هویت کاربران عادی؛ نشست آن کاملاً جدا از نشست پنل مدیریت است.
+let googleCallbackPromise = null
+const USER_NEXT_KEY = 'chartmasters_login_next'
+
+// فقط مسیرهای داخلی سایت پذیرفته می‌شود (جلوگیری از open redirect)
+export function safeNextPath(value) {
+  if (typeof value !== 'string') return ''
+  return /^\/(?![/\\])[^\s]*$/.test(value) && !value.startsWith('/login') ? value : ''
+}
+
+export const userAuth = {
+  getSession: getUserSession,
+  rememberNext(value) {
+    const next = safeNextPath(value)
+    try { if (next) sessionStorage.setItem(USER_NEXT_KEY, next) } catch { /* ذخیره نشد؛ به داشبورد می‌رود */ }
+  },
+  consumeNext() {
+    try {
+      const next = safeNextPath(sessionStorage.getItem(USER_NEXT_KEY) || '')
+      sessionStorage.removeItem(USER_NEXT_KEY)
+      return next
+    } catch { return '' }
+  },
+  async getValidSession() {
+    return getValidUserSession()
+  },
+  async registerCurrentDevice() {
+    return registerDeviceSession(await getValidUserSession())
+  },
+  async getDeviceSessions() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) throw new Error('برای مشاهده دستگاه‌های متصل ابتدا وارد حساب کاربری شو.')
+    const claims = getJwtClaims(session.access_token)
+    const rows = await request(
+      '/rest/v1/user_device_sessions?select=id,session_id,device_key,device_label,device_type,browser,operating_system,created_at,last_seen_at&order=last_seen_at.desc',
+      {},
+      session.access_token,
+    )
+    return (rows || []).map((device) => ({ ...device, is_current: device.session_id === claims?.session_id }))
+  },
+  async touchCurrentDevice() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) return null
+    const claims = getJwtClaims(session.access_token)
+    if (!claims?.session_id) return null
+    const rows = await request(
+      '/rest/v1/user_device_sessions?session_id=eq.' + encodeURIComponent(claims.session_id),
+      { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ last_seen_at: new Date().toISOString() }) },
+      session.access_token,
+    )
+    if (!rows?.length) return registerDeviceSession(session)
+    return rows[0]
+  },
+  async signOutOtherDevices() {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session?.user?.id) throw new Error('نشست کاربری معتبر نیست؛ دوباره وارد حساب شو.')
+    const claims = getJwtClaims(session.access_token)
+    if (!claims?.session_id) throw new Error('شناسه نشست فعلی پیدا نشد؛ دوباره وارد حساب شو.')
+    await request('/auth/v1/logout?scope=others', { method: 'POST' }, session.access_token)
+    await request(
+      '/rest/v1/user_device_sessions?user_id=eq.' + encodeURIComponent(session.user.id) + '&session_id=neq.' + encodeURIComponent(claims.session_id),
+      { method: 'DELETE', headers: { Prefer: 'return=minimal' } },
+      session.access_token,
+    )
+    return true
+  },
+  async signInWithGoogle() {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      throw new Error('تنظیمات اتصال Supabase در محیط پروژه وارد نشده است.')
+    }
+
+    const randomBytes = crypto.getRandomValues(new Uint8Array(32))
+    const verifier = encodeBase64Url(randomBytes)
+    const challenge = await createCodeChallenge(verifier)
+    sessionStorage.setItem(USER_CODE_VERIFIER_KEY, verifier)
+
+    const authorizeUrl = new URL('/auth/v1/authorize', SUPABASE_URL)
+    authorizeUrl.searchParams.set('provider', 'google')
+    authorizeUrl.searchParams.set('redirect_to', window.location.origin + '/login')
+    authorizeUrl.searchParams.set('code_challenge', challenge)
+    authorizeUrl.searchParams.set('code_challenge_method', 's256')
+    window.location.assign(authorizeUrl.toString())
+  },
+  async updateProfile(profile) {
+    const session = await getValidUserSession()
+    if (!session?.access_token) throw new Error('برای ویرایش پروفایل ابتدا وارد حساب کاربری شو.')
+    const result = await request('/auth/v1/user', {
+      method: 'PUT',
+      body: JSON.stringify({ data: profile }),
+    }, session.access_token)
+    const current = getUserSession()
+    if (current) saveUserSession({ ...current, user: result })
+    return result
+  },
+  async signOut() {
+    const session = await getValidUserSession()
+    if (session?.access_token) {
+      const claims = getJwtClaims(session.access_token)
+      if (claims?.session_id) {
+        await request(
+          '/rest/v1/user_device_sessions?session_id=eq.' + encodeURIComponent(claims.session_id),
+          { method: 'DELETE', headers: { Prefer: 'return=minimal' } },
+          session.access_token,
+        ).catch(() => {})
+      }
+      await request('/auth/v1/logout?scope=local', { method: 'POST' }, session.access_token).catch(() => {})
+    }
+    saveUserSession(null)
+  },
+  async completeGoogleSignIn(code) {
+    if (googleCallbackPromise) return googleCallbackPromise
+    googleCallbackPromise = (async () => {
+      const verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
+      if (!code || !verifier) {
+        throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
+      }
+
+      const session = await request('/auth/v1/token?grant_type=pkce', {
+        method: 'POST',
+        body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
+      })
+
+      sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
+      saveUserSession(session)
+      await registerDeviceSession(getUserSession()).catch(() => {})
+      return getUserSession()
+    })()
+    try {
+      return await googleCallbackPromise
+    } finally {
+      googleCallbackPromise = null
+    }
+  }
+}
+
 export const supabase = {
   getSession,
   async signIn(email, password) {
@@ -308,6 +585,133 @@ export const supabase = {
       await request('/rest/v1/rpc/increment_indicator_downloads', { method: 'POST', body: JSON.stringify({ p_slug: slug }) })
     } catch {
       // نادیده گرفته می‌شود
+    }
+  },
+}
+
+ 
+// User learning data uses the Google user session; database RLS isolates every account.
+export const userLearning = {
+  async getVideoStatus(videoId) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !videoId) return { isFavorite: false, progress: null }
+    const [favorites, progress] = await Promise.all([
+      request('/rest/v1/user_favorites?select=id&video_id=eq.' + encodeURIComponent(videoId) + '&limit=1', {}, session.access_token),
+      request('/rest/v1/user_video_progress?select=id,is_completed,completed_at,last_watched_at&video_id=eq.' + encodeURIComponent(videoId) + '&limit=1', {}, session.access_token),
+    ])
+    return { isFavorite: Boolean(favorites?.length), progress: progress?.[0] || null }
+  },
+
+  async addHistory(videoId) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session.user?.id) return null
+    const rows = await request('/rest/v1/user_video_progress?on_conflict=user_id,video_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify({ user_id: session.user.id, video_id: videoId, last_watched_at: new Date().toISOString() }),
+    }, session.access_token)
+    return rows?.[0] || null
+  },
+
+  async setFavorite(videoId, shouldFavorite) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session.user?.id) throw new Error('برای ذخیره علاقه‌مندی ابتدا وارد حساب کاربری شو.')
+    if (shouldFavorite) {
+      await request('/rest/v1/user_favorites?on_conflict=user_id,video_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+        body: JSON.stringify({ user_id: session.user.id, video_id: videoId }),
+      }, session.access_token)
+    } else {
+      await request('/rest/v1/user_favorites?user_id=eq.' + session.user.id + '&video_id=eq.' + encodeURIComponent(videoId), {
+        method: 'DELETE',
+        headers: { Prefer: 'return=minimal' },
+      }, session.access_token)
+    }
+    return shouldFavorite
+  },
+
+  async setCompleted(videoId, completed) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session.user?.id) throw new Error('برای ثبت پیشرفت ابتدا وارد حساب کاربری شو.')
+    await this.addHistory(videoId)
+    await request('/rest/v1/user_video_progress?user_id=eq.' + session.user.id + '&video_id=eq.' + encodeURIComponent(videoId), {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        is_completed: completed,
+        completed_at: completed ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      }),
+    }, session.access_token)
+    return completed
+  },
+
+  async getDashboardData() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) throw new Error('برای مشاهده داشبورد ابتدا وارد حساب کاربری شو.')
+    const token = session.access_token
+    const [progress, favorites] = await Promise.all([
+      request('/rest/v1/user_video_progress?select=id,last_watched_at,is_completed,completed_at,videos(id,slug,title,cover_url,duration)&order=last_watched_at.desc&limit=1000', {}, token),
+      request('/rest/v1/user_favorites?select=id,created_at,videos(id,slug,title,cover_url,duration)&order=created_at.desc&limit=1000', {}, token),
+    ])
+
+    const videoIds = [...new Set((progress || []).map((item) => item.videos?.id).filter(Boolean))]
+    let courses = []
+    if (videoIds.length) {
+      // آدرس درخواست محدودیت طول دارد؛ شناسه‌ها را دسته‌های کوچک می‌فرستیم تا برای کاربر پرفعالیت خطا ندهد
+      const viewedMemberships = (await Promise.all(chunkList(videoIds, ID_CHUNK_SIZE).map((ids) => request(
+        '/rest/v1/playlist_videos?select=playlist_id,video_id,playlists(id,title,cover_url,status)&video_id=in.(' + ids.join(',') + ')',
+        {},
+        token,
+      )))).flat()
+      const courseIds = [...new Set((viewedMemberships || [])
+        .filter((item) => item.playlists?.status === 'published')
+        .map((item) => item.playlist_id))]
+      if (courseIds.length) {
+        const lessonPages = await Promise.all(chunkList(courseIds, ID_CHUNK_SIZE).map((ids) => request(
+          '/rest/v1/playlist_videos?select=playlist_id,video_id,position,videos(slug),playlists(id,title,cover_url,status)&order=position.asc&playlist_id=in.(' + ids.join(',') + ')',
+          {},
+          token,
+        )))
+        const allLessons = lessonPages.flat()
+        const completedIds = new Set((progress || []).filter((item) => item.is_completed).map((item) => item.videos?.id))
+        const courseMap = new Map()
+        for (const lesson of allLessons || []) {
+          const playlist = lesson.playlists
+          if (!playlist || playlist.status !== 'published') continue
+          if (!courseMap.has(lesson.playlist_id)) {
+            courseMap.set(lesson.playlist_id, { ...playlist, totalLessons: 0, completedLessons: 0 })
+          }
+          const course = courseMap.get(lesson.playlist_id)
+          course.totalLessons += 1
+          const done = completedIds.has(lesson.video_id)
+          if (done) course.completedLessons += 1
+          // جلسهٔ بعدی = اولین جلسهٔ تکمیل‌نشده (ترتیب position)؛ اگر همه تمام شده‌اند، اولین جلسه برای مرور
+          if (lesson.videos?.slug) {
+            const entry = { slug: lesson.videos.slug, number: course.totalLessons }
+            if (!course.firstLesson) course.firstLesson = entry
+            if (!done && !course.pendingLesson) course.pendingLesson = entry
+          }
+        }
+        courses = [...courseMap.values()].map(({ firstLesson, pendingLesson, ...course }) => ({
+          ...course,
+          nextLesson: pendingLesson || firstLesson || null,
+          progressPercent: course.totalLessons ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0,
+        }))
+      }
+    }
+
+    return {
+      progress: progress || [],
+      favorites: favorites || [],
+      courses,
+      stats: {
+        courseCount: courses.length,
+        viewedCount: (progress || []).length,
+        completedCount: (progress || []).filter((item) => item.is_completed).length,
+        favoriteCount: (favorites || []).length,
+      },
     }
   },
 }

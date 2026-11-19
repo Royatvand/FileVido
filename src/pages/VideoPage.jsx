@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getVideoById, getAparatEmbedUrl, getPlaylistForVideo, videos } from '../data/videos'
-import { supabase } from '../lib/supabase'
+import { supabase, userAuth, userLearning } from '../lib/supabase'
 import NotFound from './NotFound'
 import { setPageSeo } from '../lib/seo'
 import { stripIconTokens } from '../lib/iconTokens'
@@ -13,9 +13,12 @@ function VideoPage({ videoId }) {
   const [databaseVideo, setDatabaseVideo] = useState(null)
   const [databasePlaylists, setDatabasePlaylists] = useState([])
   const [loading, setLoading] = useState(!demoVideo)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
-    if (demoVideo) { setLoading(false); return }
     let active = true
     async function loadVideo() {
       try {
@@ -72,6 +75,65 @@ function VideoPage({ videoId }) {
   } : null)
 
   useEffect(() => {
+    if (!databaseVideo?.id) return
+    let active = true
+    async function trackUserLearning() {
+      try {
+        const session = await userAuth.getValidSession()
+        if (!session?.user) return
+        await userLearning.addHistory(databaseVideo.id)
+        const status = await userLearning.getVideoStatus(databaseVideo.id)
+        if (active) {
+          setIsFavorite(status.isFavorite)
+          setIsCompleted(Boolean(status.progress?.is_completed))
+        }
+      } catch {
+        // نمایش ویدیو نباید به‌خاطر خطای ثبت سابقه متوقف شود.
+      }
+    }
+    trackUserLearning()
+    return () => { active = false }
+  }, [databaseVideo?.id])
+
+  async function handleFavorite() {
+    const session = await userAuth.getValidSession()
+    if (!session?.user) {
+      window.location.assign('/login?next=' + encodeURIComponent(window.location.pathname))
+      return
+    }
+    setActionLoading(true)
+    setActionError('')
+    try {
+      const nextValue = !isFavorite
+      await userLearning.setFavorite(databaseVideo.id, nextValue)
+      setIsFavorite(nextValue)
+    } catch (error) {
+      setActionError(error.message || 'ذخیره علاقه‌مندی انجام نشد.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  async function handleCompletion() {
+    const session = await userAuth.getValidSession()
+    if (!session?.user) {
+      window.location.assign('/login?next=' + encodeURIComponent(window.location.pathname))
+      return
+    }
+    setActionLoading(true)
+    setActionError('')
+    try {
+      const nextValue = !isCompleted
+      await userLearning.setCompleted(databaseVideo.id, nextValue)
+      setIsCompleted(nextValue)
+    } catch (error) {
+      setActionError(error.message || 'ثبت پیشرفت انجام نشد.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  useEffect(() => {
     if (!video) return
     const description = stripIconTokens(video.description || 'ویدیوی آموزشی بازارهای مالی با ترجمه فارسی در چارت مسترز.')
       .replace(/\\s+/g, ' ')
@@ -111,6 +173,17 @@ function VideoPage({ videoId }) {
             </div>
             <h1>{video.title}</h1>
             <div className="video-meta">{video.instructor && <span>مدرس: {video.instructor}</span>}{video.level && <span>سطح: {video.level}</span>}{video.duration && <span>مدت: {video.duration}</span>}</div>
+            {databaseVideo && (
+              <div className="video-user-actions">
+                <button type="button" className={'video-user-action ' + (isFavorite ? 'is-active' : '')} onClick={handleFavorite} disabled={actionLoading}>
+                  {isFavorite ? '♥ ذخیره‌شده در علاقه‌مندی‌ها' : '♡ افزودن به علاقه‌مندی‌ها'}
+                </button>
+                <button type="button" className={'video-user-action ' + (isCompleted ? 'is-active' : '')} onClick={handleCompletion} disabled={actionLoading}>
+                  {isCompleted ? '✓ آموزش تکمیل شد' : '○ علامت‌گذاری به‌عنوان تکمیل‌شده'}
+                </button>
+                {actionError && <span className="video-user-action-error" role="alert">{actionError}</span>}
+              </div>
+            )}
             <div className="video-description"><h2>درباره این ویدیو</h2><p><RichText text={video.description} /></p></div>
             {video.tags.length > 0 && <div className="video-tags" aria-label="برچسب‌های ویدیو">{video.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
           </section>

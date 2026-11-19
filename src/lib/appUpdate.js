@@ -1,0 +1,222 @@
+/**
+ * Android-only app update management.
+ * Web builds never enter this flow.
+ */
+import { Capacitor } from '@capacitor/core'
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const DISMISSED_KEY = 'chartmasters_dismissed_version_code'
+const DEVICE_KEY = 'chartmasters_device_key'
+
+export function isAndroidNative() {
+  try {
+    return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
+  } catch {
+    return false
+  }
+}
+
+function getDeviceKey() {
+  try {
+    let key = localStorage.getItem(DEVICE_KEY)
+    if (!key) {
+      key = crypto.randomUUID()
+      localStorage.setItem(DEVICE_KEY, key)
+    }
+    return key
+  } catch {
+    return null
+  }
+}
+
+export function getDismissedVersionCode() {
+  try {
+    const value = Number(localStorage.getItem(DISMISSED_KEY) || '0')
+    return Number.isFinite(value) ? value : 0
+  } catch {
+    return 0
+  }
+}
+
+export function setDismissedVersionCode(versionCode) {
+  try {
+    localStorage.setItem(DISMISSED_KEY, String(versionCode))
+  } catch {
+    /* ignore */
+  }
+}
+
+async function publicRequest(path) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error('تنظیمات اتصال Supabase در محیط پروژه وارد نشده است.')
+  }
+  const response = await fetch(`${SUPABASE_URL}${path}`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  const result = response.status === 204 ? null : await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new Error(result?.message || result?.msg || result?.hint || 'درخواست نسخه اپ با خطا مواجه شد.')
+  }
+  return result
+}
+
+/** Fetch the highest published version (by version_code). */
+export async function fetchLatestPublishedVersion() {
+  const rows = await publicRequest(
+    '/rest/v1/app_versions?select=id,version_code,version_name,changelog,download_url,is_mandatory,published_at&is_published=eq.true&order=version_code.desc&limit=1',
+  )
+  return rows?.[0] || null
+}
+
+/** Current native app info from Capacitor App plugin. */
+export async function getNativeAppInfo() {
+  if (!isAndroidNative()) return null
+  try {
+    const { App } = await import('@capacitor/app')
+    const info = await App.getInfo()
+    return {
+      versionCode: Number(info.build) || 0,
+      versionName: info.version || '0',
+      id: info.id || '',
+      name: info.name || '',
+    }
+  } catch (error) {
+    console.warn('[appUpdate] App.getInfo failed', error)
+    return null
+  }
+}
+
+/**
+ * Compare installed version with the latest published one.
+ * Returns null when no update is needed / not on Android.
+ */
+export async function checkForAppUpdate() {
+  if (!isAndroidNative()) return null
+
+  const [installed, latest] = await Promise.all([
+    getNativeAppInfo(),
+    fetchLatestPublishedVersion(),
+  ])
+
+  if (!installed || !latest) return null
+  if (latest.version_code <= installed.versionCode) return null
+
+  // Optional updates the user already dismissed stay hidden until a newer code appears.
+  if (!latest.is_mandatory && latest.version_code <= getDismissedVersionCode()) {
+    return null
+  }
+
+  return {
+    installed,
+    latest: {
+      id: latest.id,
+      versionCode: latest.version_code,
+      versionName: latest.version_name,
+      changelog: latest.changelog || '',
+      downloadUrl: latest.download_url,
+      isMandatory: Boolean(latest.is_mandatory),
+      publishedAt: latest.published_at,
+    },
+  }
+}
+
+/** Register / refresh FCM token for this Android device. */
+export async function registerFcmToken(token, userId = null) {
+  if (!isAndroidNative() || !token || !SUPABASE_URL || !SUPABASE_KEY) return null
+
+  const payload = {
+    token,
+    platform: 'android',
+    device_key: getDeviceKey(),
+    user_id: userId || null,
+    last_seen_at: new Date().toISOString(),
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/fcm_tokens?on_conflict=token`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      body: JSON.stringify(payload),
+    },
+  )
+
+  const result = await response.json().catch(() => null)
+  if (!response.ok) {
+    console.warn('[appUpdate] FCM token registration failed', result)
+    return null
+  }
+  return result?.[0] || null
+}
+
+/**
+ * Initialize push notifications on Android.
+ * Safe no-op when the Push Notifications plugin or google-services is missing.
+ */
+export async function initAndroidPushNotifications(userId = null) {
+  if (!isAndroidNative()) return
+
+  try {
+    const { PushNotifications } = await import('@capacitor/push-notifications')
+
+    const permission = await PushNotifications.checkPermissions()
+    let status = permission.receive
+    if (status === 'prompt' || status === 'prompt-with-rationale') {
+      const requested = await PushNotifications.requestPermissions()
+      status = requested.receive
+    }
+    if (status !== 'granted') {
+      console.info('[appUpdate] Notification permission not granted')
+      return
+    }
+
+    await PushNotifications.register()
+
+    PushNotifications.addListener('registration', async (event) => {
+      if (event?.value) {
+        await registerFcmToken(event.value, userId)
+      }
+    })
+
+    PushNotifications.addListener('registrationError', (error) => {
+      console.warn('[appUpdate] Push registration error', error)
+    })
+
+    // Tapping an update notification can open the download URL when present.
+    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+      const url = action?.notification?.data?.download_url
+      if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+        window.open(url, '_system')
+      }
+    })
+  } catch (error) {
+    // Plugin not installed or google-services.json missing — infrastructure only.
+    console.info('[appUpdate] Push notifications unavailable:', error?.message || error)
+  }
+}
+
+/** Listen for app resume and re-check for updates. */
+export async function onAppResume(callback) {
+  if (!isAndroidNative() || typeof callback !== 'function') return () => {}
+  try {
+    const { App } = await import('@capacitor/app')
+    const handle = await App.addListener('appStateChange', (state) => {
+      if (state.isActive) callback()
+    })
+    return () => {
+      handle.remove()
+    }
+  } catch {
+    return () => {}
+  }
+}

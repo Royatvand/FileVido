@@ -77,6 +77,14 @@ async function sendReleaseNotification(release, fromRolloutPercentage = 0, admin
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { message: 'Method not allowed' })
 
+  // Preview deployments share the production Supabase project. Keep all release
+  // mutations production-only so preview testing cannot pause or roll back live users.
+  if (process.env.VERCEL_ENV !== 'production') {
+    return send(res, 409, {
+      message: 'برای محافظت از نسخه زنده، تغییر وضعیت انتشار در Preview غیرفعال است. پس از مرج، این عملیات در Production فعال می‌شود.',
+    })
+  }
+
   const adminToken = getBearer(req)
   const auth = await verifyAdmin(adminToken)
   if (auth.error === 'session') return send(res, 401, { message: 'نشست مدیر نامعتبر یا منقضی است.' })

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { userAuth } from '../lib/supabase'
+import '../github-login.css'
 
 function GoogleLogin() {
   const [loading, setLoading] = useState(false)
@@ -29,7 +30,7 @@ function GoogleLogin() {
           }
         } catch (err) {
           window.history.replaceState({}, document.title, '/login')
-          if (active) setError(err.message || 'ورود با گوگل انجام نشد.')
+          if (active) setError(err.message || 'ورود با حساب انتخاب‌شده انجام نشد.')
         } finally {
           if (active) setLoading(false)
         }
@@ -91,6 +92,7 @@ function GoogleLogin() {
             {user ? (
               <div className="user-auth-success">{user.email && <strong>{user.email}</strong>}<a className="cm-auth-submit" href="/">رفتن به صفحه اصلی <span>←</span></a></div>
             ) : (
+              <div className="cm-auth-providers">
               <button className="cm-auth-google" type="button" onClick={() => handleOAuthLogin('google')} disabled={loading}>
                 <svg viewBox="0 0 48 48" aria-hidden="true">
                   <path fill="#FFC107" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.8 6.1-15Z"/>
@@ -106,6 +108,7 @@ function GoogleLogin() {
                 </svg>
                 <span>{loading ? 'لطفاً صبر کن...' : 'ادامه با حساب گیت‌هاب'}</span><span className="cm-auth-github-arrow">←</span>
               </button>
+              </div>
             )}
             <div className="cm-auth-divider"><span>ورود امن و سریع</span></div>
             <div className="cm-auth-benefits">

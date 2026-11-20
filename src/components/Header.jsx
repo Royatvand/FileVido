@@ -7,7 +7,7 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [signedIn, setSignedIn] = useState(false)
   const headerRef = useRef(null)
-  const path = window.location.pathname.replace(/\/+$/, '') || '/'
+  const path = window.location.pathname.replace(/\\/+$/, '') || '/'
   const isAbout = path === '/about'
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators' || path.startsWith('/indicator/')
@@ -50,10 +50,6 @@ function Header() {
 
         <a className="header-login" href={signedIn ? '/dashboard' : '/login'}>{signedIn ? 'داشبورد من' : 'ورود'}</a>
         <ThemeToggle />
-
-        <a className="header-action" href="/#videos">
-          شروع یادگیری <span aria-hidden="true">↗</span>
-        </a>
 
         <button type="button" className={`nav-toggle ${menuOpen ? 'open' : ''}`} aria-expanded={menuOpen} aria-controls="main-nav" aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'} onClick={() => setMenuOpen((value) => !value)}>
           <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />

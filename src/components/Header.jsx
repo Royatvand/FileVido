@@ -6,6 +6,7 @@ import ThemeToggle from './ThemeToggle'
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [signedIn, setSignedIn] = useState(false)
+  const [search, setSearch] = useState('')
   const headerRef = useRef(null)
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isAbout = path === '/about'
@@ -31,6 +32,12 @@ function Header() {
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onPointer) }
   }, [menuOpen])
 
+  function submitSearch(event) {
+    event.preventDefault()
+    const term = search.trim()
+    window.location.assign(term ? '/videos?q=' + encodeURIComponent(term) : '/videos')
+  }
+
   return (
     <header className="site-header" ref={headerRef}>
       <div className="header-inner">
@@ -47,6 +54,10 @@ function Header() {
           <a className="nav-link" href="/#categories">دسته‌بندی‌ها</a>
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>
+
+        <form className="header-search" role="search" onSubmit={submitSearch}>
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="جست‌وجوی آموزش..." aria-label="جست‌وجوی ویدیوها" />
+        </form>
 
         <a className="header-login" href={signedIn ? '/dashboard' : '/login'}>{signedIn ? 'داشبورد من' : 'ورود'}</a>
         <ThemeToggle />

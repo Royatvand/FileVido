@@ -22,7 +22,9 @@ const LEVEL_ORDER = ['مقدماتی', 'متوسط', 'پیشرفته']
 function VideosSection({ archive = false }) {
   const [videos, setVideos] = useState(demoVideos)
   const [playlists, setPlaylists] = useState(() => demoPlaylists.map((item) => ({ id: item.id, title: item.title, description: item.description, cover: '', createdAt: '', videoIds: item.videoIds })))
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('q') || '' } catch { return '' }
+  })
   const [category, setCategory] = useState('')
   const [level, setLevel] = useState('')
 

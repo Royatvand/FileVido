@@ -335,7 +335,7 @@ function AdminAppVersions({ onNotice }) {
                   <td>{row.published_at ? new Date(row.published_at).toLocaleDateString('fa-IR') : '—'}</td>
                   <td><div className="admin-row-actions">
                     {row.download_url && <a href={row.download_url} target="_blank" rel="noreferrer">دانلود APK</a>}
-                    {row.is_published && !row.is_paused && <button type="button" disabled={notifyingId === row.id} onClick={() => handleNotify(row)}>{notifyingId === row.id ? 'در حال ارسال...' : 'ارسال اعلان به گروه فعال'}</button>}
+                    {row.id === latestPublished?.id && row.is_published && !row.is_paused && <button type="button" disabled={notifyingId === row.id} onClick={() => handleNotify(row)}>{notifyingId === row.id ? 'در حال ارسال...' : 'ارسال اعلان به گروه فعال'}</button>}
                   </div></td>
                 </tr>
               ))}</tbody>

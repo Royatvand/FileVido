@@ -7,11 +7,15 @@ create table if not exists public.app_versions (
   changelog text not null default '',
   download_url text not null,
   is_mandatory boolean not null default false,
+  rollout_percentage smallint not null default 10,
+  is_paused boolean not null default false,
+  paused_at timestamptz,
   is_published boolean not null default false,
   published_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint app_versions_version_code_positive check (version_code > 0),
+  constraint app_versions_rollout_percentage_check check (rollout_percentage in (10, 25, 50, 100)),
   constraint app_versions_version_name_not_empty check (char_length(trim(version_name)) > 0),
   constraint app_versions_download_url_not_empty check (char_length(trim(download_url)) > 0)
 );

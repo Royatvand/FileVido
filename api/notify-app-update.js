@@ -55,7 +55,7 @@ async function listFcmTokens(adminToken) {
   if (!key || !auth) return []
 
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/fcm_tokens?select=id,token&platform=eq.android&order=last_seen_at.desc&limit=5000`,
+    `${SUPABASE_URL}/rest/v1/fcm_tokens?select=id,token,device_key&platform=eq.android&order=last_seen_at.desc&limit=5000`,
     {
       headers: {
         apikey: key,
@@ -68,6 +68,23 @@ async function listFcmTokens(adminToken) {
     throw new Error('خواندن توکن‌های اعلان از Supabase ناموفق بود.')
   }
   return (await response.json().catch(() => [])) || []
+}
+
+function getRolloutBucket(deviceKey, versionCode) {
+  if (!deviceKey) return null
+  const value = `${versionCode}:${deviceKey}`
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0) % 100
+}
+
+function isDeviceInRollout(row, versionCode, fromRolloutPercentage, rolloutPercentage) {
+  const bucket = getRolloutBucket(row.device_key, versionCode)
+  if (bucket === null) return fromRolloutPercentage === 0 && rolloutPercentage >= 100
+  return bucket >= fromRolloutPercentage && bucket < rolloutPercentage
 }
 
 function firebaseConfigured() {
@@ -190,14 +207,6 @@ export default async function handler(req, res) {
     }
   }
 
-  if (!firebaseConfigured()) {
-    return json(res, 501, {
-      status: 'not_configured',
-      message:
-        'زیرساخت اعلان آماده است اما Firebase پیکربندی نشده. این متغیرها را در محیط سرور (Vercel) تنظیم کنید: FIREBASE_PROJECT_ID، FIREBASE_CLIENT_EMAIL، FIREBASE_PRIVATE_KEY. همچنین فایل google-services.json را در android/app قرار دهید و جدول fcm_tokens را در Supabase اجرا کنید.',
-    })
-  }
-
   let body = req.body
   if (typeof body === 'string') {
     try {
@@ -208,34 +217,99 @@ export default async function handler(req, res) {
   }
   body = body || {}
 
-  const versionName = typeof body.version_name === 'string' ? body.version_name.trim() : ''
   const versionCode = Number(body.version_code)
-  let downloadUrl
-  try {
-    downloadUrl = new URL(body.download_url)
-  } catch {
-    return json(res, 400, { message: 'لینک دانلود نسخه معتبر نیست.' })
-  }
-  if (
-    !versionName ||
-    !Number.isInteger(versionCode) ||
-    versionCode < 1 ||
-    downloadUrl.protocol !== 'https:' ||
-    downloadUrl.username ||
-    downloadUrl.password
-  ) {
-    return json(res, 400, { message: 'اطلاعات نسخه یا لینک دانلود معتبر نیست.' })
-  }
-  if (typeof body.changelog === 'string' && body.changelog.length > 5000) {
-    return json(res, 400, { message: 'توضیحات تغییرات بیش از حد طولانی است.' })
+  if (!Number.isInteger(versionCode) || versionCode < 1) {
+    return json(res, 400, { message: 'کد نسخه معتبر نیست.' })
   }
 
+  // Never trust rollout or paused flags from request payloads. Load the authoritative
+  // release row so a caller cannot bypass a paused release or widen its rollout.
+  const supabaseKey = SERVICE_ROLE || PUBLISHABLE
+  const supabaseAuth = SERVICE_ROLE || accessToken
+  if (!SUPABASE_URL || !supabaseKey || !supabaseAuth) {
+    return json(res, 503, { message: 'دسترسی امن به اطلاعات نسخه در Supabase تنظیم نشده است.' })
+  }
+
+  let release
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/app_versions?select=version_code,version_name,changelog,download_url,is_mandatory,is_published,rollout_percentage,is_paused&version_code=eq.${versionCode}&limit=1`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseAuth}`,
+        },
+        signal: AbortSignal.timeout(10000),
+      },
+    )
+    const rows = await response.json().catch(() => [])
+    if (!response.ok) throw new Error('Unable to read authoritative release row')
+    release = rows?.[0] || null
+  } catch {
+    return json(res, 502, { message: 'خواندن وضعیت واقعی نسخه از Supabase ناموفق بود.' })
+  }
+
+  if (!release || !release.is_published) {
+    return json(res, 404, { message: 'نسخه منتشرشده‌ای با این کد پیدا نشد.' })
+  }
+
+  if (release.is_paused) {
+    return json(res, 200, {
+      status: 'paused',
+      sent: 0,
+      message: 'انتشار این نسخه متوقف است؛ اعلان جدیدی ارسال نشد.',
+    })
+  }
+
+  const activeReleaseResponse = await fetch(
+    `${SUPABASE_URL}/rest/v1/app_versions?select=version_code&is_published=eq.true&is_paused=eq.false&order=version_code.desc&limit=1`,
+    {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseAuth}` },
+      signal: AbortSignal.timeout(10000),
+    },
+  ).catch(() => null)
+  if (!activeReleaseResponse?.ok) {
+    return json(res, 502, { message: 'بررسی آخرین نسخه فعال در Supabase ناموفق بود.' })
+  }
+  const activeReleases = await activeReleaseResponse.json().catch(() => [])
+  if (Number(activeReleases?.[0]?.version_code) !== versionCode) {
+    return json(res, 409, { message: 'فقط آخرین نسخه فعال اجازه ارسال اعلان دارد.' })
+  }
+
+  const rolloutPercentage = Number(release.rollout_percentage ?? 100)
+  const fromRolloutPercentage = Number(body.from_rollout_percentage ?? 0)
+  if (![10, 25, 50, 100].includes(rolloutPercentage)) {
+    return json(res, 409, { message: 'درصد انتشار ذخیره‌شده برای این نسخه معتبر نیست.' })
+  }
+  if (![0, 10, 25, 50].includes(fromRolloutPercentage) || fromRolloutPercentage >= rolloutPercentage) {
+    return json(res, 400, { message: 'بازه گروه اعلان برای این مرحله معتبر نیست.' })
+  }
+
+  let downloadUrl
+  try {
+    downloadUrl = new URL(release.download_url)
+  } catch {
+    return json(res, 409, { message: 'لینک دانلود ثبت‌شده برای این نسخه معتبر نیست.' })
+  }
+  if (downloadUrl.protocol !== 'https:' || downloadUrl.username || downloadUrl.password) {
+    return json(res, 409, { message: 'لینک دانلود ثبت‌شده برای این نسخه امن نیست.' })
+  }
+
+  const versionName = release.version_name
   const versionPayload = {
     version_name: versionName,
-    version_code: versionCode,
+    version_code: release.version_code,
     download_url: downloadUrl.toString(),
-    changelog: typeof body.changelog === 'string' ? body.changelog : '',
-    is_mandatory: body.is_mandatory === true,
+    changelog: typeof release.changelog === 'string' ? release.changelog.slice(0, 5000) : '',
+    is_mandatory: release.is_mandatory === true,
+  }
+
+  if (!firebaseConfigured()) {
+    return json(res, 501, {
+      status: 'not_configured',
+      message:
+        'زیرساخت اعلان آماده است اما Firebase پیکربندی نشده. این متغیرها را در محیط سرور (Vercel) تنظیم کنید: FIREBASE_PROJECT_ID، FIREBASE_CLIENT_EMAIL، FIREBASE_PRIVATE_KEY. همچنین فایل google-services.json را در android/app قرار دهید و جدول fcm_tokens را در Supabase اجرا کنید.',
+    })
   }
   const title = versionPayload.is_mandatory
     ? `آپدیت اجباری ${versionName}`
@@ -252,11 +326,21 @@ export default async function handler(req, res) {
   } catch {
     return json(res, 502, { message: 'دریافت فهرست دستگاه‌ها از Supabase ناموفق بود.' })
   }
-  if (!tokens.length) {
+  const eligibleTokens = tokens.filter((row) =>
+    isDeviceInRollout(row, versionCode, fromRolloutPercentage, rolloutPercentage),
+  )
+  if (!eligibleTokens.length) {
     return json(res, 200, {
       status: 'ok',
       sent: 0,
-      message: 'هیچ توکن FCM ثبت‌شده‌ای پیدا نشد. پس از نصب اپ و اعطای مجوز اعلان، توکن‌ها ذخیره می‌شوند.',
+      failed: 0,
+      total: 0,
+      registered_tokens: tokens.length,
+      rollout_percentage: rolloutPercentage,
+      from_rollout_percentage: fromRolloutPercentage,
+      message: tokens.length
+        ? `درصد انتشار ${rolloutPercentage}٪ است؛ هنوز توکنی در گروه جدید ${fromRolloutPercentage} تا ${rolloutPercentage} درصد پیدا نشد.`
+        : 'هیچ توکن FCM ثبت‌شده‌ای پیدا نشد. پس از نصب اپ و اعطای مجوز اعلان، توکن‌ها ذخیره می‌شوند.',
     })
   }
 
@@ -272,15 +356,15 @@ export default async function handler(req, res) {
 
   let sent = 0
   let failed = 0
-  for (const row of tokens) {
+  for (const row of eligibleTokens) {
     try {
       const outcome = await sendFcmMessage(googleToken, row.token, {
         title,
         body: bodyText,
         version_name: versionName,
-        version_code: body.version_code,
-        download_url: body.download_url,
-        is_mandatory: body.is_mandatory,
+        version_code: versionPayload.version_code,
+        download_url: versionPayload.download_url,
+        is_mandatory: versionPayload.is_mandatory,
       })
       if (outcome.ok) sent += 1
       else failed += 1
@@ -293,7 +377,10 @@ export default async function handler(req, res) {
     status: 'ok',
     sent,
     failed,
-    total: tokens.length,
-    message: `اعلان برای ${sent} از ${tokens.length} دستگاه ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
+    total: eligibleTokens.length,
+    registered_tokens: tokens.length,
+    rollout_percentage: rolloutPercentage,
+    from_rollout_percentage: fromRolloutPercentage,
+    message: `اعلان گروه ${fromRolloutPercentage} تا ${rolloutPercentage} درصد برای ${sent} از ${eligibleTokens.length} دستگاه ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
   })
 }

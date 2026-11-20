@@ -259,3 +259,36 @@
   .admin-app-release-actions > * { flex: 1; }
   .admin-app-release-url { font-size: 9px; }
 }
+
+
+/* Android staged rollout and safe rollback controls */
+.admin-app-release-status.paused { border-color:rgba(248,113,113,.3); color:#fca5a5; background:rgba(248,113,113,.09); }
+.admin-release-control { flex:1 0 100%; width:100%; margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }
+.admin-release-control-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.admin-release-control-heading h4 { margin:0; color:#e8f1ea; font-size:13px; }
+.admin-release-control-heading p { margin:6px 0 0; color:#8b9a90; font-size:10px; line-height:1.9; }
+.admin-release-state { flex:0 0 auto; padding:5px 10px; border:1px solid rgba(140,242,177,.22); border-radius:999px; color:#8cf2b1; background:rgba(140,242,177,.07); font-size:10px; font-weight:800; }
+.admin-release-state.paused { border-color:rgba(248,113,113,.3); color:#fca5a5; background:rgba(248,113,113,.08); }
+.admin-release-stages { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:18px 0; }
+.admin-release-stages>div { display:flex; flex-direction:column; gap:8px; color:#75847a; font:700 10px Arial,sans-serif; text-align:center; }
+.admin-release-stages i { height:5px; border-radius:99px; background:#ffffff12; }
+.admin-release-stages>div.completed { color:#9cf0b8; }
+.admin-release-stages>div.completed i { background:#8cf2b1; }
+.admin-release-actions { display:flex; flex-wrap:wrap; gap:9px; }
+.admin-release-actions button { min-height:38px; padding:0 13px; border-radius:8px; font:700 10px Vazirmatn,sans-serif; cursor:pointer; }
+.admin-release-actions button:disabled { opacity:.42; cursor:not-allowed; }
+.admin-release-primary { border:1px solid #8cf2b1; color:#07110b; background:#8cf2b1; }
+.admin-release-danger { border:1px solid rgba(248,113,113,.4); color:#fca5a5; background:rgba(248,113,113,.08); }
+.admin-release-secondary { border:1px solid var(--line); color:#dce8df; background:#ffffff08; }
+.admin-release-hotfix { border:1px solid rgba(96,165,250,.35); color:#93c5fd; background:rgba(96,165,250,.08); }
+.admin-release-warning { margin:12px 0 0; color:#f3c98b; font-size:10px; line-height:1.9; }
+.admin-release-footnote { margin:10px 0 0; color:#78887d; font-size:9px; line-height:1.9; }
+.admin-status.paused { color:#fca5a5; background:rgba(248,113,113,.1); }
+@media(max-width:680px) {
+  .admin-release-control-heading { flex-direction:column; }
+  .admin-release-actions { display:grid; grid-template-columns:1fr; }
+  .admin-release-actions button { width:100%; }
+}
+
+/* Allow the release controls to occupy a full row below the APK download actions. */
+.admin-app-release-card { flex-wrap: wrap; }

@@ -177,7 +177,9 @@ export async function registerFcmToken(token) {
 let pushInitialization = null
 
 export function initAndroidPushNotifications() {
-  if (!isAndroidNative()) return Promise.resolve()
+  // Without google-services.json the native FCM register() call crashes the app,
+  // so push is opt-in at build time (VITE_ENABLE_PUSH=true once the file is injected).
+  if (!isAndroidNative() || import.meta.env.VITE_ENABLE_PUSH !== 'true') return Promise.resolve()
   if (pushInitialization) return pushInitialization
 
   pushInitialization = (async () => {

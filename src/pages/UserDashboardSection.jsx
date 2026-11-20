@@ -116,11 +116,10 @@ function UserDashboardSection({ section }) {
   const { user, setUser, data, setData, loading, error, setError, signOut } = useUserDashboard()
   const [notice, setNotice] = useState('')
   const [saving, setSaving] = useState(false)
-  const [name, setName] = useState('')
-
-  useEffect(() => {
-    if (user) setName(user.user_metadata?.full_name || user.user_metadata?.name || '')
-  }, [user])
+  const [nameDraft, setNameDraft] = useState(null)
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || ''
+  const name = nameDraft ?? userName
+  const setName = setNameDraft
 
   async function removeFavorite(item) {
     try {

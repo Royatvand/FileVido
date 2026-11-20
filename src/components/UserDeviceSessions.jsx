@@ -50,7 +50,7 @@ function UserDeviceSessions() {
   }, [])
 
   useEffect(() => {
-    loadDevices()
+    Promise.resolve().then(loadDevices)
     const heartbeat = window.setInterval(() => {
       userAuth.touchCurrentDevice().catch(() => {})
     }, 5 * 60 * 1000)

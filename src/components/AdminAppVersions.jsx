@@ -31,7 +31,7 @@ function AdminAppVersions({ onNotice }) {
   }, [onNotice])
 
   useEffect(() => {
-    loadData()
+    Promise.resolve().then(loadData)
   }, [loadData])
 
   function updateField(event) {

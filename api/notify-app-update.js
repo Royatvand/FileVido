@@ -166,10 +166,16 @@ export default async function handler(req, res) {
     return json(res, 405, { message: 'Method not allowed' })
   }
 
+  const internalRelease = Boolean(
+    process.env.RELEASE_TOKEN &&
+    req.headers['x-release-secret'] === process.env.RELEASE_TOKEN,
+  )
   const accessToken = getBearer(req)
-  const admin = await verifyAdmin(accessToken)
-  if (!admin) {
-    return json(res, 401, { message: 'فقط مدیر می‌تواند اعلان ارسال کند.' })
+  if (!internalRelease) {
+    const admin = await verifyAdmin(accessToken)
+    if (!admin) {
+      return json(res, 401, { message: 'فقط مدیر می‌تواند اعلان ارسال کند.' })
+    }
   }
 
   if (!firebaseConfigured()) {

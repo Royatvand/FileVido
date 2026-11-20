@@ -7,6 +7,7 @@ import { stripIconTokens } from '../lib/iconTokens'
 import RichText from '../components/RichText'
 import SubtitleTip from '../components/SubtitleTip'
 import ShareDialog from '../components/ShareDialog'
+import { LuShare2, LuHeart, LuCircleCheck } from 'react-icons/lu'
 import { formatFileSize } from '../lib/indicators'
 import './VideoPage.css'
 
@@ -177,22 +178,25 @@ function VideoPage({ videoId }) {
             </div>
             <h1>{video.title}</h1>
             <div className="video-meta">{video.instructor && <span>مدرس: {video.instructor}</span>}{video.level && <span>سطح: {video.level}</span>}{video.duration && <span>مدت: {video.duration}</span>}</div>
-            <div className="video-user-actions">
-              <button type="button" className="video-user-action video-share-trigger" onClick={() => setShareOpen(true)} aria-haspopup="dialog">
-                <span aria-hidden="true">↗</span> اشتراک‌گذاری ویدیو
+            <div className="video-actions" role="toolbar" aria-label="عملیات ویدیو">
+              <button type="button" className="video-action video-action--share" onClick={() => setShareOpen(true)} aria-haspopup="dialog">
+                <LuShare2 aria-hidden="true" />
+                <span>اشتراک‌گذاری</span>
               </button>
+              {databaseVideo && (
+                <>
+                  <button type="button" className={'video-action' + (isFavorite ? ' is-active' : '')} onClick={handleFavorite} disabled={actionLoading} aria-pressed={isFavorite}>
+                    <LuHeart aria-hidden="true" className={isFavorite ? 'is-filled' : ''} />
+                    <span>{isFavorite ? 'در علاقه‌مندی‌ها' : 'علاقه‌مندی'}</span>
+                  </button>
+                  <button type="button" className={'video-action' + (isCompleted ? ' is-active' : '')} onClick={handleCompletion} disabled={actionLoading} aria-pressed={isCompleted}>
+                    <LuCircleCheck aria-hidden="true" className={isCompleted ? 'is-filled-check' : ''} />
+                    <span>{isCompleted ? 'خوانده‌شده' : 'علامت‌گذاری خوانده‌شده'}</span>
+                  </button>
+                </>
+              )}
+              {actionError && <span className="video-user-action-error" role="alert">{actionError}</span>}
             </div>
-            {databaseVideo && (
-              <div className="video-user-actions">
-                <button type="button" className={'video-user-action ' + (isFavorite ? 'is-active' : '')} onClick={handleFavorite} disabled={actionLoading}>
-                  {isFavorite ? '♥ ذخیره‌شده در علاقه‌مندی‌ها' : '♡ افزودن به علاقه‌مندی‌ها'}
-                </button>
-                <button type="button" className={'video-user-action ' + (isCompleted ? 'is-active' : '')} onClick={handleCompletion} disabled={actionLoading}>
-                  {isCompleted ? '✓ آموزش تکمیل شد' : '○ علامت‌گذاری به‌عنوان تکمیل‌شده'}
-                </button>
-                {actionError && <span className="video-user-action-error" role="alert">{actionError}</span>}
-              </div>
-            )}
             <div className="video-description"><h2>درباره این ویدیو</h2><p><RichText text={video.description} /></p></div>
             {video.tags.length > 0 && <div className="video-tags" aria-label="برچسب‌های ویدیو">{video.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
           </section>

@@ -167,8 +167,8 @@ export default async function handler(req, res) {
   }
 
   const internalRelease = Boolean(
-    process.env.GITHUB_RELEASE_TOKEN &&
-    req.headers['x-release-secret'] === process.env.GITHUB_RELEASE_TOKEN,
+    process.env.RELEASE_TOKEN &&
+    req.headers['x-release-secret'] === process.env.RELEASE_TOKEN,
   )
   const accessToken = getBearer(req)
   if (!internalRelease) {

@@ -31,7 +31,7 @@ export default async function handler(req, res) {
       'X-GitHub-Api-Version': '2022-11-28',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ ref: 'master', inputs: { changelog, is_mandatory: body?.is_mandatory === true ? 'true' : 'false' } }),
+    body: JSON.stringify({ ref: 'feature/automatic-android-releases', inputs: { changelog, is_mandatory: body?.is_mandatory === true ? 'true' : 'false' } }),
   })
   if (!dispatch.ok) {
     const detail = await dispatch.text()

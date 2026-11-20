@@ -5,7 +5,7 @@ function send(res, status, body) { res.status(status).json(body) }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { message: 'Method not allowed' })
-  if (!process.env.RELEASE_WEBHOOK_SECRET || req.headers['x-release-secret'] !== process.env.RELEASE_WEBHOOK_SECRET) {
+  if (!process.env.GITHUB_RELEASE_TOKEN || req.headers['x-release-secret'] !== process.env.GITHUB_RELEASE_TOKEN) {
     return send(res, 401, { message: 'Unauthorized release callback' })
   }
   if (!SUPABASE_URL || !SERVICE_ROLE) return send(res, 503, { message: 'Supabase server configuration is incomplete.' })
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
   try {
     const notify = await fetch(`${process.env.APP_BASE_URL || 'https://chartmasters.top'}/api/notify-app-update`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-release-secret': process.env.RELEASE_WEBHOOK_SECRET },
+      headers: { 'Content-Type': 'application/json', 'x-release-secret': process.env.GITHUB_RELEASE_TOKEN },
       body: JSON.stringify({ ...payload, version_id: rows[0].id }),
     })
     const result = await notify.json().catch(() => ({}))

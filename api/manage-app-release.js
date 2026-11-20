@@ -23,13 +23,15 @@ async function verifyAdmin(token) {
   return { user }
 }
 
-async function dbRequest(path, options = {}) {
-  if (!SUPABASE_URL || !SERVICE_ROLE) throw new Error('Supabase server configuration is incomplete.')
+async function dbRequest(path, options = {}, adminToken = null) {
+  const apiKey = SERVICE_ROLE || PUBLISHABLE
+  const authorization = SERVICE_ROLE || adminToken
+  if (!SUPABASE_URL || !apiKey || !authorization) throw new Error('Supabase server configuration is incomplete.')
   const response = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
     method: options.method || 'GET',
     headers: {
-      apikey: SERVICE_ROLE,
-      Authorization: 'Bearer ' + SERVICE_ROLE,
+      apikey: apiKey,
+      Authorization: 'Bearer ' + authorization,
       'Content-Type': 'application/json',
       ...(options.method === 'PATCH' ? { Prefer: 'return=representation' } : {}),
     },
@@ -44,7 +46,7 @@ async function dbRequest(path, options = {}) {
   return data
 }
 
-async function sendReleaseNotification(release, fromRolloutPercentage = 0) {
+async function sendReleaseNotification(release, fromRolloutPercentage = 0, adminToken = null) {
   if (!process.env.RELEASE_TOKEN) {
     return { status: 'not_configured', message: 'مرحله انتشار ذخیره شد؛ توکن اعلان سرور تنظیم نشده است.' }
   }
@@ -57,6 +59,7 @@ async function sendReleaseNotification(release, fromRolloutPercentage = 0) {
       headers: {
         'Content-Type': 'application/json',
         'x-release-secret': process.env.RELEASE_TOKEN,
+        ...(adminToken ? { Authorization: 'Bearer ' + adminToken } : {}),
       },
       body: JSON.stringify({ ...release, from_rollout_percentage: fromRolloutPercentage }),
       signal: AbortSignal.timeout(20000),
@@ -74,10 +77,11 @@ async function sendReleaseNotification(release, fromRolloutPercentage = 0) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { message: 'Method not allowed' })
 
-  const auth = await verifyAdmin(getBearer(req))
+  const adminToken = getBearer(req)
+  const auth = await verifyAdmin(adminToken)
   if (auth.error === 'session') return send(res, 401, { message: 'نشست مدیر نامعتبر یا منقضی است.' })
   if (auth.error === 'forbidden') return send(res, 403, { message: 'فقط مدیر می‌تواند انتشار نسخه را مدیریت کند.' })
-  if (!SERVICE_ROLE) return send(res, 503, { message: 'کلید سرویس Supabase روی سرور تنظیم نشده است.' })
+  if (!SERVICE_ROLE && !PUBLISHABLE) return send(res, 503, { message: 'کلید Supabase روی سرور تنظیم نشده است.' })
 
   let body = req.body
   if (typeof body === 'string') {
@@ -91,12 +95,12 @@ export default async function handler(req, res) {
 
   try {
     const columns = 'id,version_code,version_name,changelog,download_url,is_mandatory,is_published,published_at,rollout_percentage,is_paused,paused_at'
-    const rows = await dbRequest('app_versions?select=' + columns + '&id=eq.' + encodeURIComponent(versionId) + '&limit=1')
+    const rows = await dbRequest('app_versions?select=' + columns + '&id=eq.' + encodeURIComponent(versionId) + '&limit=1', {}, adminToken)
     const release = rows?.[0]
     if (!release) return send(res, 404, { message: 'نسخه موردنظر پیدا نشد.' })
     if (!release.is_published) return send(res, 409, { message: 'فقط نسخه منتشرشده قابل مدیریت است.' })
 
-    const publishedRows = await dbRequest('app_versions?select=' + columns + '&is_published=eq.true&order=version_code.desc')
+    const publishedRows = await dbRequest('app_versions?select=' + columns + '&is_published=eq.true&order=version_code.desc', {}, adminToken)
     if (publishedRows?.[0]?.id !== release.id) {
       return send(res, 409, { message: 'برای جلوگیری از تغییر نسخه اشتباه، فقط آخرین نسخه منتشرشده قابل مدیریت است.' })
     }
@@ -120,7 +124,7 @@ export default async function handler(req, res) {
       })
       updatedRelease = result?.[0]
       if (!updatedRelease) throw new Error('به‌روزرسانی مرحله انتشار انجام نشد.')
-      notification = await sendReleaseNotification(updatedRelease, currentStage)
+      notification = await sendReleaseNotification(updatedRelease, currentStage, adminToken)
       return send(res, 200, {
         status: 'updated',
         version: updatedRelease,
@@ -152,7 +156,7 @@ export default async function handler(req, res) {
       })
       updatedRelease = result?.[0]
       if (!updatedRelease) throw new Error('ادامه انتشار انجام نشد.')
-      notification = await sendReleaseNotification(updatedRelease)
+      notification = await sendReleaseNotification(updatedRelease, 0, adminToken)
       return send(res, 200, {
         status: 'resumed',
         version: updatedRelease,

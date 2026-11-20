@@ -29,16 +29,41 @@ export default async function handler(req, res) {
     published_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }
-  const saved = await fetch(`${SUPABASE_URL}/rest/v1/app_versions?on_conflict=version_code`, {
-    method: 'POST',
-    headers: {
-      apikey: SERVICE_ROLE,
-      Authorization: `Bearer ${SERVICE_ROLE}`,
-      'Content-Type': 'application/json',
-      Prefer: 'resolution=merge-duplicates,return=representation',
-    },
-    body: JSON.stringify(payload),
-  })
+
+  const existingResponse = await fetch(
+    `${SUPABASE_URL}/rest/v1/app_versions?select=id,version_code,rollout_percentage,is_paused&version_code=eq.${versionCode}&limit=1`,
+    { headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` } },
+  )
+  const existingRows = await existingResponse.json().catch(() => [])
+  if (!existingResponse.ok) {
+    console.error('Unable to check existing app release', existingResponse.status)
+    return send(res, 502, { message: 'بررسی نسخه قبلی در Supabase ناموفق بود.' })
+  }
+
+  let saved
+  if (existingRows?.[0]?.id) {
+    saved = await fetch(`${SUPABASE_URL}/rest/v1/app_versions?id=eq.${existingRows[0].id}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: SERVICE_ROLE,
+        Authorization: `Bearer ${SERVICE_ROLE}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify(payload),
+    })
+  } else {
+    saved = await fetch(`${SUPABASE_URL}/rest/v1/app_versions`, {
+      method: 'POST',
+      headers: {
+        apikey: SERVICE_ROLE,
+        Authorization: `Bearer ${SERVICE_ROLE}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify({ ...payload, rollout_percentage: 10, is_paused: false, paused_at: null }),
+    })
+  }
   const rows = await saved.json().catch(() => [])
   if (!saved.ok || !rows?.[0]?.id) {
     console.error('Unable to register app release', saved.status, JSON.stringify(rows).slice(0, 500))
@@ -47,10 +72,13 @@ export default async function handler(req, res) {
 
   let notification = 'اعلان خودکار ارسال نشد.'
   try {
-    const notify = await fetch(`${process.env.APP_BASE_URL || 'https://chartmasters.top'}/api/notify-app-update`, {
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'https://www.chartmasters.top'
+    const notify = await fetch(`${baseUrl}/api/notify-app-update`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-release-secret': process.env.RELEASE_TOKEN },
-      body: JSON.stringify({ ...payload, version_id: rows[0].id }),
+      body: JSON.stringify(rows[0]),
     })
     const result = await notify.json().catch(() => ({}))
     notification = result.message || (notify.ok ? 'اعلان ارسال شد.' : 'ثبت نسخه انجام شد؛ ارسال اعلان با خطا مواجه شد.')

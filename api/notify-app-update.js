@@ -55,7 +55,7 @@ async function listFcmTokens(adminToken) {
   if (!key || !auth) return []
 
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/fcm_tokens?select=id,token&platform=eq.android&order=last_seen_at.desc&limit=5000`,
+    `${SUPABASE_URL}/rest/v1/fcm_tokens?select=id,token,device_key&platform=eq.android&order=last_seen_at.desc&limit=5000`,
     {
       headers: {
         apikey: key,
@@ -68,6 +68,23 @@ async function listFcmTokens(adminToken) {
     throw new Error('خواندن توکن‌های اعلان از Supabase ناموفق بود.')
   }
   return (await response.json().catch(() => [])) || []
+}
+
+function getRolloutBucket(deviceKey, versionCode) {
+  if (!deviceKey) return null
+  const value = `${versionCode}:${deviceKey}`
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0) % 100
+}
+
+function isDeviceInRollout(row, versionCode, rolloutPercentage) {
+  if (rolloutPercentage >= 100) return true
+  const bucket = getRolloutBucket(row.device_key, versionCode)
+  return bucket !== null && bucket < rolloutPercentage
 }
 
 function firebaseConfigured() {
@@ -230,6 +247,18 @@ export default async function handler(req, res) {
     return json(res, 400, { message: 'توضیحات تغییرات بیش از حد طولانی است.' })
   }
 
+  const rolloutPercentage = Number(body.rollout_percentage ?? 100)
+  if (![10, 25, 50, 100].includes(rolloutPercentage)) {
+    return json(res, 400, { message: 'درصد انتشار نسخه معتبر نیست.' })
+  }
+  if (body.is_paused === true) {
+    return json(res, 200, {
+      status: 'paused',
+      sent: 0,
+      message: 'انتشار این نسخه متوقف است؛ اعلان جدیدی ارسال نشد.',
+    })
+  }
+
   const versionPayload = {
     version_name: versionName,
     version_code: versionCode,
@@ -252,11 +281,20 @@ export default async function handler(req, res) {
   } catch {
     return json(res, 502, { message: 'دریافت فهرست دستگاه‌ها از Supabase ناموفق بود.' })
   }
-  if (!tokens.length) {
+  const eligibleTokens = tokens.filter((row) =>
+    isDeviceInRollout(row, versionCode, rolloutPercentage),
+  )
+  if (!eligibleTokens.length) {
     return json(res, 200, {
       status: 'ok',
       sent: 0,
-      message: 'هیچ توکن FCM ثبت‌شده‌ای پیدا نشد. پس از نصب اپ و اعطای مجوز اعلان، توکن‌ها ذخیره می‌شوند.',
+      failed: 0,
+      total: 0,
+      registered_tokens: tokens.length,
+      rollout_percentage: rolloutPercentage,
+      message: tokens.length
+        ? `درصد انتشار ${rolloutPercentage}٪ است؛ هنوز توکن واجد شرایطی برای این مرحله پیدا نشد.`
+        : 'هیچ توکن FCM ثبت‌شده‌ای پیدا نشد. پس از نصب اپ و اعطای مجوز اعلان، توکن‌ها ذخیره می‌شوند.',
     })
   }
 
@@ -272,7 +310,7 @@ export default async function handler(req, res) {
 
   let sent = 0
   let failed = 0
-  for (const row of tokens) {
+  for (const row of eligibleTokens) {
     try {
       const outcome = await sendFcmMessage(googleToken, row.token, {
         title,
@@ -293,7 +331,9 @@ export default async function handler(req, res) {
     status: 'ok',
     sent,
     failed,
-    total: tokens.length,
-    message: `اعلان برای ${sent} از ${tokens.length} دستگاه ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
+    total: eligibleTokens.length,
+    registered_tokens: tokens.length,
+    rollout_percentage: rolloutPercentage,
+    message: `اعلان مرحله ${rolloutPercentage}٪ برای ${sent} از ${eligibleTokens.length} دستگاه واجد شرایط ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
   })
 }

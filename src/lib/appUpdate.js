@@ -64,12 +64,33 @@ async function publicRequest(path) {
   return result
 }
 
-/** Fetch the highest published version (by version_code). */
-export async function fetchLatestPublishedVersion() {
+/** Stable, release-specific device bucket shared with the server-side FCM sender. */
+function getRolloutBucket(deviceKey, versionCode) {
+  if (!deviceKey) return null
+  const value = `${versionCode}:${deviceKey}`
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0) % 100
+}
+
+function isInReleaseRollout(release, deviceKey) {
+  if (release.is_paused) return false
+  const percentage = Number(release.rollout_percentage ?? 100)
+  if (!Number.isFinite(percentage) || percentage <= 0) return false
+  if (percentage >= 100) return true
+  const bucket = getRolloutBucket(deviceKey, release.version_code)
+  return bucket !== null && bucket < percentage
+}
+
+/** Return the newest published, unpaused release assigned to this device. */
+export async function fetchLatestPublishedVersion(deviceKey = getDeviceKey()) {
   const rows = await publicRequest(
-    '/rest/v1/app_versions?select=id,version_code,version_name,changelog,download_url,is_mandatory,published_at&is_published=eq.true&order=version_code.desc&limit=1',
+    '/rest/v1/app_versions?select=id,version_code,version_name,changelog,download_url,is_mandatory,published_at,rollout_percentage,is_paused&is_published=eq.true&order=version_code.desc&limit=50',
   )
-  return rows?.[0] || null
+  return rows?.find((row) => isInReleaseRollout(row, deviceKey)) || null
 }
 
 /** Current native app info from Capacitor App plugin. */
@@ -97,12 +118,13 @@ export async function getNativeAppInfo() {
 export async function checkForAppUpdate() {
   if (!isAndroidNative()) return null
 
-  const [installed, latest] = await Promise.all([
-    getNativeAppInfo(),
-    fetchLatestPublishedVersion(),
-  ])
+  const installed = await getNativeAppInfo()
+  if (!installed) return null
 
-  if (!installed || !latest) return null
+  // Create the stable device identity even when push notifications are disabled.
+  const deviceKey = getDeviceKey()
+  const latest = await fetchLatestPublishedVersion(deviceKey)
+  if (!latest) return null
   if (latest.version_code <= installed.versionCode) return null
 
   // Optional updates the user already dismissed stay hidden until a newer code appears.

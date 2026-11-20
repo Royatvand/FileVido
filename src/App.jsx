@@ -159,8 +159,8 @@ function App() {
 
   return (
     <div className="app-shell">
-      {isChart && <ThemeToggle />}
-      <Header />
+      {isChart && <ThemeToggle className="theme-toggle--chart" />}
+      {!isChart && <Header />}
       {isHome ? (
         <main className="main-content" id="home">
           <section className="hero-section">

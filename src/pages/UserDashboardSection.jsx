@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesCombined, LuClock3 } from 'react-icons/lu'
 import { userAuth, userLearning } from '../lib/supabase'
 import UserDashboardSidebar from '../components/UserDashboardSidebar'
@@ -27,6 +27,13 @@ function formatDate(value) {
 const jalaliMonthName = (date) => new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'short' }).format(date)
 
 function LearningActivityHeatmap({ history }) {
+  const scrollRef = useRef(null)
+  // نقشه از سال قبل شروع می‌شود و جدیدترین هفته‌ها انتهای آن است؛ در موبایل باید به انتها اسکرول شود تا فعالیت اخیر دیده شود
+  useEffect(() => {
+    const element = scrollRef.current
+    if (element) element.scrollLeft = element.scrollWidth
+  }, [history])
+
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const start = new Date(today)
@@ -71,7 +78,7 @@ function LearningActivityHeatmap({ history }) {
         <div><h3>نقشه فعالیت روزانه</h3><p>هر خانه نشان‌دهنده تعداد ویدیوهایی است که در آن روز تماشا کرده‌ای.</p></div>
         <div className="learning-activity-totals"><strong>{activeDays.toLocaleString('fa-IR')}</strong><span>روز فعال در یک سال اخیر</span></div>
       </div>
-      <div className="learning-heatmap-scroll" dir="ltr">
+      <div className="learning-heatmap-scroll" dir="ltr" ref={scrollRef}>
         <div className="learning-heatmap-months">{monthLabels.map((month, index) => <span key={index}>{month}</span>)}</div>
         <div className="learning-heatmap-body">
           <div className="learning-heatmap-weekdays"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div>

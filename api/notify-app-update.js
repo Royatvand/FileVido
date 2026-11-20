@@ -223,9 +223,10 @@ export default async function handler(req, res) {
     ? `آپدیت اجباری ${versionName}`
     : `نسخه جدید ${versionName} آماده است`
   const changelog = versionPayload.changelog.trim()
-  const bodyText = changelog
-    ? changelog.slice(0, 180)
+  const updateSummary = changelog
+    ? changelog.slice(0, 140)
     : 'برای دریافت آخرین قابلیت‌ها، اپ چارت مسترز را به‌روز کنید.'
+  const bodyText = `${updateSummary}\n\n✈️ مشکل در نصب؟ پشتیبانی تلگرام: @Chartmasters_admin`
 
   let tokens
   try {

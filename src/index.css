@@ -1227,3 +1227,32 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media(prefers-reduced-motion:reduce) {
   .user-dashboard-stat-card,.learning-metric-card,.user-dashboard-course-card,.user-device-item,.admin-stats article { transition:none; }
 }
+
+
+/* Keep the theme switch and login action together in the header */
+.site-header .header-controls {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.site-header .header-controls > .theme-toggle {
+  position: static;
+  inset: auto;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+@media (max-width: 540px) {
+  .site-header .header-controls { gap: 6px; }
+  .site-header .header-controls > .theme-toggle {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+}

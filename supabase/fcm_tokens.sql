@@ -59,3 +59,6 @@ create policy "Admins can delete FCM tokens"
 
 grant select, insert on public.fcm_tokens to anon, authenticated;
 grant update, delete on public.fcm_tokens to authenticated;
+
+-- The server-side notification API reads device tokens with the service-role key.
+grant select on table public.fcm_tokens to service_role;

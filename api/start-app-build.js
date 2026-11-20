@@ -7,7 +7,7 @@ function send(res, status, body) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { message: 'Method not allowed' })
-  const bearer = String(req.headers.authorization || '').match(/^Bearer\\s+(.+)$/i)?.[1]
+  const bearer = String(req.headers.authorization || '').match(/^Bearer\s+(.+)$/i)?.[1]
   if (!SUPABASE_URL || !SUPABASE_KEY || !bearer) return send(res, 401, { message: 'نشست مدیر معتبر نیست.' })
 
   const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {

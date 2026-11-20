@@ -7,7 +7,7 @@ function send(res, status, body) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { message: 'Method not allowed' })
-  const bearer = String(req.headers.authorization || '').match(/^Bearer\s+(.+)$/i)?.[1]
+  const bearer = String(req.headers.authorization || '').match(/^Bearer\\s+(.+)$/i)?.[1]
   if (!SUPABASE_URL || !SUPABASE_KEY || !bearer) return send(res, 401, { message: 'نشست مدیر معتبر نیست.' })
 
   const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
       'X-GitHub-Api-Version': '2022-11-28',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ ref: 'feature/automatic-android-releases', inputs: { changelog, is_mandatory: body?.is_mandatory === true ? 'true' : 'false' } }),
+    body: JSON.stringify({ ref: 'master', inputs: { changelog, is_mandatory: body?.is_mandatory === true ? 'true' : 'false' } }),
   })
   if (!dispatch.ok) {
     const detail = await dispatch.text()

@@ -254,6 +254,14 @@ export const userAuth = {
   async getValidSession() {
     return getValidUserSession()
   },
+  async fetchCurrentUser() {
+    const session = await getValidUserSession()
+    if (!session?.access_token) return null
+    const user = await request('/auth/v1/user', {}, session.access_token)
+    const current = getUserSession()
+    if (current && user?.id) saveUserSession({ ...current, user })
+    return user
+  },
   async registerCurrentDevice() {
     return registerDeviceSession(await getValidUserSession())
   },

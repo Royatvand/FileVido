@@ -3,6 +3,7 @@ import { LuBookOpen, LuHeart, LuPlay, LuCircleCheck, LuArrowLeft, LuChartNoAxesC
 import { userAuth, userLearning } from '../lib/supabase'
 import UserDashboardSidebar from '../components/UserDashboardSidebar'
 import UserDeviceSessions from '../components/UserDeviceSessions'
+import FontPicker from '../components/FontPicker'
 import useUserDashboard from '../hooks/useUserDashboard'
 
 const sections = {
@@ -10,7 +11,7 @@ const sections = {
   history: { title: 'تاریخچه تماشا', description: 'ویدیوهایی که باز کرده‌ای؛ از آخرین بازدید به قدیمی‌تر.' },
   courses: { title: 'دوره‌های من', description: 'دوره‌هایی که با تماشای یکی از جلسه‌هایشان شروع کرده‌ای.' },
   progress: { title: 'پیشرفت یادگیری', description: 'نمای کلی از جلسه‌های تکمیل‌شده و مسیر دوره‌ها.' },
-  profile: { title: 'تنظیمات پروفایل', description: 'اطلاعات نمایشی حساب کاربری‌ات را مدیریت کن.' },
+  profile: { title: 'تنظیمات پروفایل', description: 'نام نمایشی و فونت سایت را برای حساب خودت تنظیم کن.' },
 }
 
 function courseActionLabel(course) {
@@ -229,7 +230,15 @@ function UserDashboardSection({ section }) {
           )}
 
           {section === 'profile' && (
-            <section className="user-dashboard-panel user-dashboard-full-panel">
+            <>
+              <section className="user-dashboard-panel user-dashboard-full-panel">
+                <FontPicker
+                  onSaved={(updatedUser) => setUser((current) => ({ ...current, user_metadata: updatedUser.user_metadata || { ...current.user_metadata, ui_font: updatedUser.user_metadata?.ui_font } }))}
+                  onError={setError}
+                  onNotice={setNotice}
+                />
+              </section>
+              <section className="user-dashboard-panel user-dashboard-full-panel">
               <div className="user-dashboard-panel-heading"><div><h3>اطلاعات حساب</h3></div></div>
               <form className="user-dashboard-profile-form" onSubmit={saveProfile}>
                 <label htmlFor="profile-name">نام نمایشی</label>
@@ -241,6 +250,7 @@ function UserDashboardSection({ section }) {
               </form>
               <UserDeviceSessions />
             </section>
+            </>
           )}
 
           <p className="user-dashboard-data-note">اطلاعات این بخش به حساب کاربری تو متصل است و با ورود دوباره هم باقی می‌ماند.</p>

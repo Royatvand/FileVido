@@ -113,7 +113,7 @@ jobs:
       - name: Register release and notify users
         if: github.event_name == 'workflow_dispatch'
         env:
-          RELEASE_WEBHOOK_SECRET: ${{ secrets.RELEASE_WEBHOOK_SECRET }}
+          GITHUB_RELEASE_TOKEN: ${{ secrets.GITHUB_RELEASE_TOKEN }}
           CHANGELOG: ${{ inputs.changelog }}
           IS_MANDATORY: ${{ inputs.is_mandatory }}
           VERSION_NAME: ${{ steps.version.outputs.name }}
@@ -123,5 +123,5 @@ jobs:
           asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/app-release.apk"
           curl --fail-with-body --silent --show-error -X POST "https://chartmasters.top/api/register-app-release" \
             -H "Content-Type: application/json" \
-            -H "x-release-secret: ${RELEASE_WEBHOOK_SECRET}" \
+            -H "x-release-secret: ${GITHUB_RELEASE_TOKEN}" \
             -d "$(jq -n --arg name "$VERSION_NAME" --argjson code "$VERSION_CODE" --arg url "$asset_url" --arg notes "$CHANGELOG" --argjson mandatory "$IS_MANDATORY" '{version_name:$name,version_code:$code,download_url:$url,changelog:$notes,is_mandatory:$mandatory}')"

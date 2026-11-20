@@ -5,6 +5,7 @@ import AdminBanners from '../components/AdminBanners'
 import AdminPlaylists from '../components/AdminPlaylists'
 import AdminIndicators from '../components/AdminIndicators'
 import AdminAppVersions from '../components/AdminAppVersions'
+import AdminOverview from '../components/AdminOverview'
 import { extractAparatId } from '../lib/aparat'
 
 const emptyForm = {
@@ -31,7 +32,9 @@ function AdminDashboard() {
   const [coverPreview, setCoverPreview] = useState('')
   const [aparatSource, setAparatSource] = useState('')
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('videos')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [activeTab, setActiveTab] = useState('overview')
   const [newCategory, setNewCategory] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -64,9 +67,13 @@ function AdminDashboard() {
 
   const filteredVideos = useMemo(() => {
     const term = search.trim().toLowerCase()
-    if (!term) return videos
-    return videos.filter((video) => `${video.title} ${video.description}`.toLowerCase().includes(term))
-  }, [videos, search])
+    return videos.filter((video) => {
+      const matchesTerm = !term || `${video.title} ${video.description}`.toLowerCase().includes(term)
+      const matchesStatus = statusFilter === 'all' || (statusFilter === 'published' ? video.status === 'published' : video.status !== 'published')
+      const matchesCategory = !categoryFilter || String(video.category_id) === categoryFilter
+      return matchesTerm && matchesStatus && matchesCategory
+    })
+  }, [videos, search, statusFilter, categoryFilter])
 
   function updateField(event) {
     const { name, value, type, checked } = event.target
@@ -199,6 +206,60 @@ function AdminDashboard() {
     }
   }
 
+  async function handleTogglePublish(video) {
+    const next = video.status === 'published' ? 'draft' : 'published'
+    try {
+      await supabase.update('videos', video.id, {
+        status: next,
+        published_at: next === 'published' ? new Date().toISOString() : video.published_at,
+        updated_at: new Date().toISOString(),
+      })
+      setNotice({ type: 'success', text: next === 'published' ? 'ویدیو منتشر شد.' : 'ویدیو به پیش‌نویس برگشت.' })
+      await loadData()
+    } catch (error) {
+      setNotice({ type: 'error', text: error.message })
+    }
+  }
+
+  async function handleDuplicate(video) {
+    try {
+      await supabase.insert('videos', {
+        title: video.title + ' (کپی)',
+        slug: `${video.slug || 'video'}-copy-${Date.now().toString(36)}`,
+        description: video.description || '',
+        aparat_id: video.aparat_id || '',
+        cover_url: video.cover_url || '',
+        category_id: video.category_id || null,
+        duration: video.duration || '',
+        level: video.level || 'مقدماتی',
+        instructor: video.instructor || '',
+        tags: video.tags || [],
+        is_featured: false,
+        status: 'draft',
+        published_at: null,
+      })
+      setNotice({ type: 'success', text: 'یک پیش‌نویس کپی ساخته شد.' })
+      await loadData()
+    } catch (error) {
+      setNotice({ type: 'error', text: error.message })
+    }
+  }
+
+  async function handleDeleteCategory(category) {
+    if (videos.some((video) => video.category_id === category.id)) {
+      setNotice({ type: 'error', text: 'این دسته به ویدیو وصل است. اول ویدیوها را جابه‌جا کن.' })
+      return
+    }
+    if (!window.confirm(`دسته «${category.name}» حذف شود؟`)) return
+    try {
+      await supabase.remove('categories', category.id)
+      setNotice({ type: 'success', text: 'دسته‌بندی حذف شد.' })
+      await loadData()
+    } catch (error) {
+      setNotice({ type: 'error', text: error.message })
+    }
+  }
+
   async function handleLogout() {
     await supabase.signOut()
     window.location.href = '/admin/login'
@@ -206,6 +267,7 @@ function AdminDashboard() {
 
   const tabTitle =
     activeTab === 'videos' ? 'ویدیوها'
+      : activeTab === 'overview' ? 'نمای کلی'
       : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید')
         : activeTab === 'banners' ? 'اسلایدر صفحه اصلی'
           : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها'
@@ -218,6 +280,7 @@ function AdminDashboard() {
       <aside className="admin-sidebar">
         <a className="admin-sidebar-brand" href="/"><img className="admin-brand-mark" src="/chartmasters-icon.webp" alt="" /><span>Chart<span>Masters</span><small>مدیریت محتوا</small></span></a>
         <div className="admin-side-label">مدیریت</div>
+        <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>◈ <span>نمای کلی</span></button>
         <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('videos') }}>▤ <span>ویدیوها</span></button>
         <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form'); loadData() }}>＋ <span>افزودن ویدیو</span></button>
         <button className={activeTab === 'categories' ? 'active' : ''} onClick={() => setActiveTab('categories')}>◫ <span>دسته‌بندی‌ها</span></button>
@@ -239,6 +302,10 @@ function AdminDashboard() {
 
         {notice.text && <div className={`admin-alert ${notice.type || ''}`}>{notice.text}<button onClick={() => setNotice({ type: '', text: '' })}>×</button></div>}
 
+        {activeTab === 'overview' && (
+          <AdminOverview videos={videos} categories={categories} playlists={playlists} onOpen={(tab) => { if (tab === 'form') resetForm(); setActiveTab(tab) }} />
+        )}
+
         {activeTab === 'videos' && (
           <>
             <div className="admin-stats">
@@ -249,10 +316,21 @@ function AdminDashboard() {
             </div>
             <div className="admin-panel">
               <div className="admin-panel-heading"><div><h2>کتابخانه ویدیوها</h2><p>مدیریت و انتشار محتوای آموزشی</p></div><button className="admin-primary-button compact" onClick={() => { resetForm(); setActiveTab('form') }}>＋ ویدیوی جدید</button></div>
-              <div className="admin-search"><span>⌕</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="جست‌وجوی عنوان ویدیو..." /></div>
+              <div className="admin-library-tools">
+                <div className="admin-search"><span>⌕</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="جست‌وجوی عنوان ویدیو..." /></div>
+                <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="فیلتر وضعیت">
+                  <option value="all">همه وضعیت‌ها</option>
+                  <option value="published">منتشرشده</option>
+                  <option value="draft">پیش‌نویس</option>
+                </select>
+                <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} aria-label="فیلتر دسته‌بندی">
+                  <option value="">همه دسته‌ها</option>
+                  {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                </select>
+              </div>
               {loading ? <div className="admin-empty">در حال دریافت اطلاعات...</div> : filteredVideos.length === 0 ? <div className="admin-empty">هنوز ویدیویی ثبت نشده است.</div> : (
                 <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>ویدیو</th><th>دسته‌بندی</th><th>وضعیت</th><th>تاریخ ثبت</th><th>عملیات</th></tr></thead><tbody>
-                  {filteredVideos.map((video) => <tr key={video.id}><td><div className="admin-video-cell"><img src={video.cover_url || '/covers/cover-1.svg'} alt="" /><span><strong>{video.title}</strong><small>{video.aparat_id}</small></span></div></td><td>{categories.find((item) => item.id === video.category_id)?.name || '—'}</td><td><span className={`admin-status ${video.status}`}>{video.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</span></td><td>{new Date(video.created_at).toLocaleDateString('fa-IR')}</td><td><div className="admin-row-actions"><button onClick={() => startEdit(video)}>ویرایش</button><button className="danger" onClick={() => handleDelete(video)}>حذف</button><a href={`/video/${video.slug}`} target="_blank" rel="noreferrer">مشاهده</a></div></td></tr>)}
+                  {filteredVideos.map((video) => <tr key={video.id}><td><div className="admin-video-cell"><img src={video.cover_url || '/covers/cover-1.svg'} alt="" /><span><strong>{video.title}</strong><small>{video.aparat_id}</small></span></div></td><td>{categories.find((item) => item.id === video.category_id)?.name || '—'}</td><td><span className={`admin-status ${video.status}`}>{video.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</span></td><td>{new Date(video.created_at).toLocaleDateString('fa-IR')}</td><td><div className="admin-row-actions"><button onClick={() => handleTogglePublish(video)}>{video.status === 'published' ? 'پیش‌نویس' : 'انتشار'}</button><button onClick={() => startEdit(video)}>ویرایش</button><button onClick={() => handleDuplicate(video)}>کپی</button><button className="danger" onClick={() => handleDelete(video)}>حذف</button><a href={`/video/${video.slug}`} target="_blank" rel="noreferrer">مشاهده</a></div></td></tr>)}
                 </tbody></table></div>
               )}
             </div>
@@ -313,7 +391,15 @@ function AdminDashboard() {
           <div className="admin-panel">
             <div className="admin-panel-heading"><div><h2>دسته‌بندی‌های محتوا</h2><p>موضوعات اصلی کتابخانه آموزشی</p></div></div>
             <form className="admin-category-form" onSubmit={handleCategorySubmit}><input value={newCategory} onChange={(event) => setNewCategory(event.target.value)} placeholder="نام دسته‌بندی جدید" required /><button className="admin-primary-button compact" type="submit">افزودن دسته‌بندی</button></form>
-            <div className="admin-category-list">{categories.map((category) => <div key={category.id}><span>{category.name}</span><small>{category.slug}</small></div>)}</div>
+            <div className="admin-category-list">{categories.map((category) => {
+              const used = videos.filter((video) => video.category_id === category.id).length
+              return (
+                <div key={category.id}>
+                  <span>{category.name}</span>
+                  <div className="admin-category-meta"><small>{category.slug} · {used.toLocaleString('fa-IR')} ویدیو</small>{used === 0 && <button type="button" onClick={() => handleDeleteCategory(category)}>حذف</button>}</div>
+                </div>
+              )
+            })}</div>
           </div>
         )}
       </section>

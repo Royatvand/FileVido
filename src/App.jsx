@@ -190,6 +190,12 @@ function App() {
               <div className="floating-chip chip-bottom"><span className="status-dot" /> فارسی و روان</div>
             </div>
           </section>
+          <section className="path-rail" aria-label="مسیرهای چارت مسترز">
+            <a href="/videos"><small>۰۱</small><strong>کتابخانه ویدیو</strong><span>آموزش‌های ترجمه‌شده را از مقدماتی تا پیشرفته ببین.</span></a>
+            <a href="/chart"><small>۰۲</small><strong>نمودار زنده</strong><span>قیمت را همان لحظه روی چارت دنبال کن.</span></a>
+            <a href="/indicators"><small>۰۳</small><strong>ابزار معامله</strong><span>اندیکاتور و اسکریپت برای تریدینگ‌ویو و متاتریدر.</span></a>
+            <a href="/dashboard"><small>۰۴</small><strong>میز کار تو</strong><span>ادامه یادگیری، علاقه‌مندی‌ها و پیشرفت دوره‌ها.</span></a>
+          </section>
           <BannerSlider />
           <VideosSection />
           <HomeIndicators />

@@ -9,19 +9,45 @@ function AdminAppVersions({ onNotice }) {
   const [building, setBuilding] = useState(false)
   const [notifyingId, setNotifyingId] = useState(null)
 
-  const loadData = useCallback(async () => {
-    setLoading(true)
+  // version_code that existed when a build was started; we poll until a newer one is registered
+  const [waitingAfter, setWaitingAfter] = useState(null)
+
+  const loadData = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true)
     try {
       const data = await supabase.select('app_versions', '&order=version_code.desc')
       setRows(data || [])
+      return data || []
     } catch (error) {
-      onNotice?.({ type: 'error', text: error.message })
+      if (!silent) onNotice?.({ type: 'error', text: error.message })
+      return null
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [onNotice])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { Promise.resolve().then(() => loadData()) }, [loadData])
+
+  // The APK build runs in GitHub Actions (~3 min) and registers the row afterwards,
+  // so refresh the list automatically instead of requiring a manual page reload.
+  useEffect(() => {
+    if (waitingAfter === null) return undefined
+    const startedAt = Date.now()
+    const timer = window.setInterval(async () => {
+      const data = await loadData({ silent: true })
+      const newest = data?.[0]?.version_code || 0
+      if (newest > waitingAfter) {
+        window.clearInterval(timer)
+        setWaitingAfter(null)
+        onNotice?.({ type: 'success', text: `نسخه ${data[0].version_name} منتشر و در لیست ثبت شد.` })
+      } else if (Date.now() - startedAt > 12 * 60 * 1000) {
+        window.clearInterval(timer)
+        setWaitingAfter(null)
+        onNotice?.({ type: 'error', text: 'نسخه جدید هنوز ثبت نشده. وضعیت اجرای Build را در GitHub Actions بررسی کنید.' })
+      }
+    }, 15000)
+    return () => window.clearInterval(timer)
+  }, [waitingAfter, loadData, onNotice])
 
   async function handleBuild(event) {
     event.preventDefault()
@@ -45,6 +71,7 @@ function AdminAppVersions({ onNotice }) {
       if (!response.ok) throw new Error(result.message || 'شروع فرایند ساخت نسخه ناموفق بود.')
       setChangelog('')
       setIsMandatory(false)
+      setWaitingAfter(rows[0]?.version_code || 0)
       onNotice?.({ type: 'success', text: 'فرایند ساخت APK شروع شد. پس از Build موفق، Release و ثبت نسخه به‌صورت خودکار انجام می‌شود.' })
     } catch (error) {
       onNotice?.({ type: 'error', text: error.message })
@@ -112,9 +139,10 @@ function AdminAppVersions({ onNotice }) {
 
       <div className="admin-panel-heading" style={{ marginTop: 28 }}>
         <div><h2>نسخه‌های منتشرشده</h2><p>اطلاعات نسخه از فرایند انتشار دریافت می‌شود.</p></div>
-        <button type="button" className="admin-secondary-button" onClick={loadData}>بروزرسانی فهرست</button>
+        <button type="button" className="admin-secondary-button" onClick={() => loadData()}>بروزرسانی فهرست</button>
       </div>
 
+      {waitingAfter !== null && <div className="admin-empty" role="status">در حال ساخت APK... (حدود ۳ دقیقه) لیست خودکار به‌روز می‌شود.</div>}
       {loading ? <div className="admin-empty">در حال دریافت اطلاعات...</div> :
         rows.length === 0 ? <div className="admin-empty">هنوز نسخه‌ای منتشر نشده است.</div> : (
           <div className="admin-table-wrap">

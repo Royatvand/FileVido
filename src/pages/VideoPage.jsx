@@ -6,6 +6,7 @@ import { setPageSeo } from '../lib/seo'
 import { stripIconTokens } from '../lib/iconTokens'
 import RichText from '../components/RichText'
 import SubtitleTip from '../components/SubtitleTip'
+import ShareDialog from '../components/ShareDialog'
 import { formatFileSize } from '../lib/indicators'
 import './VideoPage.css'
 
@@ -18,6 +19,7 @@ function VideoPage({ videoId }) {
   const [isCompleted, setIsCompleted] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState('')
+  const [shareOpen, setShareOpen] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -175,6 +177,11 @@ function VideoPage({ videoId }) {
             </div>
             <h1>{video.title}</h1>
             <div className="video-meta">{video.instructor && <span>مدرس: {video.instructor}</span>}{video.level && <span>سطح: {video.level}</span>}{video.duration && <span>مدت: {video.duration}</span>}</div>
+            <div className="video-user-actions">
+              <button type="button" className="video-user-action video-share-trigger" onClick={() => setShareOpen(true)} aria-haspopup="dialog">
+                <span aria-hidden="true">↗</span> اشتراک‌گذاری ویدیو
+              </button>
+            </div>
             {databaseVideo && (
               <div className="video-user-actions">
                 <button type="button" className={'video-user-action ' + (isFavorite ? 'is-active' : '')} onClick={handleFavorite} disabled={actionLoading}>
@@ -218,6 +225,7 @@ function VideoPage({ videoId }) {
           )}
         </aside>}
       </div>
+      <ShareDialog open={shareOpen} onClose={() => setShareOpen(false)} title={video.title} path={`/video/${encodeURIComponent(video.id)}`} />
       {related.length > 0 && <section className="related-videos"><div className="related-heading"><span className="section-kicker">ادامه یادگیری</span><h2>ویدیوهای مرتبط</h2></div><div className="related-list">{related.map((item) => <a key={item.id} className="related-item" href={'/video/' + item.id}><img src={item.cover} alt="" loading="lazy" /><span>{item.title}</span>{item.category && <small>{item.category}</small>}</a>)}</div></section>}
     </main>
   )

@@ -7,7 +7,7 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [signedIn, setSignedIn] = useState(false)
   const headerRef = useRef(null)
-  const path = window.location.pathname.replace(/\\/+$/, '') || '/'
+  const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isAbout = path === '/about'
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators' || path.startsWith('/indicator/')

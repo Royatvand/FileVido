@@ -149,7 +149,7 @@ function VideoPage({ videoId }) {
     })
   }, [video?.id, video?.title, video?.description, video?.cover])
 
-  if (loading) return <main className="page-content video-page"><div className="admin-empty">در حال بارگذاری ویدیو...</div></main>
+  if (loading) return <main className="page-content video-page"><div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری ویدیو"><span className="user-dashboard-spinner" aria-hidden="true" /></div></main>
   if (!video) return <NotFound />
 
   const demoPlaylist = demoVideo ? getPlaylistForVideo(video.id) : null

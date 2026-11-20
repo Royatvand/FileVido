@@ -28,18 +28,24 @@ function getBearer(req) {
   return match?.[1] || null
 }
 
+/** Returns { user } for an admin, or { error: 'config' | 'session' | 'forbidden' }. */
 async function verifyAdmin(accessToken) {
-  if (!SUPABASE_URL || !accessToken) return null
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      apikey: PUBLISHABLE || SERVICE_ROLE || '',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-  if (!response.ok) return null
-  const user = await response.json()
-  if (user?.app_metadata?.role !== 'admin') return null
-  return user
+  const apikey = PUBLISHABLE || SERVICE_ROLE
+  if (!SUPABASE_URL || !apikey) return { error: 'config' }
+  if (!accessToken) return { error: 'session' }
+  let response
+  try {
+    response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      signal: AbortSignal.timeout(8000),
+      headers: { apikey, Authorization: `Bearer ${accessToken}` },
+    })
+  } catch {
+    return { error: 'config' }
+  }
+  if (!response.ok) return { error: 'session' }
+  const user = await response.json().catch(() => null)
+  if (user?.app_metadata?.role !== 'admin') return { error: 'forbidden' }
+  return { user }
 }
 
 async function listFcmTokens(adminToken) {
@@ -172,9 +178,15 @@ export default async function handler(req, res) {
   )
   const accessToken = getBearer(req)
   if (!internalRelease) {
-    const admin = await verifyAdmin(accessToken)
-    if (!admin) {
-      return json(res, 401, { message: 'فقط مدیر می‌تواند اعلان ارسال کند.' })
+    const auth = await verifyAdmin(accessToken)
+    if (auth.error === 'config') {
+      return json(res, 500, { message: 'متغیرهای Supabase (آدرس و کلید عمومی) روی سرور Vercel تنظیم نشده‌اند.' })
+    }
+    if (auth.error === 'session') {
+      return json(res, 401, { message: 'نشست ادمین نامعتبر یا منقضی است. دوباره وارد پنل ادمین شوید.' })
+    }
+    if (auth.error === 'forbidden') {
+      return json(res, 403, { message: 'فقط مدیر می‌تواند اعلان ارسال کند.' })
     }
   }
 

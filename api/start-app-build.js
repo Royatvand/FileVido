@@ -21,12 +21,12 @@ export default async function handler(req, res) {
   if (typeof body === 'string') { try { body = JSON.parse(body) } catch { body = {} } }
   const changelog = typeof body?.changelog === 'string' ? body.changelog.trim() : ''
   if (!changelog || changelog.length > 5000) return send(res, 400, { message: 'توضیحات تغییرات الزامی است و باید کمتر از ۵۰۰۰ کاراکتر باشد.' })
-  if (!process.env.GITHUB_RELEASE_TOKEN) return send(res, 503, { message: 'متغیر GITHUB_RELEASE_TOKEN در Vercel تنظیم نشده است.' })
+  if (!process.env.RELEASE_TOKEN) return send(res, 503, { message: 'متغیر RELEASE_TOKEN در Vercel تنظیم نشده است.' })
 
   const dispatch = await fetch('https://api.github.com/repos/Royatvand/FileVido/actions/workflows/android-apk.yml/dispatches', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.GITHUB_RELEASE_TOKEN}`,
+      Authorization: `Bearer ${process.env.RELEASE_TOKEN}`,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
       'Content-Type': 'application/json',

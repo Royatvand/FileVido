@@ -44,7 +44,7 @@ async function dbRequest(path, options = {}) {
   return data
 }
 
-async function sendReleaseNotification(release) {
+async function sendReleaseNotification(release, fromRolloutPercentage = 0) {
   if (!process.env.RELEASE_TOKEN) {
     return { status: 'not_configured', message: 'مرحله انتشار ذخیره شد؛ توکن اعلان سرور تنظیم نشده است.' }
   }
@@ -58,7 +58,7 @@ async function sendReleaseNotification(release) {
         'Content-Type': 'application/json',
         'x-release-secret': process.env.RELEASE_TOKEN,
       },
-      body: JSON.stringify(release),
+      body: JSON.stringify({ ...release, from_rollout_percentage: fromRolloutPercentage }),
       signal: AbortSignal.timeout(20000),
     })
     const result = await response.json().catch(() => ({}))
@@ -120,7 +120,7 @@ export default async function handler(req, res) {
       })
       updatedRelease = result?.[0]
       if (!updatedRelease) throw new Error('به‌روزرسانی مرحله انتشار انجام نشد.')
-      notification = await sendReleaseNotification(updatedRelease)
+      notification = await sendReleaseNotification(updatedRelease, currentStage)
       return send(res, 200, {
         status: 'updated',
         version: updatedRelease,
@@ -181,7 +181,8 @@ export default async function handler(req, res) {
         body: { rollout_percentage: 100, is_paused: false, paused_at: null, updated_at: now },
       })
       fallbackRelease = fallbackResult?.[0] || fallbackRelease
-      notification = await sendReleaseNotification(fallbackRelease)
+      // Avoid a misleading push: devices that already installed the higher APK
+      // cannot be downgraded by Android. Their fix must be a higher-code hotfix.
     }
 
     return send(res, 200, {

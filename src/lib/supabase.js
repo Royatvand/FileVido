@@ -216,6 +216,15 @@ async function registerDeviceSession(session) {
       last_seen_at: now,
     }),
   }, session.access_token)
+  // One browser holds one session at a time, so older rows of this device are stale
+  // (previous logins). Remove them so the device is not listed several times.
+  await request(
+    '/rest/v1/user_device_sessions?user_id=eq.' + encodeURIComponent(session.user.id)
+      + '&device_key=eq.' + encodeURIComponent(metadata.device_key)
+      + '&session_id=neq.' + encodeURIComponent(claims.session_id),
+    { method: 'DELETE', headers: { Prefer: 'return=minimal' } },
+    session.access_token,
+  ).catch(() => {})
   return rows?.[0] || null
 }
 
@@ -257,7 +266,16 @@ export const userAuth = {
       {},
       session.access_token,
     )
-    return (rows || []).map((device) => ({ ...device, is_current: device.session_id === claims?.session_id }))
+    // Rows are ordered by last_seen_at desc; keep one row per device (the current session wins).
+    const byDevice = new Map()
+    for (const device of rows || []) {
+      const current = device.session_id === claims?.session_id
+      const existing = byDevice.get(device.device_key)
+      if (!existing || (current && !existing.is_current)) {
+        byDevice.set(device.device_key, { ...device, is_current: current })
+      }
+    }
+    return [...byDevice.values()]
   },
   async touchCurrentDevice() {
     const session = await getValidUserSession()

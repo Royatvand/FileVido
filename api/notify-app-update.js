@@ -81,10 +81,10 @@ function getRolloutBucket(deviceKey, versionCode) {
   return (hash >>> 0) % 100
 }
 
-function isDeviceInRollout(row, versionCode, rolloutPercentage) {
-  if (rolloutPercentage >= 100) return true
+function isDeviceInRollout(row, versionCode, fromRolloutPercentage, rolloutPercentage) {
   const bucket = getRolloutBucket(row.device_key, versionCode)
-  return bucket !== null && bucket < rolloutPercentage
+  if (bucket === null) return fromRolloutPercentage === 0 && rolloutPercentage >= 100
+  return bucket >= fromRolloutPercentage && bucket < rolloutPercentage
 }
 
 function firebaseConfigured() {
@@ -262,8 +262,12 @@ export default async function handler(req, res) {
   }
 
   const rolloutPercentage = Number(release.rollout_percentage ?? 100)
+  const fromRolloutPercentage = Number(body.from_rollout_percentage ?? 0)
   if (![10, 25, 50, 100].includes(rolloutPercentage)) {
     return json(res, 409, { message: 'درصد انتشار ذخیره‌شده برای این نسخه معتبر نیست.' })
+  }
+  if (![0, 10, 25, 50].includes(fromRolloutPercentage) || fromRolloutPercentage >= rolloutPercentage) {
+    return json(res, 400, { message: 'بازه گروه اعلان برای این مرحله معتبر نیست.' })
   }
 
   let downloadUrl
@@ -308,7 +312,7 @@ export default async function handler(req, res) {
     return json(res, 502, { message: 'دریافت فهرست دستگاه‌ها از Supabase ناموفق بود.' })
   }
   const eligibleTokens = tokens.filter((row) =>
-    isDeviceInRollout(row, versionCode, rolloutPercentage),
+    isDeviceInRollout(row, versionCode, fromRolloutPercentage, rolloutPercentage),
   )
   if (!eligibleTokens.length) {
     return json(res, 200, {
@@ -318,8 +322,9 @@ export default async function handler(req, res) {
       total: 0,
       registered_tokens: tokens.length,
       rollout_percentage: rolloutPercentage,
+      from_rollout_percentage: fromRolloutPercentage,
       message: tokens.length
-        ? `درصد انتشار ${rolloutPercentage}٪ است؛ هنوز توکن واجد شرایطی برای این مرحله پیدا نشد.`
+        ? `درصد انتشار ${rolloutPercentage}٪ است؛ هنوز توکنی در گروه جدید ${fromRolloutPercentage} تا ${rolloutPercentage} درصد پیدا نشد.`
         : 'هیچ توکن FCM ثبت‌شده‌ای پیدا نشد. پس از نصب اپ و اعطای مجوز اعلان، توکن‌ها ذخیره می‌شوند.',
     })
   }
@@ -360,6 +365,7 @@ export default async function handler(req, res) {
     total: eligibleTokens.length,
     registered_tokens: tokens.length,
     rollout_percentage: rolloutPercentage,
-    message: `اعلان مرحله ${rolloutPercentage}٪ برای ${sent} از ${eligibleTokens.length} دستگاه واجد شرایط ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
+    from_rollout_percentage: fromRolloutPercentage,
+    message: `اعلان گروه ${fromRolloutPercentage} تا ${rolloutPercentage} درصد برای ${sent} از ${eligibleTokens.length} دستگاه ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
   })
 }

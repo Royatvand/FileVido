@@ -78,7 +78,7 @@ export default async function handler(req, res) {
     const notify = await fetch(`${baseUrl}/api/notify-app-update`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-release-secret': process.env.RELEASE_TOKEN },
-      body: JSON.stringify(rows[0]),
+      body: JSON.stringify({ ...rows[0], from_rollout_percentage: 0 }),
     })
     const result = await notify.json().catch(() => ({}))
     notification = result.message || (notify.ok ? 'اعلان ارسال شد.' : 'ثبت نسخه انجام شد؛ ارسال اعلان با خطا مواجه شد.')

@@ -17,30 +17,6 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://chartmasters.top/" />
     <title>چارت مسترز | ChartMasters</title>
-    <script>
-      (function () {
-        var files = {
-          dastkhat: '/fonts/dastkhat/DastkhatFaNum-Variable.woff2',
-          diamond: '/fonts/dastkhat/DastkhatDiamondFaNum-Variable.woff2',
-          dots: '/fonts/dastkhat/DastkhatDotsFaNum-Variable.woff2',
-          bar: '/fonts/dastkhat/DastkhatBarFaNum-Variable.woff2',
-          bardots: '/fonts/dastkhat/DastkhatBarDotsFaNum-Variable.woff2',
-          mono: '/fonts/dastkhat/DastkhatMono-Variable.woff2'
-        }
-        try {
-          var font = localStorage.getItem('chartmasters-font')
-          if (!files[font]) return
-          document.documentElement.dataset.font = font
-          var link = document.createElement('link')
-          link.rel = 'preload'
-          link.as = 'font'
-          link.type = 'font/woff2'
-          link.crossOrigin = 'anonymous'
-          link.href = files[font]
-          document.head.appendChild(link)
-        } catch (e) {}
-      })()
-    </script>
   </head>
   <body>
     <div id="root"></div>

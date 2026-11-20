@@ -121,7 +121,7 @@ export default async function handler(req, res) {
       const result = await dbRequest('app_versions?id=eq.' + encodeURIComponent(versionId), {
         method: 'PATCH',
         body: { rollout_percentage: nextStage, updated_at: now },
-      })
+      }, adminToken)
       updatedRelease = result?.[0]
       if (!updatedRelease) throw new Error('به‌روزرسانی مرحله انتشار انجام نشد.')
       notification = await sendReleaseNotification(updatedRelease, currentStage, adminToken)
@@ -138,7 +138,7 @@ export default async function handler(req, res) {
       const result = await dbRequest('app_versions?id=eq.' + encodeURIComponent(versionId), {
         method: 'PATCH',
         body: { is_paused: true, paused_at: now, updated_at: now },
-      })
+      }, adminToken)
       updatedRelease = result?.[0]
       if (!updatedRelease) throw new Error('توقف انتشار انجام نشد.')
       return send(res, 200, {
@@ -153,7 +153,7 @@ export default async function handler(req, res) {
       const result = await dbRequest('app_versions?id=eq.' + encodeURIComponent(versionId), {
         method: 'PATCH',
         body: { is_paused: false, paused_at: null, updated_at: now },
-      })
+      }, adminToken)
       updatedRelease = result?.[0]
       if (!updatedRelease) throw new Error('ادامه انتشار انجام نشد.')
       notification = await sendReleaseNotification(updatedRelease, 0, adminToken)
@@ -171,7 +171,7 @@ export default async function handler(req, res) {
     const pauseResult = await dbRequest('app_versions?id=eq.' + encodeURIComponent(versionId), {
       method: 'PATCH',
       body: { is_paused: true, paused_at: now, updated_at: now },
-    })
+    }, adminToken)
     updatedRelease = pauseResult?.[0]
     fallbackRelease = (publishedRows || []).find((row) =>
       Number(row.version_code) < Number(release.version_code) &&
@@ -183,7 +183,7 @@ export default async function handler(req, res) {
       const fallbackResult = await dbRequest('app_versions?id=eq.' + encodeURIComponent(fallbackRelease.id), {
         method: 'PATCH',
         body: { rollout_percentage: 100, is_paused: false, paused_at: null, updated_at: now },
-      })
+      }, adminToken)
       fallbackRelease = fallbackResult?.[0] || fallbackRelease
       // Avoid a misleading push: devices that already installed the higher APK
       // cannot be downgraded by Android. Their fix must be a higher-code hotfix.

@@ -863,6 +863,9 @@ button, input, textarea, select { font-family: inherit; }
 @media(max-width:540px) {
   .theme-toggle { left: 14px; bottom: 14px; width: 44px; height: 44px; }
 }
+/* /chart is full-screen (no header) and has its own "صفحه اصلی" button bottom-left; the single theme toggle sits above it */
+.theme-toggle.theme-toggle--chart { z-index: 50; left: 14px; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); width: 40px; height: 40px; }
+.theme-toggle.theme-toggle--chart span { font-size: 20px; }
 
 /* Optional coral theme — green remains the default */
 :root[data-theme="coral"] {

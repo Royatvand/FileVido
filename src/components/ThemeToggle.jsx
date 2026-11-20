@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-function ThemeToggle() {
+function ThemeToggle({ className = '' }) {
   const [isCoral, setIsCoral] = useState(() => {
     try {
       return window.localStorage.getItem('chartmasters-theme') === 'coral'
@@ -21,7 +21,7 @@ function ThemeToggle() {
 
   return (
     <button
-      className="theme-toggle"
+      className={('theme-toggle ' + className).trim()}
       type="button"
       onClick={() => setIsCoral((current) => !current)}
       aria-label={isCoral ? 'بازگشت به تم سبز' : 'فعال‌کردن تم مرجانی'}

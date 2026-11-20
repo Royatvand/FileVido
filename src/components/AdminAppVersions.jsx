@@ -61,8 +61,12 @@ function AdminAppVersions({ onNotice }) {
   }
 
   async function maybeNotifyUsers(versionId, versionPayload) {
-    const session = supabase.getSession()
-    if (!session?.access_token) return
+    // Refresh an expired admin token first; a stale JWT made the server reject the admin.
+    const session = await supabase.getValidSession()
+    if (!session?.access_token) {
+      onNotice?.({ type: 'error', text: 'نشست ادمین منقضی شده است. دوباره وارد شوید و ارسال اعلان را از لیست نسخه‌ها بزنید.' })
+      return
+    }
 
     setNotifyingId(versionId)
     try {

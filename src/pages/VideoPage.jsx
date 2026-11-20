@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ShareButton from '../components/ShareButton'
 import { getVideoById, getAparatEmbedUrl, getPlaylistForVideo, videos } from '../data/videos'
 import { supabase, userAuth, userLearning } from '../lib/supabase'
 import NotFound from './NotFound'
@@ -186,6 +187,7 @@ function VideoPage({ videoId }) {
                 {actionError && <span className="video-user-action-error" role="alert">{actionError}</span>}
               </div>
             )}
+            <ShareButton path={'/video/' + video.id} title={video.title} />
             <div className="video-description"><h2>درباره این ویدیو</h2><p><RichText text={video.description} /></p></div>
             {video.tags.length > 0 && <div className="video-tags" aria-label="برچسب‌های ویدیو">{video.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
           </section>
@@ -199,6 +201,7 @@ function VideoPage({ videoId }) {
             <span className="playlist-eyebrow">مسیر یادگیری</span><h2>{playlist.title}</h2><p>{playlist.description}</p>
             <div className="playlist-progress"><span>{playlistVideos.length} جلسه</span><span>جلسه {currentIndex + 1} از {playlistVideos.length}</span></div>
             <div className="playlist-progress-track"><span style={{ width: (((currentIndex + 1) / playlistVideos.length) * 100) + '%' }} /></div>
+            {playlistVideos[0] && <ShareButton path={'/video/' + playlistVideos[0].id} title={'دوره ' + playlist.title} label="اشتراک دوره در تلگرام" />}
           </div>
           <div className="playlist-lessons">{playlistVideos.map((item, index) => {
             const isActive = item.id === video.id

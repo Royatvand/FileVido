@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { FaTelegramPlane } from 'react-icons/fa'
 import { getVideoById, getAparatEmbedUrl, getPlaylistForVideo, videos } from '../data/videos'
 import { supabase, userAuth, userLearning } from '../lib/supabase'
 import NotFound from './NotFound'
@@ -159,6 +160,11 @@ function VideoPage({ videoId }) {
   const previousVideo = currentIndex > 0 ? playlistVideos[currentIndex - 1] : null
   const nextVideo = currentIndex >= 0 && currentIndex < playlistVideos.length - 1 ? playlistVideos[currentIndex + 1] : null
   const related = demoVideo ? videos.filter((item) => item.id !== video.id && !demoPlaylist?.videoIds.includes(item.id)).slice(0, 3) : []
+  const videoShareUrl = new URL('/video/' + encodeURIComponent(video.id), window.location.origin).toString()
+  const playlistShareUrl = playlistVideos[0]?.id
+    ? new URL('/video/' + encodeURIComponent(playlistVideos[0].id), window.location.origin).toString()
+    : videoShareUrl
+  const telegramShare = (url, text) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
 
   return (
     <main className="page-content video-page">
@@ -167,6 +173,17 @@ function VideoPage({ videoId }) {
         <div className="watch-main">
           {playlist && <SubtitleTip />}
           <div className="player-frame"><iframe src={getAparatEmbedUrl(video.aparatId)} title={video.title} allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin" /></div>
+          <div className="video-share-bar" aria-label="اشتراک‌گذاری محتوا">
+            <div className="video-share-copy"><span className="video-share-kicker">با دوستانت به اشتراک بگذار</span><strong>یادگیری وقتی بهتره که باهم باشه.</strong></div>
+            <div className="video-share-buttons">
+              <a className="video-share-button video-share-button-primary" href={telegramShare(videoShareUrl, `🎬 ${video.title}\n\nاین ویدیو رو در چارت مسترز ببین:`)} target="_blank" rel="noopener noreferrer" aria-label="اشتراک‌گذاری ویدیو در تلگرام">
+                <FaTelegramPlane aria-hidden="true" /><span>اشتراک ویدیو</span>
+              </a>
+              {playlist && <a className="video-share-button video-share-button-secondary" href={telegramShare(playlistShareUrl, `📚 ${playlist.title}\n\nاین پلی‌لیست آموزشی رو در چارت مسترز دنبال کن:`)} target="_blank" rel="noopener noreferrer" aria-label="اشتراک‌گذاری پلی‌لیست در تلگرام">
+                <FaTelegramPlane aria-hidden="true" /><span>اشتراک پلی‌لیست</span>
+              </a>}
+            </div>
+          </div>
           <section className="video-info">
             <div className="video-title-row">
               {video.category && <span className="video-category">{video.category}</span>}

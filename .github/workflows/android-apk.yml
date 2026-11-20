@@ -5,6 +5,9 @@ on:
   push:
     tags: ['app-v*']
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -52,3 +55,12 @@ jobs:
         with:
           name: chartmasters-apk
           path: android/app/build/outputs/apk/**/*.apk
+
+      # با ساخت تگ app-v*، APK به‌صورت عمومی در GitHub Releases منتشر می‌شود
+      - name: Publish APK to GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/app-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ChartMasters ${{ github.ref_name }}
+          generate_release_notes: true
+          files: android/app/build/outputs/apk/**/*.apk

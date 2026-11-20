@@ -56,7 +56,12 @@ async function getValidSession() {
   let session = getSession()
   if (!session) return null
 
-  if (session.expires_at && session.expires_at * 1000 < Date.now() + 30000) {
+  // بعض پاسخ‌های Auth مقدار expires_at ندارند؛ زمان انقضا را از JWT هم می‌خوانیم.
+  const tokenClaims = session.access_token ? getJwtClaims(session.access_token) : null
+  const expiresAt = Number(session.expires_at || tokenClaims?.exp || 0)
+  const needsRefresh = !session.access_token || !expiresAt || expiresAt * 1000 < Date.now() + 60000
+
+  if (needsRefresh) {
     try {
       session = await refreshSession(session)
     } catch {
@@ -354,8 +359,12 @@ export const supabase = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
-    saveSession(data)
-    return data
+    const session = {
+      ...data,
+      expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+    }
+    saveSession(session)
+    return session
   },
   async signOut() {
     const session = await getValidSession()

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { userAuth } from '../lib/supabase'
+import '../github-login.css'
 
 function GoogleLogin() {
   const [loading, setLoading] = useState(false)
@@ -21,7 +22,7 @@ function GoogleLogin() {
       if (code) {
         setLoading(true)
         try {
-          const session = await userAuth.completeGoogleSignIn(code)
+          const session = await userAuth.completeOAuthSignIn(code)
           window.history.replaceState({}, document.title, '/login')
           if (active && session?.user) {
             setUser(session.user)
@@ -29,7 +30,7 @@ function GoogleLogin() {
           }
         } catch (err) {
           window.history.replaceState({}, document.title, '/login')
-          if (active) setError(err.message || 'ورود با گوگل انجام نشد.')
+          if (active) setError(err.message || 'ورود با حساب انتخاب‌شده انجام نشد.')
         } finally {
           if (active) setLoading(false)
         }
@@ -42,14 +43,14 @@ function GoogleLogin() {
     return () => { active = false }
   }, [])
 
-  async function handleGoogleLogin() {
+  async function handleOAuthLogin(provider) {
     setError('')
     setLoading(true)
     try {
-      await userAuth.signInWithGoogle()
+      await userAuth.signInWithProvider(provider)
       setLoading(false) // the Android app returns here while the browser is open; the web page navigates away
     } catch (err) {
-      setError(err.message || 'امکان شروع ورود با گوگل وجود ندارد.')
+      setError(err.message || 'امکان شروع ورود وجود ندارد.')
       setLoading(false)
     }
   }
@@ -85,13 +86,14 @@ function GoogleLogin() {
           <div className="cm-auth-form-content">
             <span className="cm-auth-kicker">حساب کاربری</span>
             <h1>{user ? 'ورود با موفقیت انجام شد' : 'به چارت مسترز خوش آمدی'}</h1>
-            <p>{user ? 'حساب گوگل شما با موفقیت به چارت مسترز متصل شد.' : 'برای دسترسی به فضای شخصی، دوره‌ها و ادامه مسیر یادگیری وارد حساب خود شو.'}</p>
+            <p>{user ? 'حساب کاربری شما با موفقیت به چارت مسترز متصل شد.' : 'برای دسترسی به فضای شخصی، دوره‌ها و ادامه مسیر یادگیری با گوگل یا گیت‌هاب وارد شو.'}</p>
             {loading && <div className="user-auth-status">در حال بررسی اطلاعات ورود...</div>}
             {error && <div className="user-auth-error" role="alert">{error}</div>}
             {user ? (
               <div className="user-auth-success">{user.email && <strong>{user.email}</strong>}<a className="cm-auth-submit" href="/">رفتن به صفحه اصلی <span>←</span></a></div>
             ) : (
-              <button className="cm-auth-google" type="button" onClick={handleGoogleLogin} disabled={loading}>
+              <div className="cm-auth-providers">
+              <button className="cm-auth-google" type="button" onClick={() => handleOAuthLogin('google')} disabled={loading}>
                 <svg viewBox="0 0 48 48" aria-hidden="true">
                   <path fill="#FFC107" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.8 6.1-15Z"/>
                   <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44Z"/>
@@ -100,6 +102,13 @@ function GoogleLogin() {
                 </svg>
                 <span>{loading ? 'لطفاً صبر کن...' : 'ادامه با حساب گوگل'}</span><span className="cm-auth-google-arrow">←</span>
               </button>
+              <button className="cm-auth-github" type="button" onClick={() => handleOAuthLogin('github')} disabled={loading}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.54v-2.08c-3.1.67-3.75-1.32-3.75-1.32-.5-1.28-1.23-1.62-1.23-1.62-1.01-.69.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15 1 .1.76 2.2 3.23 1.68.1-.72.39-1.2.7-1.48-2.47-.28-5.07-1.24-5.07-5.5 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.12-1.45 3.05-1.15 3.05-1.15.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3 0 4.27-2.6 5.22-5.08 5.5.4.35.75 1.02.75 2.06v3.05c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/>
+                </svg>
+                <span>{loading ? 'لطفاً صبر کن...' : 'ادامه با حساب گیت‌هاب'}</span><span className="cm-auth-github-arrow">←</span>
+              </button>
+              </div>
             )}
             <div className="cm-auth-divider"><span>ورود امن و سریع</span></div>
             <div className="cm-auth-benefits">

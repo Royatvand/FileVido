@@ -289,3 +289,6 @@
   .admin-release-actions { display:grid; grid-template-columns:1fr; }
   .admin-release-actions button { width:100%; }
 }
+
+/* Allow the release controls to occupy a full row below the APK download actions. */
+.admin-app-release-card { flex-wrap: wrap; }

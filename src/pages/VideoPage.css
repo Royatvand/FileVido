@@ -74,9 +74,22 @@
 .playlist-file-copy small { color: var(--muted); font-size: 11px; }
 
 
-.video-user-actions { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin-top:17px; }
-.video-user-action { padding:9px 13px; border:1px solid var(--line); border-radius:8px; color:#c5d2c9; background:rgba(255,255,255,.025); font:10px var(--cm-font); cursor:pointer; transition:border-color .2s,color .2s,background .2s; }
-.video-user-action:hover,.video-user-action.is-active { border-color:rgba(140,242,177,.3); color:var(--accent); background:rgba(140,242,177,.07); }
-.video-user-action:disabled { opacity:.55; cursor:wait; }
-.video-user-action-error { width:100%; color:#ffaaaa; font-size:9px; }
-@media(max-width:520px) { .video-user-actions { align-items:stretch; } .video-user-action { flex:1 1 100%; text-align:center; } }
+/* Video actions: one aligned toolbar (share / favorite / mark as watched) */
+.video-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:18px; max-width:620px; }
+.video-action { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:44px; padding:0 14px; border:1px solid var(--line); border-radius:12px; color:#c5d2c9; background:rgba(255,255,255,.03); font:600 11px var(--cm-font); cursor:pointer; transition:border-color .2s,color .2s,background .2s,transform .2s; }
+.video-action svg { flex:0 0 auto; width:18px; height:18px; transition:transform .2s; }
+.video-action:hover { border-color:rgba(140,242,177,.35); color:var(--accent); background:rgba(140,242,177,.06); transform:translateY(-1px); }
+.video-action:hover svg { transform:scale(1.08); }
+.video-action:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.video-action.is-active { border-color:rgba(140,242,177,.4); color:var(--accent); background:rgba(140,242,177,.1); }
+.video-action svg.is-filled { fill:currentColor; }
+.video-action svg.is-filled-check circle { fill:currentColor; }
+.video-action svg.is-filled-check path { stroke:#07110b; }
+.video-action--share { color:#e5eee8; }
+.video-action:disabled { opacity:.55; cursor:wait; transform:none; }
+.video-user-action-error { grid-column:1/-1; color:#ffaaaa; font-size:10px; }
+@media(max-width:520px) {
+  .video-actions { grid-template-columns:1fr 1fr; max-width:none; }
+  .video-action--share { grid-column:1/-1; }
+  .video-action { font-size:11px; padding:0 10px; }
+}

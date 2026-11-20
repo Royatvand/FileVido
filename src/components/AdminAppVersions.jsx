@@ -28,6 +28,8 @@ function AdminAppVersions({ onNotice }) {
 
   useEffect(() => { Promise.resolve().then(() => loadData()) }, [loadData])
 
+  const latestPublished = rows.find((row) => row.is_published && row.download_url)
+
   // The APK build runs in GitHub Actions (~3 min) and registers the row afterwards,
   // so refresh the list automatically instead of requiring a manual page reload.
   useEffect(() => {
@@ -100,6 +102,16 @@ function AdminAppVersions({ onNotice }) {
     }
   }
 
+  async function handleCopyDownloadLink(url) {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('قابلیت کپی در این مرورگر در دسترس نیست.')
+      await navigator.clipboard.writeText(url)
+      onNotice?.({ type: 'success', text: 'لینک دانلود APK کپی شد.' })
+    } catch (error) {
+      onNotice?.({ type: 'error', text: error.message || 'کپی لینک ناموفق بود.' })
+    }
+  }
+
   return (
     <div className="admin-panel admin-app-versions">
       <div className="admin-panel-heading">
@@ -136,6 +148,47 @@ function AdminAppVersions({ onNotice }) {
           پس از Build موفق، APK در GitHub Releases قرار می‌گیرد، نسخه در Supabase ثبت و اعلان برای کاربران ارسال می‌شود.
         </small>
       </form>
+
+      {latestPublished && (
+        <section className="admin-app-release-card" aria-label="آخرین نسخه آماده دانلود">
+          <div className="admin-app-release-info">
+            <span className="admin-app-release-kicker">آخرین نسخه منتشرشده</span>
+            <div className="admin-app-release-title">
+              <h3 dir="ltr">ChartMasters v{latestPublished.version_name}</h3>
+              <span className="admin-app-release-status">آماده دانلود</span>
+            </div>
+            <p>
+              کد نسخه: <b dir="ltr">{latestPublished.version_code}</b>
+              <span aria-hidden="true"> · </span>
+              {latestPublished.published_at
+                ? new Date(latestPublished.published_at).toLocaleDateString('fa-IR')
+                : 'تاریخ انتشار ثبت نشده'}
+              {latestPublished.is_mandatory ? ' · آپدیت اجباری' : ''}
+            </p>
+            {latestPublished.changelog && (
+              <div className="admin-app-release-notes">{latestPublished.changelog}</div>
+            )}
+            <div className="admin-app-release-url" dir="ltr">{latestPublished.download_url}</div>
+          </div>
+          <div className="admin-app-release-actions">
+            <a
+              className="admin-app-release-download"
+              href={latestPublished.download_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              دانلود فایل APK <span aria-hidden="true">↗</span>
+            </a>
+            <button
+              type="button"
+              className="admin-app-release-copy"
+              onClick={() => handleCopyDownloadLink(latestPublished.download_url)}
+            >
+              کپی لینک دانلود
+            </button>
+          </div>
+        </section>
+      )}
 
       <div className="admin-panel-heading" style={{ marginTop: 28 }}>
         <div><h2>نسخه‌های منتشرشده</h2><p>اطلاعات نسخه از فرایند انتشار دریافت می‌شود.</p></div>

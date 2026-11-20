@@ -62,8 +62,11 @@ function AdminAppVersions({ onNotice }) {
   }
 
   async function maybeNotifyUsers(versionId, versionPayload) {
-    const session = supabase.getSession()
-    if (!session?.access_token) return
+    const session = await supabase.getValidSession()
+    if (!session?.access_token) {
+      onNotice?.({ type: 'error', text: 'نشست مدیر منقضی شده است؛ دوباره وارد پنل مدیریت شوید.' })
+      return
+    }
 
     setNotifyingId(versionId)
     try {

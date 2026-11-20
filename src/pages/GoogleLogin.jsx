@@ -47,6 +47,7 @@ function GoogleLogin() {
     setLoading(true)
     try {
       await userAuth.signInWithGoogle()
+      setLoading(false) // the Android app returns here while the browser is open; the web page navigates away
     } catch (err) {
       setError(err.message || 'امکان شروع ورود با گوگل وجود ندارد.')
       setLoading(false)

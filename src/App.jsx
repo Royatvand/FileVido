@@ -27,6 +27,7 @@ import {
 } from './lib/appUpdate'
 import { useEffect, useState } from 'react'
 import { setPageSeo } from './lib/seo'
+import { initNativeAuthListener } from './lib/nativeAuth'
 import './admin.css'
 
 function App() {
@@ -81,6 +82,17 @@ function App() {
       })
     }
   }, [path, isHome, isVideos, isChart, isIndicators, isAbout])
+
+  // Android-only: finish Google sign-in when the system browser returns through the deep link.
+  useEffect(() => {
+    let dispose = () => {}
+    let disposed = false
+    initNativeAuthListener().then((cleanup) => {
+      if (disposed) cleanup()
+      else dispose = cleanup
+    }).catch(() => {})
+    return () => { disposed = true; dispose() }
+  }, [])
 
   // Android-only: check version on launch / resume and register for FCM.
   useEffect(() => {

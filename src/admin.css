@@ -186,3 +186,76 @@
 .admin-gallery-actions button.danger { margin-inline-start:auto; color:#e99b9b; }
 .admin-gallery-actions button:disabled { opacity:.3; cursor:not-allowed; }
 .admin-gallery-empty { margin:0; }
+
+
+/* Latest Android release download card in the admin dashboard */
+.admin-app-release-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 22px;
+  padding: 22px;
+  border: 1px solid rgba(140, 242, 177, .24);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(140, 242, 177, .09), rgba(255, 255, 255, .025));
+}
+.admin-app-release-info { min-width: 0; flex: 1; }
+.admin-app-release-kicker {
+  display: inline-flex;
+  margin-bottom: 9px;
+  color: #8cf2b1;
+  font-size: 10px;
+  font-weight: 800;
+}
+.admin-app-release-title { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.admin-app-release-title h3 { margin: 0; color: #edf6ef; font-size: 19px; font-weight: 800; }
+.admin-app-release-status {
+  padding: 4px 9px;
+  border: 1px solid rgba(140, 242, 177, .2);
+  border-radius: 999px;
+  color: #8cf2b1;
+  background: rgba(140, 242, 177, .08);
+  font-size: 9px;
+  font-weight: 700;
+}
+.admin-app-release-info > p { margin: 9px 0 0; color: #89978e; font-size: 10px; line-height: 1.9; }
+.admin-app-release-info > p b { color: #dce8df; }
+.admin-app-release-notes {
+  margin-top: 10px;
+  color: #c0cec4;
+  font-size: 11px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+.admin-app-release-url {
+  max-width: 100%;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+  color: #81958a;
+  font: 10px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.admin-app-release-actions { display: flex; flex: 0 0 auto; flex-direction: column; gap: 8px; min-width: 150px; }
+.admin-app-release-download,
+.admin-app-release-copy {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font: 700 11px Vazirmatn, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+.admin-app-release-download { border: 1px solid #8cf2b1; color: #07110b; background: #8cf2b1; }
+.admin-app-release-copy { border: 1px solid var(--line); color: #dce8df; background: #ffffff08; }
+.admin-app-release-download:hover { filter: brightness(1.06); }
+.admin-app-release-copy:hover { background: #ffffff12; }
+@media (max-width: 680px) {
+  .admin-app-release-card { align-items: stretch; flex-direction: column; gap: 16px; padding: 17px; }
+  .admin-app-release-actions { flex-direction: row; min-width: 0; }
+  .admin-app-release-actions > * { flex: 1; }
+  .admin-app-release-url { font-size: 9px; }
+}

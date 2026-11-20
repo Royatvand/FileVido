@@ -261,6 +261,21 @@ export default async function handler(req, res) {
     })
   }
 
+  const activeReleaseResponse = await fetch(
+    `${SUPABASE_URL}/rest/v1/app_versions?select=version_code&is_published=eq.true&is_paused=eq.false&order=version_code.desc&limit=1`,
+    {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseAuth}` },
+      signal: AbortSignal.timeout(10000),
+    },
+  ).catch(() => null)
+  if (!activeReleaseResponse?.ok) {
+    return json(res, 502, { message: 'بررسی آخرین نسخه فعال در Supabase ناموفق بود.' })
+  }
+  const activeReleases = await activeReleaseResponse.json().catch(() => [])
+  if (Number(activeReleases?.[0]?.version_code) !== versionCode) {
+    return json(res, 409, { message: 'فقط آخرین نسخه فعال اجازه ارسال اعلان دارد.' })
+  }
+
   const rolloutPercentage = Number(release.rollout_percentage ?? 100)
   const fromRolloutPercentage = Number(body.from_rollout_percentage ?? 0)
   if (![10, 25, 50, 100].includes(rolloutPercentage)) {

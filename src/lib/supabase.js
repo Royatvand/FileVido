@@ -354,6 +354,9 @@ export const userAuth = {
 
 export const supabase = {
   getSession,
+  async getValidSession() {
+    return getValidSession()
+  },
   async signIn(email, password) {
     const data = await request('/auth/v1/token?grant_type=password', {
       method: 'POST',

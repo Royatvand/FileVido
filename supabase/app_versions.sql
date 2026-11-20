@@ -24,7 +24,7 @@ create unique index if not exists app_versions_version_code_uidx
   on public.app_versions (version_code);
 
 create index if not exists app_versions_published_code_idx
-  on public.app_versions (is_published, is_paused, version_code desc);
+  on public.app_versions (is_published, version_code desc);
 
 alter table public.app_versions enable row level security;
 

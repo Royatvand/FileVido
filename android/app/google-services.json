@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "896723495343",
+    "project_id": "fir-aa658",
+    "storage_bucket": "fir-aa658.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896723495343:android:bca7c97760fc0f8ea0675a",
+        "android_client_info": {
+          "package_name": "chartmasters.app"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWQwaqKqXoxhj4ZKpo5bE6j7iXhRRoaf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

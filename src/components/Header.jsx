@@ -48,8 +48,8 @@ function Header() {
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>
 
-        <a className="header-login" href={signedIn ? '/dashboard' : '/login'}>{signedIn ? 'داشبورد من' : 'ورود'}</a>
         <ThemeToggle />
+        <a className="header-login" href={signedIn ? '/dashboard' : '/login'}>{signedIn ? 'داشبورد من' : 'ورود'}</a>
 
         <button type="button" className={`nav-toggle ${menuOpen ? 'open' : ''}`} aria-expanded={menuOpen} aria-controls="main-nav" aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'} onClick={() => setMenuOpen((value) => !value)}>
           <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />

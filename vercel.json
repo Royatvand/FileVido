@@ -2,6 +2,9 @@
   "functions": {
     "api/page.js": {
       "includeFiles": "dist/index.html"
+    },
+    "api/notify-app-update.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [

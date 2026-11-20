@@ -142,14 +142,13 @@ export async function openExternalUrl(url) {
 }
 
 /** Register / refresh FCM token for this Android device. */
-export async function registerFcmToken(token, userId = null) {
+export async function registerFcmToken(token) {
   if (!isAndroidNative() || !token || !SUPABASE_URL || !SUPABASE_KEY) return null
 
   const payload = {
     token,
     platform: 'android',
     device_key: getDeviceKey(),
-    user_id: userId || null,
     last_seen_at: new Date().toISOString(),
   }
 
@@ -177,7 +176,7 @@ export async function registerFcmToken(token, userId = null) {
 /** Initialize Android push notifications once per app runtime. */
 let pushInitialization = null
 
-export function initAndroidPushNotifications(userId = null) {
+export function initAndroidPushNotifications() {
   if (!isAndroidNative()) return Promise.resolve()
   if (pushInitialization) return pushInitialization
 
@@ -210,7 +209,7 @@ export function initAndroidPushNotifications(userId = null) {
 
     // Register listeners BEFORE register(); otherwise the registration event can be missed.
     await PushNotifications.addListener('registration', async (event) => {
-      if (event?.value) await registerFcmToken(event.value, userId)
+      if (event?.value) await registerFcmToken(event.value)
     })
     await PushNotifications.addListener('registrationError', (error) => {
       console.warn('[appUpdate] Push registration error', error)

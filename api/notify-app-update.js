@@ -16,6 +16,11 @@ const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY
 const PUBLISHABLE = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY
 
+const FCM_TIMEOUT_MS = 8000
+const FCM_CONCURRENCY = 20
+const SEND_BUDGET_MS = 50000 // must stay below maxDuration (60s) in vercel.json
+const PRUNE_CHUNK = 50
+
 function json(res, status, body) {
   res.statusCode = status
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -129,6 +134,7 @@ async function sendFcmMessage(accessToken, token, payload) {
     `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
     {
       method: 'POST',
+      signal: AbortSignal.timeout(FCM_TIMEOUT_MS),
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
@@ -159,6 +165,82 @@ async function sendFcmMessage(accessToken, token, payload) {
   )
   const result = await response.json().catch(() => ({}))
   return { ok: response.ok, status: response.status, result }
+}
+
+function isInvalidTokenOutcome(outcome) {
+  if (outcome.status === 404) return true
+  const details = outcome.result?.error?.details
+  const code = Array.isArray(details)
+    ? details.map((item) => item?.errorCode).find(Boolean)
+    : null
+  return code === 'UNREGISTERED'
+}
+
+/** One retry for rate limits / transient server errors. */
+async function sendWithRetry(accessToken, token, payload) {
+  let outcome = await sendFcmMessage(accessToken, token, payload)
+  if (outcome.status === 429 || outcome.status >= 500) {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    outcome = await sendFcmMessage(accessToken, token, payload)
+  }
+  return outcome
+}
+
+/** Send to every row with bounded concurrency, a per-request timeout and a total time budget. */
+export async function sendToAll(accessToken, rows, payload, options = {}) {
+  const concurrency = options.concurrency || FCM_CONCURRENCY
+  const budgetMs = options.budgetMs ?? SEND_BUDGET_MS
+  const deadline = Date.now() + budgetMs
+  const stats = { sent: 0, failed: 0, skipped: 0, invalidIds: [] }
+  let index = 0
+
+  async function worker() {
+    while (index < rows.length) {
+      if (Date.now() >= deadline) return
+      const row = rows[index]
+      index += 1
+      try {
+        const outcome = await sendWithRetry(accessToken, row.token, payload)
+        if (outcome.ok) stats.sent += 1
+        else {
+          stats.failed += 1
+          if (isInvalidTokenOutcome(outcome)) stats.invalidIds.push(row.id)
+        }
+      } catch {
+        stats.failed += 1
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, rows.length) }, worker))
+  stats.skipped = Math.max(0, rows.length - index)
+  return stats
+}
+
+/** Remove tokens FCM reported as dead so they are not retried on every release. */
+async function pruneTokens(ids, adminToken) {
+  if (!ids.length || !SUPABASE_URL) return 0
+  const key = SERVICE_ROLE || PUBLISHABLE
+  const auth = SERVICE_ROLE || adminToken
+  if (!key || !auth) return 0
+  let pruned = 0
+  for (let i = 0; i < ids.length; i += PRUNE_CHUNK) {
+    const chunk = ids.slice(i, i + PRUNE_CHUNK)
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/fcm_tokens?id=in.(${chunk.join(',')})`,
+        {
+          method: 'DELETE',
+          signal: AbortSignal.timeout(8000),
+          headers: { apikey: key, Authorization: `Bearer ${auth}`, Prefer: 'return=minimal' },
+        },
+      )
+      if (response.ok) pruned += chunk.length
+    } catch {
+      /* best effort */
+    }
+  }
+  return pruned
 }
 
 export default async function handler(req, res) {
@@ -251,30 +333,26 @@ export default async function handler(req, res) {
     })
   }
 
-  let sent = 0
-  let failed = 0
-  for (const row of tokens) {
-    try {
-      const outcome = await sendFcmMessage(googleToken, row.token, {
-        title,
-        body: bodyText,
-        version_name: versionName,
-        version_code: body.version_code,
-        download_url: body.download_url,
-        is_mandatory: body.is_mandatory,
-      })
-      if (outcome.ok) sent += 1
-      else failed += 1
-    } catch {
-      failed += 1
-    }
-  }
+  // Dedupe defensively (the unique index should already guarantee this).
+  const unique = [...new Map(tokens.filter((row) => row?.token).map((row) => [row.token, row])).values()]
+  const { sent, failed, skipped, invalidIds } = await sendToAll(googleToken, unique, {
+    title,
+    body: bodyText,
+    version_name: versionName,
+    version_code: body.version_code,
+    download_url: body.download_url,
+    is_mandatory: body.is_mandatory,
+  })
+  const pruned = await pruneTokens(invalidIds, accessToken)
 
   return json(res, 200, {
     status: 'ok',
     sent,
     failed,
-    total: tokens.length,
-    message: `اعلان برای ${sent} از ${tokens.length} دستگاه ارسال شد${failed ? ` (${failed} ناموفق)` : ''}.`,
+    skipped,
+    pruned,
+    truncated: skipped > 0,
+    total: unique.length,
+    message: `اعلان برای ${sent} از ${unique.length} دستگاه ارسال شد${failed ? ` (${failed} ناموفق` : ''}${pruned ? `${failed ? '، ' : ' ('}${pruned} توکن نامعتبر حذف شد` : ''}${failed || pruned ? ')' : ''}${skipped ? `؛ ${skipped} دستگاه به دلیل محدودیت زمان ارسال نشد، دوباره اجرا کنید` : ''}.`,
   })
 }

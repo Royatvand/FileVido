@@ -1,5 +1,6 @@
 -- FCM device tokens for Android push notifications (app update alerts).
--- Tokens can be registered anonymously from the Android app; user_id is optional.
+-- Tokens are registered anonymously by design (the app never sends user_id);
+-- the insert policy still lets a signed-in caller attach only their own id.
 create table if not exists public.fcm_tokens (
   id uuid primary key default gen_random_uuid(),
   token text not null,
@@ -8,9 +9,17 @@ create table if not exists public.fcm_tokens (
   device_key text,
   user_id uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
-  last_seen_at timestamptz not null default now(),
-  constraint fcm_tokens_token_not_empty check (char_length(trim(token)) > 0)
+  last_seen_at timestamptz not null default now()
 );
+
+-- Bound size/format so the public insert endpoint cannot be used to store junk.
+alter table public.fcm_tokens drop constraint if exists fcm_tokens_token_not_empty;
+alter table public.fcm_tokens drop constraint if exists fcm_tokens_token_format;
+alter table public.fcm_tokens add constraint fcm_tokens_token_format
+  check (char_length(token) between 100 and 4096 and token ~ '^[A-Za-z0-9:_-]+$');
+alter table public.fcm_tokens drop constraint if exists fcm_tokens_device_key_len;
+alter table public.fcm_tokens add constraint fcm_tokens_device_key_len
+  check (device_key is null or char_length(device_key) <= 100);
 
 create unique index if not exists fcm_tokens_token_uidx
   on public.fcm_tokens (token);
@@ -25,6 +34,7 @@ alter table public.fcm_tokens enable row level security;
 
 -- Devices may register a token, but anonymous callers cannot assign it to a user.
 drop policy if exists "Anyone can register FCM tokens" on public.fcm_tokens;
+drop policy if exists "Devices can register FCM tokens" on public.fcm_tokens;
 create policy "Devices can register FCM tokens"
   on public.fcm_tokens for insert
   with check (

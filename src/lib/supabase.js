@@ -83,6 +83,11 @@ function chunkList(list, size) {
 
 const USER_SESSION_KEY = 'chartmasters_user_session'
 const USER_CODE_VERIFIER_KEY = 'chartmasters_google_code_verifier'
+export const NATIVE_AUTH_REDIRECT = 'chartmasters://auth'
+
+export function isNativeApp() {
+  return typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.())
+}
 
 function getUserSession() {
   try {
@@ -289,12 +294,23 @@ export const userAuth = {
     const verifier = encodeBase64Url(randomBytes)
     const challenge = await createCodeChallenge(verifier)
     sessionStorage.setItem(USER_CODE_VERIFIER_KEY, verifier)
+    // In the Android app the system browser may outlive the WebView process, so keep a copy that survives it.
+    if (isNativeApp()) {
+      try { localStorage.setItem(USER_CODE_VERIFIER_KEY, verifier) } catch { /* ignore */ }
+    }
 
     const authorizeUrl = new URL('/auth/v1/authorize', SUPABASE_URL)
     authorizeUrl.searchParams.set('provider', 'google')
-    authorizeUrl.searchParams.set('redirect_to', window.location.origin + '/login')
+    authorizeUrl.searchParams.set('redirect_to', isNativeApp() ? NATIVE_AUTH_REDIRECT : window.location.origin + '/login')
     authorizeUrl.searchParams.set('code_challenge', challenge)
     authorizeUrl.searchParams.set('code_challenge_method', 's256')
+    if (isNativeApp()) {
+      // Google blocks sign-in inside WebViews, so use the system browser (Custom Tab);
+      // it returns to the app through the chartmasters:// deep link (see nativeAuth.js).
+      const { Browser } = await import('@capacitor/browser')
+      await Browser.open({ url: authorizeUrl.toString() })
+      return
+    }
     window.location.assign(authorizeUrl.toString())
   },
   async updateProfile(profile) {
@@ -326,7 +342,10 @@ export const userAuth = {
   async completeGoogleSignIn(code) {
     if (googleCallbackPromise) return googleCallbackPromise
     googleCallbackPromise = (async () => {
-      const verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
+      let verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
+      if (!verifier && isNativeApp()) {
+        try { verifier = localStorage.getItem(USER_CODE_VERIFIER_KEY) } catch { /* ignore */ }
+      }
       if (!code || !verifier) {
         throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
       }
@@ -337,6 +356,7 @@ export const userAuth = {
       })
 
       sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
+      try { localStorage.removeItem(USER_CODE_VERIFIER_KEY) } catch { /* ignore */ }
       saveUserSession(session)
       await registerDeviceSession(getUserSession()).catch(() => {})
       return getUserSession()

@@ -50,7 +50,7 @@ function UserDeviceSessions() {
   }, [])
 
   useEffect(() => {
-    loadDevices()
+    Promise.resolve().then(loadDevices)
     const heartbeat = window.setInterval(() => {
       userAuth.touchCurrentDevice().catch(() => {})
     }, 5 * 60 * 1000)
@@ -113,6 +113,7 @@ function UserDeviceSessions() {
                 </div>
                 <span>{device.operating_system} · {device.browser}</span>
                 <small><LuClock3 /> آخرین فعالیت: {formatLastSeen(device.last_seen_at)}</small>
+                {device.merged_count > 0 && <small>{device.merged_count.toLocaleString('fa-IR')} نشست قدیمی‌تر مشابه روی این نوع دستگاه</small>}
               </div>
               <span className="user-device-kind">
                 {device.device_type === 'mobile' ? 'موبایل' : device.device_type === 'tablet' ? 'تبلت' : 'کامپیوتر'}

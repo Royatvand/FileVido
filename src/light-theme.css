@@ -283,3 +283,242 @@
     transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
   }
 }
+
+
+/* -------------------------------------------------------------------------
+   Light theme completion pass
+   Covers routes and surfaces that have their own stylesheets (admin,
+   indicators, video watch page and chart). Keep media/player content intact.
+   ------------------------------------------------------------------------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f8f6;
+  --panel: #ffffff;
+  --muted: #64746a;
+  --accent: #168653;
+  --line: rgba(28, 65, 43, .13);
+}
+:root[data-theme="light"] .app-shell,
+:root[data-theme="light"] .main-content { color: #203128; }
+:root[data-theme="light"] .site-header,
+:root[data-theme="light"] .site-footer { color: #24372b; }
+:root[data-theme="light"] .site-header .nav-toggle { color: #315541; }
+:root[data-theme="light"] .site-header button,
+:root[data-theme="light"] .site-header a { -webkit-tap-highlight-color: transparent; }
+:root[data-theme="light"] .video-page,
+:root[data-theme="light"] .videos-section,
+:root[data-theme="light"] .indicators-page,
+:root[data-theme="light"] .about-page { color: #24372b; }
+
+/* Video watch page */
+:root[data-theme="light"] .watch-layout,
+:root[data-theme="light"] .watch-main { color: #24372b; }
+:root[data-theme="light"] .video-info,
+:root[data-theme="light"] .playlist-panel,
+:root[data-theme="light"] .lesson-nav-card,
+:root[data-theme="light"] .playlist-file {
+  color: #26382d;
+  border-color: rgba(31, 70, 46, .13);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 61, 43, .055);
+}
+:root[data-theme="light"] .video-info h1,
+:root[data-theme="light"] .video-description h2,
+:root[data-theme="light"] .playlist-panel-heading h2,
+:root[data-theme="light"] .lesson-nav-card strong,
+:root[data-theme="light"] .playlist-file-copy strong,
+:root[data-theme="light"] .related-heading h2 { color: #1b2a22; }
+:root[data-theme="light"] .video-meta,
+:root[data-theme="light"] .video-description,
+:root[data-theme="light"] .video-description p,
+:root[data-theme="light"] .playlist-panel-heading p,
+:root[data-theme="light"] .playlist-lesson-copy small,
+:root[data-theme="light"] .lesson-nav-card span,
+:root[data-theme="light"] .playlist-file-copy small,
+:root[data-theme="light"] .related-item small { color: #69786f; }
+:root[data-theme="light"] .playlist-lesson {
+  color: #405349;
+  border-color: rgba(31, 70, 46, .1);
+  background: #f8fbf8;
+}
+:root[data-theme="light"] .playlist-lesson:hover,
+:root[data-theme="light"] .playlist-lesson.active {
+  color: #126a40;
+  border-color: rgba(22, 134, 83, .25);
+  background: #edf7f0;
+}
+:root[data-theme="light"] .playlist-lesson-copy strong { color: #26382d; }
+:root[data-theme="light"] .playlist-lesson-number { color: #53665a; background: #eaf1ec; }
+:root[data-theme="light"] .playlist-lesson.active .playlist-lesson-number { color: #fff; background: #168653; }
+:root[data-theme="light"] .playlist-progress-track { background: #e6eee8; }
+:root[data-theme="light"] .video-action {
+  color: #52665a;
+  border-color: rgba(31, 70, 46, .15);
+  background: #fff;
+}
+:root[data-theme="light"] .video-action:hover,
+:root[data-theme="light"] .video-action.is-active { color: #126a40; background: #edf7f0; border-color: rgba(22, 134, 83, .3); }
+:root[data-theme="light"] .video-user-action-error { color: #a33b3b; }
+
+/* Indicator library and detail pages */
+:root[data-theme="light"] .indicators-page h1,
+:root[data-theme="light"] .indicator-body h3,
+:root[data-theme="light"] .indicator-head h1,
+:root[data-theme="light"] .indicator-section h2,
+:root[data-theme="light"] .similar-indicators h2,
+:root[data-theme="light"] .related-indicators-heading h2,
+:root[data-theme="light"] .install-guide-step h3,
+:root[data-theme="light"] .install-guide-note strong { color: #1b2a22; }
+:root[data-theme="light"] .indicators-intro,
+:root[data-theme="light"] .indicator-body p,
+:root[data-theme="light"] .indicator-meta,
+:root[data-theme="light"] .indicator-section p,
+:root[data-theme="light"] .indicator-content,
+:root[data-theme="light"] .install-guide-intro,
+:root[data-theme="light"] .install-guide-step > p,
+:root[data-theme="light"] .install-guide-figure figcaption,
+:root[data-theme="light"] .indicator-gallery-item figcaption { color: #64746a; }
+:root[data-theme="light"] .indicator-card,
+:root[data-theme="light"] .indicator-gallery-item,
+:root[data-theme="light"] .install-guide-step,
+:root[data-theme="light"] .install-guide-note {
+  color: #26382d;
+  border-color: rgba(31, 70, 46, .13);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 61, 43, .05);
+}
+:root[data-theme="light"] .indicators-filters input,
+:root[data-theme="light"] .indicators-filters input:focus-visible {
+  color: #24372b;
+  border-color: rgba(31, 70, 46, .18);
+  background: #fff;
+}
+:root[data-theme="light"] .indicators-chips button {
+  color: #52665a;
+  border-color: rgba(31, 70, 46, .14);
+  background: #f3f7f4;
+}
+:root[data-theme="light"] .indicators-chips button.active {
+  color: #126a40;
+  border-color: rgba(22, 134, 83, .28);
+  background: rgba(22, 134, 83, .09);
+}
+:root[data-theme="light"] .indicator-thumb,
+:root[data-theme="light"] .indicator-thumb-fallback,
+:root[data-theme="light"] .indicator-gallery-item > button,
+:root[data-theme="light"] .install-guide-figure > a { background: #edf3ef; }
+:root[data-theme="light"] .indicator-back,
+:root[data-theme="light"] .indicator-download,
+:root[data-theme="light"] .related-indicator-link { color: #168653; }
+:root[data-theme="light"] .install-guide-path { color: #176c45; background: #f1f7f2; }
+:root[data-theme="light"] .liquid-glass-action {
+  color: #176c45;
+  border-color: rgba(22, 134, 83, .2);
+  background: linear-gradient(135deg, rgba(22,134,83,.09), rgba(255,255,255,.96));
+  box-shadow: 0 5px 18px rgba(31, 61, 43, .08);
+  backdrop-filter: blur(12px);
+}
+:root[data-theme="light"] .liquid-glass-action-arrow { color: #176c45; border-color: rgba(22,134,83,.18); background: rgba(22,134,83,.08); }
+
+/* Admin login and dashboard — admin.css is loaded after the theme file,
+   so these deliberately use the theme attribute for stronger specificity. */
+:root[data-theme="light"] .admin-auth-page,
+:root[data-theme="light"] .admin-page { color: #24372b; background: #f4f7f5; }
+:root[data-theme="light"] .admin-auth-card,
+:root[data-theme="light"] .admin-panel,
+:root[data-theme="light"] .admin-stats article,
+:root[data-theme="light"] .admin-banner-item,
+:root[data-theme="light"] .admin-playlist-select,
+:root[data-theme="light"] .admin-playlist-list article,
+:root[data-theme="light"] .admin-gallery-field,
+:root[data-theme="light"] .admin-gallery-item,
+:root[data-theme="light"] .admin-app-release-card {
+  color: #26382d;
+  border-color: rgba(31, 70, 46, .13);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 61, 43, .055);
+}
+:root[data-theme="light"] .admin-sidebar {
+  border-color: rgba(31, 70, 46, .12);
+  background: #edf3ef;
+}
+:root[data-theme="light"] .admin-sidebar-brand,
+:root[data-theme="light"] .admin-topbar h1,
+:root[data-theme="light"] .admin-panel-heading h2,
+:root[data-theme="light"] .admin-video-cell strong,
+:root[data-theme="light"] .admin-category-list > div,
+:root[data-theme="light"] .admin-playlist-select > strong,
+:root[data-theme="light"] .admin-playlist-info strong,
+:root[data-theme="light"] .admin-playlist-lessons > div > strong,
+:root[data-theme="light"] .admin-app-release-title h3,
+:root[data-theme="light"] .admin-app-release-info > p b { color: #1b2a22; }
+:root[data-theme="light"] .admin-auth-card p,
+:root[data-theme="light"] .admin-auth-card small,
+:root[data-theme="light"] .admin-topbar,
+:root[data-theme="light"] .admin-live-status,
+:root[data-theme="light"] .admin-panel-heading p,
+:root[data-theme="light"] .admin-stats article span,
+:root[data-theme="light"] .admin-table th,
+:root[data-theme="light"] .admin-table td,
+:root[data-theme="light"] .admin-empty,
+:root[data-theme="light"] .admin-video-cell small,
+:root[data-theme="light"] .admin-category-list small,
+:root[data-theme="light"] .admin-playlist-select > small,
+:root[data-theme="light"] .admin-playlist-select > span,
+:root[data-theme="light"] .admin-playlist-info small,
+:root[data-theme="light"] .admin-app-release-info > p,
+:root[data-theme="light"] .admin-app-release-notes { color: #64746a; }
+:root[data-theme="light"] .admin-sidebar > button,
+:root[data-theme="light"] .admin-sidebar-bottom > a { color: #53665a; }
+:root[data-theme="light"] .admin-sidebar > button.active,
+:root[data-theme="light"] .admin-sidebar > button:hover { color: #126a40; background: #e1f1e6; border-color: rgba(22,134,83,.2); }
+:root[data-theme="light"] .admin-auth-card label,
+:root[data-theme="light"] .admin-form-grid label,
+:root[data-theme="light"] .admin-cover-field { color: #405349; }
+:root[data-theme="light"] .admin-auth-card input,
+:root[data-theme="light"] .admin-form-grid input,
+:root[data-theme="light"] .admin-form-grid textarea,
+:root[data-theme="light"] .admin-form-grid select,
+:root[data-theme="light"] .admin-category-form input,
+:root[data-theme="light"] .admin-gallery-item > input,
+:root[data-theme="light"] .admin-search,
+:root[data-theme="light"] .admin-search input {
+  color: #24372b;
+  border-color: rgba(31, 70, 46, .18);
+  background: #fff;
+}
+:root[data-theme="light"] .admin-form-grid select { color-scheme: light; }
+:root[data-theme="light"] .admin-table td { border-bottom-color: rgba(31,70,46,.09); }
+:root[data-theme="light"] .admin-table tr { border-bottom-color: rgba(31,70,46,.1); }
+:root[data-theme="light"] .admin-playlist-options label { color: #405349; background: #f7faf8; }
+:root[data-theme="light"] .admin-playlist-lessons > div,
+:root[data-theme="light"] .admin-playlist-list article.selected { background: #f2f8f3; border-color: rgba(22,134,83,.2); }
+:root[data-theme="light"] .admin-app-release-kicker,
+:root[data-theme="light"] .admin-app-release-status { color: #168653; }
+:root[data-theme="light"] .admin-app-release-copy { color: #405349; background: #f4f8f5; }
+:root[data-theme="light"] .admin-cover-preview,
+:root[data-theme="light"] .admin-playlist-thumb { background: #edf3ef; }
+
+/* Embedded chart page: leave the third-party chart canvas itself untouched. */
+:root[data-theme="light"] .chart-page,
+:root[data-theme="light"] .bitycle-widget .bitycle-fallback { color: #24372b; background: #f4f7f5; }
+:root[data-theme="light"] .chart-back {
+  color: #176c45;
+  border-color: rgba(22,134,83,.22);
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 8px 24px rgba(31,61,43,.12);
+}
+:root[data-theme="light"] .bitycle-fallback { color: #64746a; }
+
+/* Shared states, alerts and focus visibility */
+:root[data-theme="light"] input:focus-visible,
+:root[data-theme="light"] textarea:focus-visible,
+:root[data-theme="light"] select:focus-visible,
+:root[data-theme="light"] button:focus-visible,
+:root[data-theme="light"] a:focus-visible {
+  outline-color: rgba(22, 134, 83, .65);
+}
+:root[data-theme="light"] .admin-alert.error { color: #a33b3b; border-color: #e8a0a0; background: #fff2f2; }
+:root[data-theme="light"] .admin-alert.success { color: #176c45; border-color: #a8d9ba; background: #eff9f1; }
+:root[data-theme="light"] .admin-field-hint.error { color: #a33b3b; }
+:root[data-theme="light"] .admin-field-hint.success { color: #176c45; }

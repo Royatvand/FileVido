@@ -24,7 +24,7 @@ async function handleAuthUrl(url) {
     }
     const code = params.get('code')
     if (!code) return
-    await userAuth.completeGoogleSignIn(code)
+    await userAuth.completeOAuthSignIn(code)
     window.location.replace(userAuth.consumeNext() || '/dashboard')
   } catch (error) {
     window.location.replace('/login?error_description=' + encodeURIComponent(error.message || 'ورود با گوگل انجام نشد.'))

@@ -1008,6 +1008,9 @@ button, input, textarea, select { font-family: inherit; }
 .login-google:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .login-google:disabled { opacity:.6; cursor:wait; transform:none; }
 .login-google svg { width:22px; height:22px; flex:0 0 auto; }
+.login-providers { display:grid; gap:10px; }
+.login-google.login-github { color:#e9f1ec; background:transparent; border:1px solid #2c3d37; }
+.login-google.login-github:hover { border-color:color-mix(in srgb, var(--accent) 45%, transparent); background:color-mix(in srgb, var(--accent) 7%, transparent); }
 .login-points { list-style:none; margin:24px 0 0; padding:20px 0 0; border-top:1px solid #1d2b27; display:grid; gap:11px; }
 .login-points li { position:relative; padding-inline-start:20px; color:#8a9a92; font-size:12px; line-height:1.9; }
 .login-points li::before { content:''; position:absolute; inset-inline-start:2px; top:.8em; width:8px; height:2px; border-radius:2px; background:var(--accent); }

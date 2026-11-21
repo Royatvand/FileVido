@@ -229,13 +229,75 @@ async function registerDeviceSession(session) {
 }
 
 // احراز هویت کاربران عادی؛ نشست آن کاملاً جدا از نشست پنل مدیریت است.
-let googleCallbackPromise = null
+let oauthCallbackPromise = null
 const USER_NEXT_KEY = 'chartmasters_login_next'
 
 // فقط مسیرهای داخلی سایت پذیرفته می‌شود (جلوگیری از open redirect)
 export function safeNextPath(value) {
   if (typeof value !== 'string') return ''
   return /^\/(?![/\\])[^\s]*$/.test(value) && !value.startsWith('/login') ? value : ''
+}
+
+async function startUserOAuthSignIn(provider) {
+  if (!['google', 'github'].includes(provider)) {
+    throw new Error('روش ورود انتخاب‌شده پشتیبانی نمی‌شود.')
+  }
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error('تنظیمات اتصال Supabase در محیط پروژه وارد نشده است.')
+  }
+
+  const randomBytes = crypto.getRandomValues(new Uint8Array(32))
+  const verifier = encodeBase64Url(randomBytes)
+  const challenge = await createCodeChallenge(verifier)
+  sessionStorage.setItem(USER_CODE_VERIFIER_KEY, verifier)
+  // In the Android app the system browser may outlive the WebView process, so keep a copy that survives it.
+  if (isNativeApp()) {
+    try { localStorage.setItem(USER_CODE_VERIFIER_KEY, verifier) } catch { /* ignore */ }
+  }
+
+  const authorizeUrl = new URL('/auth/v1/authorize', SUPABASE_URL)
+  authorizeUrl.searchParams.set('provider', provider)
+  authorizeUrl.searchParams.set('redirect_to', isNativeApp() ? NATIVE_AUTH_REDIRECT : window.location.origin + '/login')
+  authorizeUrl.searchParams.set('code_challenge', challenge)
+  authorizeUrl.searchParams.set('code_challenge_method', 's256')
+  if (provider === 'github') authorizeUrl.searchParams.set('scopes', 'read:user user:email')
+
+  if (isNativeApp()) {
+    // OAuth providers open in the system browser and return through chartmasters://auth.
+    const { Browser } = await import('@capacitor/browser')
+    await Browser.open({ url: authorizeUrl.toString() })
+    return
+  }
+  window.location.assign(authorizeUrl.toString())
+}
+
+async function completeUserOAuthSignIn(code) {
+  if (oauthCallbackPromise) return oauthCallbackPromise
+  oauthCallbackPromise = (async () => {
+    let verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
+    if (!verifier && isNativeApp()) {
+      try { verifier = localStorage.getItem(USER_CODE_VERIFIER_KEY) } catch { /* ignore */ }
+    }
+    if (!code || !verifier) {
+      throw new Error('نشست ورود معتبر نیست. لطفاً دوباره وارد حساب شو.')
+    }
+
+    const session = await request('/auth/v1/token?grant_type=pkce', {
+      method: 'POST',
+      body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
+    })
+
+    sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
+    try { localStorage.removeItem(USER_CODE_VERIFIER_KEY) } catch { /* ignore */ }
+    saveUserSession(session)
+    await registerDeviceSession(getUserSession()).catch(() => {})
+    return getUserSession()
+  })()
+  try {
+    return await oauthCallbackPromise
+  } finally {
+    oauthCallbackPromise = null
+  }
 }
 
 export const userAuth = {
@@ -311,33 +373,14 @@ export const userAuth = {
     )
     return true
   },
+  async signInWithProvider(provider) {
+    return startUserOAuthSignIn(provider)
+  },
   async signInWithGoogle() {
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      throw new Error('تنظیمات اتصال Supabase در محیط پروژه وارد نشده است.')
-    }
-
-    const randomBytes = crypto.getRandomValues(new Uint8Array(32))
-    const verifier = encodeBase64Url(randomBytes)
-    const challenge = await createCodeChallenge(verifier)
-    sessionStorage.setItem(USER_CODE_VERIFIER_KEY, verifier)
-    // In the Android app the system browser may outlive the WebView process, so keep a copy that survives it.
-    if (isNativeApp()) {
-      try { localStorage.setItem(USER_CODE_VERIFIER_KEY, verifier) } catch { /* ignore */ }
-    }
-
-    const authorizeUrl = new URL('/auth/v1/authorize', SUPABASE_URL)
-    authorizeUrl.searchParams.set('provider', 'google')
-    authorizeUrl.searchParams.set('redirect_to', isNativeApp() ? NATIVE_AUTH_REDIRECT : window.location.origin + '/login')
-    authorizeUrl.searchParams.set('code_challenge', challenge)
-    authorizeUrl.searchParams.set('code_challenge_method', 's256')
-    if (isNativeApp()) {
-      // Google blocks sign-in inside WebViews, so use the system browser (Custom Tab);
-      // it returns to the app through the chartmasters:// deep link (see nativeAuth.js).
-      const { Browser } = await import('@capacitor/browser')
-      await Browser.open({ url: authorizeUrl.toString() })
-      return
-    }
-    window.location.assign(authorizeUrl.toString())
+    return startUserOAuthSignIn('google')
+  },
+  async signInWithGitHub() {
+    return startUserOAuthSignIn('github')
   },
   async updateProfile(profile) {
     const session = await getValidUserSession()
@@ -365,34 +408,13 @@ export const userAuth = {
     }
     saveUserSession(null)
   },
+  async completeOAuthSignIn(code) {
+    return completeUserOAuthSignIn(code)
+  },
+  // Backward-compatible alias for the existing Android Google callback.
   async completeGoogleSignIn(code) {
-    if (googleCallbackPromise) return googleCallbackPromise
-    googleCallbackPromise = (async () => {
-      let verifier = sessionStorage.getItem(USER_CODE_VERIFIER_KEY)
-      if (!verifier && isNativeApp()) {
-        try { verifier = localStorage.getItem(USER_CODE_VERIFIER_KEY) } catch { /* ignore */ }
-      }
-      if (!code || !verifier) {
-        throw new Error('نشست ورود معتبر نیست. لطفاً دوباره با گوگل وارد شوید.')
-      }
-
-      const session = await request('/auth/v1/token?grant_type=pkce', {
-        method: 'POST',
-        body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
-      })
-
-      sessionStorage.removeItem(USER_CODE_VERIFIER_KEY)
-      try { localStorage.removeItem(USER_CODE_VERIFIER_KEY) } catch { /* ignore */ }
-      saveUserSession(session)
-      await registerDeviceSession(getUserSession()).catch(() => {})
-      return getUserSession()
-    })()
-    try {
-      return await googleCallbackPromise
-    } finally {
-      googleCallbackPromise = null
-    }
-  }
+    return completeUserOAuthSignIn(code)
+  },
 }
 
 export const supabase = {

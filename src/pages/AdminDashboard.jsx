@@ -6,12 +6,30 @@ import AdminPlaylists from '../components/AdminPlaylists'
 import AdminIndicators from '../components/AdminIndicators'
 import AdminAppVersions from '../components/AdminAppVersions'
 import { extractAparatId } from '../lib/aparat'
+import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers } from 'react-icons/lu'
 
 const emptyForm = {
   title: '', slug: '', description: '', aparat_id: '', cover_url: '',
   category_id: '', duration: '', level: 'مقدماتی', instructor: '',
   tags: '', is_featured: false, status: 'draft', playlist_ids: [],
 }
+
+
+const ADMIN_NAV = [
+  { label: 'محتوای آموزشی', items: [
+    { id: 'videos', label: 'ویدیوها', Icon: LuVideo },
+    { id: 'form', label: 'افزودن ویدیو', Icon: LuCirclePlus },
+    { id: 'categories', label: 'دسته‌بندی‌ها', Icon: LuFolderTree },
+    { id: 'playlists', label: 'پلی‌لیست‌ها', Icon: LuListVideo },
+  ] },
+  { label: 'سایت', items: [
+    { id: 'banners', label: 'اسلایدر', Icon: LuImage },
+    { id: 'indicators', label: 'اندیکاتورها', Icon: LuChartCandlestick },
+  ] },
+  { label: 'اپلیکیشن', items: [
+    { id: 'app-versions', label: 'نسخه‌های اپ', Icon: LuSmartphone },
+  ] },
+]
 
 function slugify(value) {
   return value.trim().toLowerCase()
@@ -204,6 +222,12 @@ function AdminDashboard() {
     window.location.href = '/admin/login'
   }
 
+  function selectTab(id) {
+    if (id === 'videos') { resetForm(); setActiveTab('videos') }
+    else if (id === 'form') { resetForm(); setActiveTab('form'); loadData() }
+    else setActiveTab(id)
+  }
+
   const tabTitle =
     activeTab === 'videos' ? 'ویدیوها'
       : activeTab === 'form' ? (editingId ? 'ویرایش ویدیو' : 'افزودن ویدیوی جدید')
@@ -217,24 +241,28 @@ function AdminDashboard() {
     <main className="admin-page" dir="rtl">
       <aside className="admin-sidebar">
         <a className="admin-sidebar-brand" href="/"><img className="admin-brand-mark" src="/chartmasters-icon.webp" alt="" /><span>Chart<span>Masters</span><small>مدیریت محتوا</small></span></a>
-        <div className="admin-side-label">مدیریت</div>
-        <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('videos') }}>▤ <span>ویدیوها</span></button>
-        <button className={activeTab === 'form' ? 'active' : ''} onClick={() => { resetForm(); setActiveTab('form'); loadData() }}>＋ <span>افزودن ویدیو</span></button>
-        <button className={activeTab === 'categories' ? 'active' : ''} onClick={() => setActiveTab('categories')}>◫ <span>دسته‌بندی‌ها</span></button>
-        <button className={activeTab === 'playlists' ? 'active' : ''} onClick={() => setActiveTab('playlists')}>▤ <span>پلی‌لیست‌ها</span></button>
-        <button className={activeTab === 'banners' ? 'active' : ''} onClick={() => setActiveTab('banners')}>▣ <span>اسلایدر</span></button>
-        <button className={activeTab === 'indicators' ? 'active' : ''} onClick={() => setActiveTab('indicators')}>ƒ <span>اندیکاتورها</span></button>
-        <button className={activeTab === 'app-versions' ? 'active' : ''} onClick={() => setActiveTab('app-versions')}>↑ <span>نسخه اپ</span></button>
+        <nav className="admin-nav" aria-label="بخش‌های مدیریت">
+        {ADMIN_NAV.map((group) => (
+          <div className="admin-nav-group" key={group.label}>
+            <div className="admin-side-label">{group.label}</div>
+            {group.items.map(({ id, label, Icon }) => (
+              <button key={id} className={activeTab === id ? 'active' : ''} aria-current={activeTab === id ? 'page' : undefined} onClick={() => selectTab(id)}>
+                <Icon aria-hidden="true" /> <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        ))}
+        </nav>
         <div className="admin-sidebar-bottom">
-          <a href="/" target="_blank" rel="noreferrer">مشاهده سایت ↗</a>
-          <button onClick={handleLogout}>خروج از حساب <span>↗</span></button>
+          <a href="/" target="_blank" rel="noreferrer"><LuExternalLink aria-hidden="true" /> <span>مشاهده سایت</span></a>
+          <button onClick={handleLogout}><LuLogOut aria-hidden="true" /> <span>خروج از حساب</span></button>
         </div>
       </aside>
 
       <section className="admin-workspace">
         <header className="admin-topbar">
-          <div><span className="admin-kicker">CHARTMASTERS / ADMIN</span><h1>{tabTitle}</h1></div>
-          <div className="admin-live-status"><i /> اتصال به دیتابیس</div>
+          <div><h1>{tabTitle}</h1></div>
+          <div className="admin-live-status"><i /> دیتابیس متصل است</div>
         </header>
 
         {notice.text && <div className={`admin-alert ${notice.type || ''}`}>{notice.text}<button onClick={() => setNotice({ type: '', text: '' })}>×</button></div>}
@@ -242,10 +270,10 @@ function AdminDashboard() {
         {activeTab === 'videos' && (
           <>
             <div className="admin-stats">
-              <article><span>کل ویدیوها</span><strong>{videos.length}</strong></article>
-              <article><span>منتشرشده</span><strong>{videos.filter((item) => item.status === 'published').length}</strong></article>
-              <article><span>پیش‌نویس</span><strong>{videos.filter((item) => item.status === 'draft').length}</strong></article>
-              <article><span>دسته‌بندی‌ها</span><strong>{categories.length}</strong></article>
+              <article><i className="admin-stat-icon"><LuFilm aria-hidden="true" /></i><div><span>کل ویدیوها</span><strong>{videos.length}</strong></div></article>
+              <article><i className="admin-stat-icon is-ok"><LuCircleCheck aria-hidden="true" /></i><div><span>منتشرشده</span><strong>{videos.filter((item) => item.status === 'published').length}</strong></div></article>
+              <article><i className="admin-stat-icon is-warn"><LuPencilLine aria-hidden="true" /></i><div><span>پیش‌نویس</span><strong>{videos.filter((item) => item.status === 'draft').length}</strong></div></article>
+              <article><i className="admin-stat-icon"><LuLayers aria-hidden="true" /></i><div><span>دسته‌بندی‌ها</span><strong>{categories.length}</strong></div></article>
             </div>
             <div className="admin-panel">
               <div className="admin-panel-heading"><div><h2>کتابخانه ویدیوها</h2><p>مدیریت و انتشار محتوای آموزشی</p></div><button className="admin-primary-button compact" onClick={() => { resetForm(); setActiveTab('form') }}>＋ ویدیوی جدید</button></div>

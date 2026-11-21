@@ -1,0 +1,285 @@
+/* ChartMasters — optional light theme
+   Loaded after index.css so the existing green and coral themes remain untouched. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f7f5;
+  --panel: #ffffff;
+  --muted: #66756d;
+  --accent: #168653;
+  --line: rgba(25, 55, 39, .13);
+  color: #1b2a22;
+  background: var(--bg);
+}
+
+:root[data-theme="light"] body {
+  color: #1b2a22;
+  background: #f4f7f5;
+}
+
+:root[data-theme="light"] .app-shell {
+  color: #1b2a22;
+  background:
+    radial-gradient(ellipse at 80% 8%, rgba(51, 166, 108, .09), transparent 36%),
+    radial-gradient(ellipse at 8% 55%, rgba(95, 160, 125, .07), transparent 38%),
+    #f4f7f5;
+}
+
+:root[data-theme="light"] .site-header {
+  border-color: rgba(25, 55, 39, .1);
+  background: rgba(250, 252, 250, .88);
+  box-shadow: 0 5px 24px rgba(31, 61, 43, .045);
+}
+
+:root[data-theme="light"] .brand-name,
+:root[data-theme="light"] .hero-content h1,
+:root[data-theme="light"] .about-hero h1,
+:root[data-theme="light"] .about-story-copy h2,
+:root[data-theme="light"] .values-heading h2,
+:root[data-theme="light"] .coming-section h2,
+:root[data-theme="light"] .footer-heading,
+:root[data-theme="light"] .video-page h1,
+:root[data-theme="light"] .videos-heading h1,
+:root[data-theme="light"] .videos-heading h2 {
+  color: #1b2a22;
+}
+
+:root[data-theme="light"] .nav-link { color: #65746b; }
+:root[data-theme="light"] .nav-link:hover,
+:root[data-theme="light"] .nav-link.active { color: #17271e; }
+:root[data-theme="light"] .nav-link.active::after { background: #168653; }
+
+:root[data-theme="light"] .header-login {
+  color: #176c45;
+  border-color: rgba(22, 134, 83, .2);
+  background: rgba(22, 134, 83, .07);
+}
+:root[data-theme="light"] .header-login:hover {
+  color: #fff;
+  border-color: #168653;
+  background: #168653;
+}
+
+:root[data-theme="light"] .theme-toggle {
+  color: #167447;
+  border-color: rgba(22, 134, 83, .25);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 7px 22px rgba(26, 62, 41, .12);
+}
+:root[data-theme="light"] .theme-toggle:hover { background: #edf7f0; }
+
+:root[data-theme="light"] .eyebrow {
+  color: #32694c;
+  border-color: rgba(22, 134, 83, .18);
+  background: rgba(22, 134, 83, .06);
+}
+:root[data-theme="light"] .hero-description,
+:root[data-theme="light"] .about-lead,
+:root[data-theme="light"] .about-story-copy p,
+:root[data-theme="light"] .about-quote-card p,
+:root[data-theme="light"] .value-card p,
+:root[data-theme="light"] .coming-section p,
+:root[data-theme="light"] .footer-brand p,
+:root[data-theme="light"] .footer-links a,
+:root[data-theme="light"] .footer-bottom,
+:root[data-theme="light"] .video-info,
+:root[data-theme="light"] .video-meta,
+:root[data-theme="light"] .video-category,
+:root[data-theme="light"] .video-description,
+:root[data-theme="light"] .videos-heading p {
+  color: #66756d;
+}
+
+:root[data-theme="light"] .hero-content h1 .hl,
+:root[data-theme="light"] .section-kicker,
+:root[data-theme="light"] .value-number,
+:root[data-theme="light"] .quote-mark,
+:root[data-theme="light"] .footer-links a:hover,
+:root[data-theme="light"] .footer-brand .brand-accent {
+  color: #168653;
+}
+
+:root[data-theme="light"] .hero-glow {
+  background: radial-gradient(circle, rgba(39, 170, 103, .12), transparent 68%);
+}
+:root[data-theme="light"] .visual-orbit { border-color: rgba(22, 134, 83, .12); }
+:root[data-theme="light"] .visual-card {
+  color: #26382d;
+  border-color: rgba(32, 91, 58, .14);
+  background: linear-gradient(145deg, #ffffff, #edf5ef);
+  box-shadow: 0 25px 70px rgba(36, 74, 49, .12), inset 0 1px rgba(255,255,255,.9);
+}
+:root[data-theme="light"] .visual-card-top,
+:root[data-theme="light"] .chart-footer,
+:root[data-theme="light"] .chart-label { color: #718078; }
+:root[data-theme="light"] .chart-value,
+:root[data-theme="light"] .chart-line { color: #168653; }
+:root[data-theme="light"] .floating-chip {
+  color: #294434;
+  border-color: rgba(34, 89, 56, .13);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 10px 28px rgba(30, 67, 43, .12);
+}
+
+:root[data-theme="light"] .primary-button {
+  color: #fff;
+  background: #168653;
+  box-shadow: 0 7px 18px rgba(22, 134, 83, .13);
+}
+:root[data-theme="light"] .primary-button:hover { background: #106d42; }
+:root[data-theme="light"] .secondary-button {
+  color: #315541;
+  border-color: rgba(31, 91, 57, .18);
+  background: rgba(255,255,255,.72);
+}
+:root[data-theme="light"] .secondary-button:hover {
+  color: #126a40;
+  border-color: rgba(22, 134, 83, .4);
+}
+:root[data-theme="light"] .site-footer {
+  border-color: rgba(25, 55, 39, .1);
+  background: linear-gradient(180deg, #edf3ef, #e7efea);
+}
+:root[data-theme="light"] .footer-note,
+:root[data-theme="light"] .about-cta {
+  color: #52675a;
+  border-color: rgba(22, 134, 83, .16);
+  background: linear-gradient(110deg, rgba(22,134,83,.07), rgba(255,255,255,.72));
+}
+:root[data-theme="light"] .about-quote-card,
+:root[data-theme="light"] .value-card {
+  color: #26382d;
+  border-color: rgba(22, 134, 83, .14);
+  background: linear-gradient(145deg, #fff, #f0f6f1);
+  box-shadow: 0 12px 34px rgba(31, 61, 43, .055);
+}
+:root[data-theme="light"] .about-quote-card p,
+:root[data-theme="light"] .value-card h3,
+:root[data-theme="light"] .about-cta h2 { color: #24372b; }
+:root[data-theme="light"] .coming-section { border-color: var(--line); }
+
+:root[data-theme="light"] .videos-section,
+:root[data-theme="light"] .videos-archive,
+:root[data-theme="light"] .video-page,
+:root[data-theme="light"] .user-dashboard-main {
+  color: #1b2a22;
+}
+:root[data-theme="light"] .video-card,
+:root[data-theme="light"] .video-page .video-info,
+:root[data-theme="light"] .filter-group,
+:root[data-theme="light"] .videos-search,
+:root[data-theme="light"] .videos-empty,
+:root[data-theme="light"] .user-auth-card,
+:root[data-theme="light"] .login-card,
+:root[data-theme="light"] .user-dashboard-panel,
+:root[data-theme="light"] .user-dashboard-stat-card,
+:root[data-theme="light"] .user-dashboard-course-card,
+:root[data-theme="light"] .user-dashboard-section-row,
+:root[data-theme="light"] .user-device-panel,
+:root[data-theme="light"] .user-device-item,
+:root[data-theme="light"] .learning-metric-card,
+:root[data-theme="light"] .learning-activity-card,
+:root[data-theme="light"] .admin-panel,
+:root[data-theme="light"] .admin-stats article {
+  color: #26382d;
+  border-color: rgba(31, 70, 46, .12);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 61, 43, .055);
+}
+
+:root[data-theme="light"] .video-body,
+:root[data-theme="light"] .video-card .video-body,
+:root[data-theme="light"] .user-dashboard-topbar,
+:root[data-theme="light"] .user-dashboard-sidebar,
+:root[data-theme="light"] .user-dashboard-welcome,
+:root[data-theme="light"] .user-dashboard-content-grid,
+:root[data-theme="light"] .user-dashboard-full-panel {
+  color: #26382d;
+  border-color: rgba(31, 70, 46, .1);
+  background: #f8fbf8;
+}
+
+:root[data-theme="light"] .video-card h3,
+:root[data-theme="light"] .video-page h2,
+:root[data-theme="light"] .video-page h3,
+:root[data-theme="light"] .user-dashboard h1,
+:root[data-theme="light"] .user-dashboard h2,
+:root[data-theme="light"] .user-dashboard h3,
+:root[data-theme="light"] .user-auth-card h1,
+:root[data-theme="light"] .login-card h1,
+:root[data-theme="light"] .learning-activity-heading h3 {
+  color: #1b2a22;
+}
+:root[data-theme="light"] .video-card p,
+:root[data-theme="light"] .video-page p,
+:root[data-theme="light"] .user-dashboard p,
+:root[data-theme="light"] .user-dashboard small,
+:root[data-theme="light"] .learning-activity-heading p,
+:root[data-theme="light"] .learning-metric-top,
+:root[data-theme="light"] .learning-metric-bottom {
+  color: #69786f;
+}
+:root[data-theme="light"] .filter-chip {
+  color: #53665a;
+  border-color: rgba(31, 70, 46, .14);
+  background: #f3f7f4;
+}
+:root[data-theme="light"] .filter-chip.active,
+:root[data-theme="light"] .filter-chip[aria-pressed="true"] {
+  color: #126a40;
+  border-color: rgba(22, 134, 83, .28);
+  background: rgba(22, 134, 83, .09);
+}
+:root[data-theme="light"] input,
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] select {
+  color: #24372b;
+  border-color: rgba(31, 70, 46, .18);
+  background: #fff;
+}
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder { color: #8a988f; }
+:root[data-theme="light"] .user-dashboard-nav-link { color: #617168; }
+:root[data-theme="light"] .user-dashboard-nav-link.active,
+:root[data-theme="light"] .user-dashboard-nav-link:hover { color: #126a40; background: rgba(22,134,83,.08); }
+:root[data-theme="light"] .user-dashboard-stat-card div strong,
+:root[data-theme="light"] .learning-metric-card > strong { color: #1b2a22; }
+:root[data-theme="light"] .learning-heatmap-cell.level-0 { background: #e7eee9; }
+:root[data-theme="light"] .learning-heatmap-cell.level-1 { background: #c9e8d4; }
+:root[data-theme="light"] .learning-heatmap-cell.level-2 { background: #91d3aa; }
+:root[data-theme="light"] .learning-heatmap-cell.level-3 { background: #50b879; }
+:root[data-theme="light"] .learning-heatmap-cell.level-4 { background: #168653; }
+
+:root[data-theme="light"] .login-page {
+  color: #1b2a22;
+  background: radial-gradient(900px 480px at 50% 108%, rgba(22,134,83,.09), transparent 70%), #f4f7f5;
+}
+:root[data-theme="light"] .login-card,
+:root[data-theme="light"] .user-auth-card {
+  border-color: rgba(31, 70, 46, .13);
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 24px 70px rgba(31,61,43,.1);
+}
+:root[data-theme="light"] .login-brand,
+:root[data-theme="light"] .login-card h1,
+:root[data-theme="light"] .user-auth-card h1 { color: #1b2a22; }
+:root[data-theme="light"] .login-lead,
+:root[data-theme="light"] .login-points li { color: #66756d; }
+:root[data-theme="light"] .login-points { border-color: rgba(31,70,46,.12); }
+:root[data-theme="light"] .login-google { color: #fff; background: #168653; }
+:root[data-theme="light"] .login-google:hover { background: #106d42; }
+
+:root[data-theme="light"] .theme-toggle span { font-size: 21px; }
+:root[data-theme="light"] .site-header .theme-toggle { background: #fff; }
+:root[data-theme="light"] .admin-stats article span,
+:root[data-theme="light"] .admin-panel,
+:root[data-theme="light"] .user-dashboard-eyebrow,
+:root[data-theme="light"] .user-dashboard-section-kicker { color: #66756d; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme="light"] .video-card,
+  :root[data-theme="light"] .user-dashboard-panel,
+  :root[data-theme="light"] .user-dashboard-course-card,
+  :root[data-theme="light"] .learning-metric-card {
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+}

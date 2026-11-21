@@ -1,33 +1,50 @@
 import { useEffect, useState } from 'react'
 
+const themes = ['green', 'coral', 'light']
+
+const themeLabels = {
+  green: 'سبز',
+  coral: 'مرجانی',
+  light: 'روشن',
+}
+
+const themeIcons = {
+  green: '☀',
+  coral: '☾',
+  light: '◐',
+}
+
 function ThemeToggle({ className = '' }) {
-  const [isCoral, setIsCoral] = useState(() => {
+  const [theme, setTheme] = useState(() => {
     try {
-      return window.localStorage.getItem('chartmasters-theme') === 'coral'
+      const savedTheme = window.localStorage.getItem('chartmasters-theme')
+      return themes.includes(savedTheme) ? savedTheme : 'green'
     } catch {
-      return false
+      return 'green'
     }
   })
 
   useEffect(() => {
-    document.documentElement.dataset.theme = isCoral ? 'coral' : 'green'
+    document.documentElement.dataset.theme = theme
 
     try {
-      window.localStorage.setItem('chartmasters-theme', isCoral ? 'coral' : 'green')
+      window.localStorage.setItem('chartmasters-theme', theme)
     } catch {
-      // The theme still works for the current page when storage is unavailable.
+      // The selected theme still works for the current page when storage is unavailable.
     }
-  }, [isCoral])
+  }, [theme])
+
+  const nextTheme = themes[(themes.indexOf(theme) + 1) % themes.length]
 
   return (
     <button
       className={('theme-toggle ' + className).trim()}
       type="button"
-      onClick={() => setIsCoral((current) => !current)}
-      aria-label={isCoral ? 'بازگشت به تم سبز' : 'فعال‌کردن تم مرجانی'}
-      title={isCoral ? 'بازگشت به تم سبز' : 'فعال‌کردن تم مرجانی'}
+      onClick={() => setTheme(nextTheme)}
+      aria-label={`فعال‌کردن تم ${themeLabels[nextTheme]}`}
+      title={`تم بعدی: ${themeLabels[nextTheme]}`}
     >
-      <span aria-hidden="true">{isCoral ? '☾' : '☀'}</span>
+      <span aria-hidden="true">{themeIcons[theme]}</span>
     </button>
   )
 }

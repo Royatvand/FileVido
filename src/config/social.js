@@ -3,6 +3,6 @@
 // تا وقتی خالی باشد، آیکون‌ها بدون لینک نمایش داده می‌شوند.
 export const socialLinks = {
   telegram: 'https://t.me/ChartMastersAcademy',
-  instagram: '',
+  instagram: 'https://www.instagram.com/chartmastersir/',
   github: '',
 }

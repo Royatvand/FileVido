@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { userAuth } from '../lib/supabase'
+import PhoneAuth from '../components/PhoneAuth'
 
 function GoogleLogin() {
   const [loading, setLoading] = useState(false)
@@ -100,6 +101,7 @@ function GoogleLogin() {
                 <span>{loading ? 'لطفاً صبر کن...' : 'ادامه با حساب گوگل'}</span><span className="cm-auth-google-arrow">←</span>
               </button>
             )}
+            {!user && <PhoneAuth />}
             <div className="cm-auth-divider"><span>ورود امن و سریع</span></div>
             <div className="cm-auth-benefits">
               <div><span className="cm-auth-benefit-icon">01</span><span><strong>فضای شخصی و اختصاصی</strong><small>علاقه‌مندی‌ها و تاریخچه یادگیری</small></span></div>

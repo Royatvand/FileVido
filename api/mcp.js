@@ -359,6 +359,23 @@ function createServer(requestInfo) {
 
 const mcpHandler = createMcpHandler(createServer, { responseMode: 'json' })
 
+function unauthorizedResponse() {
+  const resourceMetadata = 'https://chartmasters.top/.well-known/oauth-protected-resource/api/mcp'
+  return new Response(JSON.stringify({
+    error: 'unauthorized',
+    error_description: 'برای اتصال به ابزارهای چارت مسترز، ابتدا حساب کاربری خود را متصل کنید.',
+  }), {
+    status: 401,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadata}"`,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'WWW-Authenticate',
+    },
+  })
+}
+
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -367,14 +384,30 @@ export default async function handler(request) {
         Allow: 'GET, POST, DELETE, OPTIONS',
         'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, Mcp-Session-Id, Mcp-Protocol-Version',
+        'Access-Control-Expose-Headers': 'WWW-Authenticate',
         'Access-Control-Max-Age': '86400',
       },
     })
   }
 
+  if (!['GET', 'POST', 'DELETE'].includes(request.method)) {
+    return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, POST, DELETE, OPTIONS' } })
+  }
+
+  const accessToken = readBearerToken(request)
+  if (!accessToken) return unauthorizedResponse()
+
+  try {
+    await verifySupabaseUser(accessToken)
+  } catch {
+    return unauthorizedResponse()
+  }
+
   const response = await mcpHandler.fetch(request)
   const headers = new Headers(response.headers)
   headers.set('Cache-Control', 'no-store')
+  headers.set('Access-Control-Allow-Origin', '*')
+  headers.set('Access-Control-Expose-Headers', 'WWW-Authenticate')
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,

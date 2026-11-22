@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LuSearch, LuGraduationCap, LuTrendingUp, LuActivity, LuHeart, LuChartNoAxesColumn, LuShieldCheck, LuCopy, LuCheck } from 'react-icons/lu'
 
 const MCP_URL = 'https://chartmasters.top/api/mcp'
 
@@ -7,42 +8,51 @@ const CLIENTS = [
     id: 'claude',
     name: 'Claude',
     steps: [
-      'در Claude به بخش Customize ← Connectors برو و «Add custom connector» را بزن.',
-      'آدرس بالا را وارد کن و ادامه بده.',
-      'در بخش OAuth client گزینه «Register automatically» را انتخاب کن.',
-      'با حساب چارت مسترز وارد شو و در صفحه تأیید، «تأیید و اتصال» را بزن.',
+      ['افزودن کانکتور', 'در Claude به Customize ← Connectors برو و «Add custom connector» را بزن.'],
+      ['وارد کردن آدرس', 'آدرس بالا را بچسبان و ادامه بده. در بخش OAuth client گزینه «Register automatically» را انتخاب کن.'],
+      ['ورود به حساب', 'با حساب چارت مسترز وارد شو.'],
+      ['تأیید دسترسی', 'در صفحه تأیید، «تأیید و اتصال» را بزن. تمام.'],
     ],
   },
   {
     id: 'gemini',
     name: 'Gemini',
     steps: [
-      'صفحه Gemini Developer Mode را باز کن (gemini.google.com/devmode) و یک MCP app جدید بساز.',
-      'آدرس بالا را وارد کن.',
-      'در تب Authentication گزینه «Dynamic Client Registration» را انتخاب کن و ذخیره کن.',
-      'با حساب چارت مسترز وارد شو و دسترسی را تأیید کن.',
+      ['ساخت MCP app', 'gemini.google.com/devmode را باز کن و یک custom MCP app جدید بساز.'],
+      ['وارد کردن آدرس', 'آدرس بالا را در فیلد سرور بچسبان.'],
+      ['تنظیم احراز هویت', 'در تب Authentication گزینه «Dynamic Client Registration» را بزن و ذخیره کن.'],
+      ['تأیید دسترسی', 'با حساب چارت مسترز وارد شو و دسترسی را تأیید کن.'],
     ],
   },
   {
     id: 'grok',
     name: 'Grok',
     steps: [
-      'به grok.com/connectors برو و «New Connector ← Custom» را بزن.',
-      'آدرس بالا را وارد کن.',
-      'ورود با OAuth را انتخاب کن و با حساب چارت مسترز وارد شو.',
-      'دسترسی را در صفحه تأیید قبول کن.',
+      ['افزودن کانکتور', 'به grok.com/connectors برو و «New Connector ← Custom» را بزن.'],
+      ['وارد کردن آدرس', 'آدرس بالا را بچسبان.'],
+      ['ورود با OAuth', 'روش ورود OAuth را انتخاب کن و با حساب چارت مسترز وارد شو.'],
+      ['تأیید دسترسی', 'دسترسی را در صفحه تأیید قبول کن.'],
     ],
   },
 ]
 
 const TOOLS = [
-  ['جستجوی ویدیوها', 'ویدیوهای منتشرشده را بر اساس موضوع پیدا می‌کند.'],
-  ['دوره‌ها', 'فهرست دوره‌ها و جلسه‌های هر دوره.'],
-  ['اندیکاتورها', 'اندیکاتورهای تریدینگ‌ویو و متاتریدر.'],
-  ['پیشرفت من', 'چند ویدیو شروع یا کامل کرده‌ای.'],
-  ['فعالیت من', 'نمای ۳۶۵ روزه فعالیت آموزشی تو.'],
-  ['علاقه‌مندی‌های من', 'ویدیوهایی که ذخیره کرده‌ای.'],
+  [LuSearch, 'جستجوی ویدیو', 'ویدیوهای منتشرشده را بر اساس موضوع پیدا می‌کند.'],
+  [LuGraduationCap, 'دوره‌ها', 'فهرست دوره‌ها و جلسه‌های هر دوره.'],
+  [LuTrendingUp, 'اندیکاتورها', 'اندیکاتورهای تریدینگ‌ویو و متاتریدر.'],
+  [LuChartNoAxesColumn, 'پیشرفت من', 'چند ویدیو شروع یا کامل کرده‌ای.'],
+  [LuActivity, 'فعالیت من', 'نمای ۳۶۵ روزه فعالیت آموزشی تو.'],
+  [LuHeart, 'علاقه‌مندی‌ها', 'ویدیوهایی که ذخیره کرده‌ای.'],
 ]
+
+// الگوی ثابت برای نمونه هیت‌مپ (فقط نمایشی)
+const HEAT = Array.from({ length: 7 * 18 }, (_, i) => {
+  const h = Math.imul(i + 7, 2654435761) >>> 0
+  const r = (h >>> 8) % 100
+  const week = Math.floor(i / 7)
+  const boost = week > 9 ? 12 : 0
+  return r + boost > 92 ? 3 : r + boost > 76 ? 2 : r + boost > 55 ? 1 : 0
+})
 
 export default function Connect() {
   const [active, setActive] = useState('claude')
@@ -62,53 +72,75 @@ export default function Connect() {
   return (
     <main className="page-content connect-page">
       <section className="connect-hero">
-        <h1>چارت مسترز را به دستیار هوش مصنوعی‌ات وصل کن</h1>
-        <p>
-          بعد از اتصال می‌توانی از Claude، Gemini یا Grok بپرسی «دوره‌های پرایس اکشن چیست؟» یا «این هفته چقدر درس دیدم؟»
-          و جواب را از اطلاعات واقعی خودت بگیری.
-        </p>
-      </section>
-
-      <section className="connect-url" aria-label="آدرس اتصال">
-        <span>آدرس اتصال</span>
-        <div className="connect-url-row">
-          <code dir="ltr">{MCP_URL}</code>
-          <button type="button" className="primary-button" onClick={copyUrl}>
-            {copied ? 'کپی شد' : 'کپی آدرس'}
-          </button>
-        </div>
-      </section>
-
-      <section className="connect-steps">
-        <div className="connect-tabs" role="tablist" aria-label="انتخاب دستیار">
-          {CLIENTS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={active === item.id}
-              className={active === item.id ? 'is-active' : ''}
-              onClick={() => setActive(item.id)}
-            >
-              {item.name}
+        <div className="connect-hero-copy">
+          <h1>دستیار هوش مصنوعی‌ات،<br />حالا چارت مسترز را می‌شناسد</h1>
+          <p>
+            Claude، Gemini یا Grok را یک بار وصل کن. از آن به بعد می‌توانی درباره دوره‌ها و ویدیوها سؤال کنی
+            و پیشرفت یادگیری خودت را بپرسی.
+          </p>
+          <div className="connect-url">
+            <code dir="ltr">{MCP_URL}</code>
+            <button type="button" className="primary-button" onClick={copyUrl}>
+              {copied ? <LuCheck aria-hidden="true" /> : <LuCopy aria-hidden="true" />}
+              {copied ? 'کپی شد' : 'کپی آدرس'}
             </button>
-          ))}
+          </div>
         </div>
-        <ol className="connect-step-list" role="tabpanel">
-          {client.steps.map((step) => <li key={step}>{step}</li>)}
+
+        <figure className="connect-chat" aria-label="نمونه گفتگو با دستیار">
+          <div className="connect-msg connect-msg--user">این ماه چقدر درس دیدم؟</div>
+          <div className="connect-msg connect-msg--bot">
+            <p>در ۱۲۶ روز اخیر ۴۱ روز فعال بودی. نمودار فعالیتت:</p>
+            <div className="connect-heat" aria-hidden="true">
+              {HEAT.map((level, i) => <i key={i} data-level={level} />)}
+            </div>
+          </div>
+          <figcaption>نمونه گفتگو</figcaption>
+        </figure>
+      </section>
+
+      <section className="connect-setup" aria-labelledby="connect-setup-title">
+        <div className="connect-setup-head">
+          <h2 id="connect-setup-title">اتصال در چهار قدم</h2>
+          <div className="connect-tabs" role="tablist" aria-label="انتخاب دستیار">
+            {CLIENTS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={active === item.id}
+                className={active === item.id ? 'is-active' : ''}
+                onClick={() => setActive(item.id)}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ol className="connect-timeline" role="tabpanel">
+          {client.steps.map(([title, text], index) => (
+            <li key={title}>
+              <span className="connect-step-num">{index + 1}</span>
+              <strong>{title}</strong>
+              <p>{text}</p>
+            </li>
+          ))}
         </ol>
       </section>
 
-      <section className="connect-tools">
-        <h2>چه چیزهایی در دسترس است؟</h2>
+      <section className="connect-tools" aria-labelledby="connect-tools-title">
+        <h2 id="connect-tools-title">دستیار چه چیزهایی را می‌تواند ببیند؟</h2>
         <ul>
-          {TOOLS.map(([title, text]) => (
-            <li key={title}><strong>{title}</strong><span>{text}</span></li>
+          {TOOLS.map(([Icon, title, text]) => (
+            <li key={title}>
+              <span className="connect-tool-icon"><Icon aria-hidden="true" /></span>
+              <div><strong>{title}</strong><span>{text}</span></div>
+            </li>
           ))}
         </ul>
         <p className="connect-note">
-          اتصال فقط‌خواندنی است: دستیار نمی‌تواند چیزی در حساب تو تغییر دهد. اطلاعات شخصی فقط با تأیید خودت و فقط برای حساب خودت خوانده می‌شود،
-          و هر زمان بخواهی می‌توانی اتصال را از تنظیمات همان دستیار قطع کنی.
+          <LuShieldCheck aria-hidden="true" />
+          <span>اتصال فقط‌خواندنی است و دستیار چیزی را تغییر نمی‌دهد. اطلاعات شخصی فقط برای حساب خودت و با تأیید خودت خوانده می‌شود. هر زمان بخواهی، اتصال را از تنظیمات همان دستیار قطع کن.</span>
         </p>
       </section>
     </main>

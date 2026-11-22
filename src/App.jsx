@@ -13,6 +13,7 @@ import IndicatorPage from './pages/IndicatorPage'
 import AdminLogin from './pages/AdminLogin'
 import GoogleLogin from './pages/GoogleLogin'
 import OAuthConsent from './pages/OAuthConsent'
+import Connect from './pages/Connect'
 import UserDashboard from './pages/UserDashboard'
 import UserDashboardSection from './pages/UserDashboardSection'
 import AdminDashboard from './pages/AdminDashboard'
@@ -35,6 +36,7 @@ function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isHome = path === '/'
   const isAbout = path === '/about'
+  const isConnect = path === '/connect'
   const isVideos = path === '/videos'
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators'
@@ -76,6 +78,12 @@ function App() {
         description: 'دانلود اندیکاتورها و اسکریپت‌های آماده برای تریدینگ‌ویو (Pine Script) و متاتریدر ۴ و ۵ همراه با آموزش نصب و استفاده به زبان فارسی.',
         path: '/indicators',
       })
+    } else if (isConnect) {
+      setPageSeo({
+        title: 'اتصال چارت مسترز به Claude، Gemini و Grok',
+        description: 'چارت مسترز را به دستیار هوش مصنوعی خودت وصل کن و درباره دوره‌ها، ویدیوها، اندیکاتورها و پیشرفت یادگیری‌ات سؤال بپرس.',
+        path: '/connect',
+      })
     } else if (isAbout) {
       setPageSeo({
         title: 'درباره چارت مسترز | آموزش بازارهای مالی با زیرنویس فارسی',
@@ -83,7 +91,7 @@ function App() {
         path: '/about',
       })
     }
-  }, [path, isHome, isVideos, isChart, isIndicators, isAbout])
+  }, [path, isHome, isVideos, isChart, isIndicators, isAbout, isConnect])
 
   // Android-only: finish Google sign-in when the system browser returns through the deep link.
   useEffect(() => {
@@ -221,7 +229,7 @@ function App() {
         <main className="main-content"><Indicators /></main>
       ) : indicatorSlug ? (
         <IndicatorPage slug={indicatorSlug} />
-      ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
+      ) : isConnect ? <Connect /> : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       {!isChart && <Footer />}
       {updateOverlay}
     </div>

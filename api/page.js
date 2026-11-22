@@ -11,7 +11,7 @@ import { videos as demoVideos } from '../src/data/videos.js'
 
 // صفحه‌های حساب کاربری و مدیریت نباید ایندکس شوند
 const PRIVATE_PATH = /^\/(login|oauth\/consent|dashboard(\/|$)|admin)/
-const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/login', '/oauth/consent', '/dashboard', '/dashboard/favorites', '/dashboard/history', '/dashboard/courses', '/dashboard/progress', '/dashboard/profile', '/admin', '/admin/login'])
+const STATIC_PAGES = new Set(['/', '/videos', '/chart', '/indicators', '/about', '/connect', '/login', '/oauth/consent', '/dashboard', '/dashboard/favorites', '/dashboard/history', '/dashboard/courses', '/dashboard/progress', '/dashboard/profile', '/admin', '/admin/login'])
 const DEMO_SLUGS = new Set(demoVideos.map((video) => video.id))
 const SLUG_PATTERN = /^[^/\s]{1,200}$/
 

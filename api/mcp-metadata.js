@@ -33,7 +33,7 @@ export default function handler(request) {
     return jsonResponse({ error: 'Method not allowed.' }, 405, { Allow: 'GET, OPTIONS' })
   }
 
-  const supabaseUrl = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\\/+$/, '')
+  const supabaseUrl = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/+$/, '')
   if (!supabaseUrl) {
     return jsonResponse({ error: 'Supabase URL is not configured.' }, 503)
   }

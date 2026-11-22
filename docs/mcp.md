@@ -77,6 +77,8 @@ MCP_BASE_URL=https://YOUR-PREVIEW-HOST npm run test:mcp
 
 The test checks protected-resource metadata, its origin, CORS preflight for metadata and MCP, and the unauthenticated 401 discovery challenge. It does not replace interactive OAuth and per-user RLS tests in each AI client.
 
+If a Vercel Preview deployment is protected by Deployment Protection, a direct Node request may receive a Vercel login redirect before it reaches the application. In that case, run the checks against a publicly reachable deployment or use your authenticated Vercel access path; the redirect is not an MCP API response. Do not disable Deployment Protection just to make the smoke test pass.
+
 ## Deployment and verification checklist
 
 1. Confirm the two existing Supabase environment variables are present in the Vercel project.

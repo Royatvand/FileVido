@@ -362,8 +362,9 @@ function createServer(context = {}) {
 
 const mcpHandler = createMcpHandler(createServer, { responseMode: 'json' })
 
-function unauthorizedResponse() {
-  const resourceMetadata = 'https://chartmasters.top/.well-known/oauth-protected-resource/api/mcp'
+function unauthorizedResponse(request) {
+  const requestOrigin = new URL(request.url).origin
+  const resourceMetadata = new URL('/.well-known/oauth-protected-resource/api/mcp', requestOrigin).toString()
   return new Response(JSON.stringify({
     error: 'unauthorized',
     error_description: 'برای اتصال به ابزارهای چارت مسترز، ابتدا حساب کاربری خود را متصل کنید.',
@@ -399,12 +400,12 @@ export default async function handler(request) {
   }
 
   const accessToken = readBearerToken(request)
-  if (!accessToken) return unauthorizedResponse()
+  if (!accessToken) return unauthorizedResponse(request)
 
   try {
     await verifySupabaseUser(accessToken)
   } catch {
-    return unauthorizedResponse()
+    return unauthorizedResponse(request)
   }
 
   const response = await mcpHandler.fetch(request)

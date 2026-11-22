@@ -70,6 +70,16 @@ function AdminSupportTickets({ onNotice = () => {} }) {
   }, [loadTickets])
 
   useEffect(() => {
+    const refreshTimer = window.setInterval(async () => {
+      try {
+        const rows = await loadTickets(selectedId)
+        if (selectedId && rows.some((item) => item.id === selectedId)) await loadMessages(selectedId)
+      } catch { /* refresh is best-effort; use the manual refresh action to retry immediately */ }
+    }, 20000)
+    return () => window.clearInterval(refreshTimer)
+  }, [loadTickets, loadMessages, selectedId])
+
+  useEffect(() => {
     let active = true
     if (!selectedId) { setMessages([]); setMeetingUrl(''); return undefined }
     setError('')

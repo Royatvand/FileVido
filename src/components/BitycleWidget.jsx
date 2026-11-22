@@ -5,7 +5,8 @@ const SCRIPT_SRC = 'https://widget.bitycle.com/static/script/v1/script.js'
 const WIDGET_ID = 'bitycle-ac-widget'
 const LOAD_TIMEOUT_MS = 15000
 
-// طبق پاسخ پشتیبانی Bitycle: اگر symbol و source_priority مشخص نشوند، همهٔ نمادها در جست‌وجو و پنجرهٔ انتخاب نماد در دسترس‌اند
+// نماد و منبع داده را عمداً ثابت نمی‌کنیم تا فهرست نمادها به یک بازار یا صرافی محدود نشود.
+// جست‌وجوی داخلی و جست‌وجوی سفارشی نماد طبق مستندات Bitycle فعال هستند.
 const widgetConfig = {
   id: WIDGET_ID,
   theme: 'chartmasters.top',
@@ -16,28 +17,13 @@ const widgetConfig = {
   datafeed_type: 'general',
   interval: '1M',
   disabled_features: [],
-  enabled_features: [],
+  enabled_features: [
+    'show_search_dialog',
+    'show_custom_search_dialog',
+    'custom_symbol_search',
+  ],
   calendar_type: 'miladi',
   ai: { enabled: false, effort: 'low', disabled_features: [], enabled_features: [] },
-  symbol_modal: {
-    kind: [
-      'tehran_stock',
-      'car',
-      'tehran_cgf',
-      'forex',
-      'crypto',
-      'swap',
-      'structured',
-      'stock',
-      'index',
-      'futures',
-      'fund',
-      'economic',
-      'dr',
-      'bond',
-      'commodity',
-    ],
-  },
 }
 
 // ویجت فقط روی دامنه‌های وایت‌لیست‌شده کار می‌کند؛ داخل اپ اندروید آدرس صفحه https://localhost است

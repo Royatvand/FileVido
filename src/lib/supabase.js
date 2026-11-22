@@ -336,16 +336,25 @@ export const userAuth = {
       {},
       session.access_token,
     )
-    // Rows are ordered by last_seen_at desc; keep one row per device (the current session wins).
-    const byDevice = new Map()
+    // Rows are ordered by last_seen_at desc. The same browser gets a new device_key whenever its
+    // site data is cleared, the Android app WebView is used, or a private window logs in, so
+    // device_key alone still leaves duplicates. Group by what the user can actually tell apart
+    // (type + OS + browser) and keep one row per group: the current session wins, else the latest.
+    const groups = new Map()
     for (const device of rows || []) {
       const current = device.session_id === claims?.session_id
-      const existing = byDevice.get(device.device_key)
-      if (!existing || (current && !existing.is_current)) {
-        byDevice.set(device.device_key, { ...device, is_current: current })
+      const key = [device.device_type, device.operating_system, device.browser].join('|')
+      const group = groups.get(key)
+      if (!group) {
+        groups.set(key, { ...device, is_current: current, merged_count: 0 })
+        continue
+      }
+      group.merged_count += 1
+      if (current && !group.is_current) {
+        groups.set(key, { ...device, is_current: true, merged_count: group.merged_count })
       }
     }
-    return [...byDevice.values()]
+    return [...groups.values()]
   },
   async touchCurrentDevice() {
     const session = await getValidUserSession()

@@ -78,6 +78,17 @@ function UserSupportTickets() {
   }, [loadTickets])
 
   useEffect(() => {
+    const refreshTimer = window.setInterval(async () => {
+      try {
+        const rows = await userSupport.listTickets()
+        setTickets(rows || [])
+        if (selectedId) setMessages(await userSupport.listMessages(selectedId))
+      } catch { /* refresh is best-effort; the next poll or user action can retry */ }
+    }, 20000)
+    return () => window.clearInterval(refreshTimer)
+  }, [selectedId])
+
+  useEffect(() => {
     let active = true
     async function loadMessages() {
       if (!selectedId) {

@@ -81,8 +81,11 @@ function safeSearchTerm(value) {
     .replace(/\s+/g, ' ')
 }
 
-function createServer(requestInfo) {
-  const request = requestInfo?.request
+function createServer(context = {}) {
+  // MCP SDK v2 passes the original HTTP Request as context.requestInfo.
+  // Read the bearer token here so per-user tools use the same OAuth token
+  // that the outer handler already validated.
+  const request = context.requestInfo
   const accessToken = readBearerToken(request)
   let userPromise
 

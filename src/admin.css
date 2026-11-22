@@ -420,3 +420,42 @@
 .admin-page .admin-app-release-status { font-size: 12px; }
 .admin-page .admin-app-release-info > p, .admin-page .admin-app-release-notes, .admin-page .admin-app-release-url { font-size: 12.5px; }
 .admin-page .admin-app-release-download, .admin-page .admin-app-release-copy { font-size: 13px; }
+
+
+/* Admin support inbox */
+.admin-support { display:grid; gap:16px; }
+.admin-support-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.admin-support-stats article { display:grid; gap:6px; padding:16px 18px; border:1px solid var(--line); border-radius:12px; background:#ffffff06; }
+.admin-support-stats span { color:#93a198; font-size:10px; }
+.admin-support-stats strong { color:#eaf5ed; font-size:22px; }
+.admin-support-layout { display:grid; grid-template-columns:minmax(260px,.8fr) minmax(0,1.7fr); gap:16px; align-items:start; }
+.admin-support-list,.admin-support-detail { min-width:0; }
+.admin-support-ticket-list { display:grid; max-height:680px; overflow:auto; }
+.admin-support-ticket { display:grid; gap:8px; width:100%; padding:14px 16px; border:0; border-top:1px solid #ffffff0c; text-align:right; background:transparent; cursor:pointer; }
+.admin-support-ticket:hover,.admin-support-ticket.active { background:#8cf2b10c; }
+.admin-support-ticket.active { box-shadow:inset -3px 0 #8cf2b1; }
+.admin-support-ticket>span { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+.admin-support-ticket strong { color:#e8f1eb; font-size:11px; }
+.admin-support-ticket small { color:#819087; font-size:9px; }
+.admin-support-detail { display:grid; gap:14px; }
+.admin-support-detail>.admin-panel-heading { margin-bottom:0; }
+.admin-support-detail>.admin-panel-heading p { overflow-wrap:anywhere; }
+.admin-support-category { color:#9aaba0; font-size:10px; }
+.admin-support-messages { display:grid; align-content:start; gap:12px; max-height:460px; min-height:190px; overflow:auto; padding:14px; border:1px solid #ffffff10; border-radius:10px; background:#080e0b; }
+.admin-support-meeting { display:grid; gap:8px; padding:14px; border:1px solid #8cf2b12b; border-radius:10px; background:#8cf2b108; }
+.admin-support-meeting label { display:grid; gap:7px; color:#bdcfc2; font-size:10px; }
+.admin-support-meeting input { width:100%; min-width:0; padding:11px 12px; border:1px solid #ffffff18; border-radius:8px; outline:none; color:#edf5ef; background:#090f0c; font:12px Arial,sans-serif; }
+.admin-support-meeting input:focus { border-color:#8cf2b177; }
+.admin-support-meeting-actions { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
+.admin-support-meeting-actions a { display:inline-flex; align-items:center; gap:6px; color:#a9efbd; font-size:10px; }
+.admin-support-meeting>small { color:#84948a; font-size:9px; line-height:1.9; }
+.admin-support-reply { display:grid; gap:9px; }
+.admin-support-reply label { color:#bdcfc2; font-size:11px; }
+.admin-support-reply textarea { width:100%; min-width:0; padding:12px; border:1px solid #ffffff18; border-radius:9px; outline:none; color:#edf5ef; background:#090f0c; font:12px var(--cm-font); resize:vertical; }
+.admin-support-reply textarea:focus { border-color:#8cf2b177; }
+.admin-support-reply>div { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:9px; }
+.admin-support-no-selection { min-height:360px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; color:#819087; }
+.admin-support-no-selection svg { width:30px; height:30px; color:#8cf2b1; }
+.admin-support-no-selection strong { color:#dce8df; }
+@media (max-width:900px) { .admin-support-layout { grid-template-columns:1fr; } .admin-support-ticket-list { max-height:340px; } }
+@media (max-width:560px) { .admin-support-stats { grid-template-columns:1fr; } .admin-support-detail>.admin-panel-heading { align-items:flex-start; } .admin-support-reply>div { justify-content:stretch; } .admin-support-reply>div button { flex:1; } }

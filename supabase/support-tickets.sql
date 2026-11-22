@@ -125,7 +125,7 @@ create policy "Users and admins add valid ticket messages"
         sender_role = 'user'
         and exists (
           select 1 from public.support_tickets t
-          where t.id = ticket_id and t.user_id = (select auth.uid())
+          where t.id = ticket_id and t.user_id = (select auth.uid()) and t.status <> 'closed'
         )
       )
       or (

@@ -21,7 +21,7 @@ The MCP server and consent UI reuse the existing website configuration:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-No Supabase service-role key, custom OAuth client secret, or additional Vercel secret is required for the public-client authorization-code-with-PKCE flow. Do not expose a service-role key to this integration.
+No Supabase service-role key is used or required by this MCP server. With Dynamic Client Registration enabled, supported clients can register through Supabase and use authorization-code-with-PKCE without a manually supplied client secret. If a client must use manual OAuth client registration, create that client in Supabase OAuth Apps and follow its public/confidential client requirements; enter a client secret only in the provider's secure OAuth settings when Supabase actually issues one. Never place OAuth client secrets, access tokens, or the Supabase service-role key in this repository, browser code, or chat.
 
 ## Supabase dashboard setup required
 

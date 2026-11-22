@@ -63,6 +63,10 @@ All tools are read-only. No tool can change a profile, course, favorite, progres
 
 The current database stores one `user_video_progress` row per user and video. The heatmap therefore counts videos whose `last_watched_at` falls on a day; it does not represent watch-session count or time spent watching.
 
+## Supported AI clients
+
+Setup instructions for the supported remote clients are in [MCP clients: Claude, Grok, and Gemini](./mcp-clients.md). ChatGPT is intentionally excluded from this integration scope.
+
 ## Deployment and verification checklist
 
 1. Confirm the two existing Supabase environment variables are present in the Vercel project.

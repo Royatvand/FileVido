@@ -17,11 +17,8 @@ const widgetConfig = {
   datafeed_type: 'general',
   interval: '1M',
   disabled_features: [],
-  enabled_features: [
-    'show_search_dialog',
-    'show_custom_search_dialog',
-    'custom_symbol_search',
-  ],
+  // فقط جست‌وجوی استاندارد TradingView را فعال می‌کنیم؛ جست‌وجوی سفارشی Bitycle غیرفعال می‌ماند.
+  enabled_features: ['show_search_dialog'],
   calendar_type: 'miladi',
   ai: { enabled: false, effort: 'low', disabled_features: [], enabled_features: [] },
 }

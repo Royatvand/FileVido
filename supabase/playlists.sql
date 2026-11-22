@@ -21,6 +21,12 @@ create index if not exists playlist_videos_video_id_idx on public.playlist_video
 alter table public.playlists enable row level security;
 alter table public.playlist_videos enable row level security;
 
+-- Make this script safe to run more than once.
+drop policy if exists "Admins manage playlists" on public.playlists;
+drop policy if exists "Public can read published playlists" on public.playlists;
+drop policy if exists "Admins manage playlist videos" on public.playlist_videos;
+drop policy if exists "Public can read published playlist videos" on public.playlist_videos;
+
 create policy "Admins manage playlists"
 on public.playlists for all to authenticated
 using ((select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')

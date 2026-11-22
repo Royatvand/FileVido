@@ -360,7 +360,7 @@ function createServer(context = {}) {
   return server
 }
 
-const mcpHandler = createMcpHandler(createServer, { responseMode: 'json' })
+const mcpHandler = createMcpHandler(createServer)
 
 function unauthorizedResponse(request) {
   const requestOrigin = new URL(request.url).origin

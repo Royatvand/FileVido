@@ -9,7 +9,7 @@ const LOAD_TIMEOUT_MS = 15000
 // نوع بازارها در symbol_modal.kind عمداً به چهار دستهٔ انتخاب‌شده محدود شده است.
 const widgetConfig = {
   id: WIDGET_ID,
-  theme: 'bitycle',
+  theme: 'chartmasters.top',
   type: 'ac',
   locale: 'fa',
   mode: 'dark',
@@ -20,6 +20,7 @@ const widgetConfig = {
   disabled_features: [],
   enabled_features: [
     'show_search_dialog',
+    'custom_symbol_search',
     'header_symbol_search',
     'allow_arbitrary_symbol_search_input',
     'symbol_search_hot_key',
@@ -29,7 +30,6 @@ const widgetConfig = {
   symbol_modal: {
     kind: ['forex', 'tehran_cgf', 'car', 'tehran_stock'],
   },
-  develop: true,
 }
 
 // ویجت فقط روی دامنه‌های وایت‌لیست‌شده کار می‌کند؛ داخل اپ اندروید آدرس صفحه https://localhost است

@@ -6,7 +6,7 @@ const WIDGET_ID = 'bitycle-ac-widget'
 const LOAD_TIMEOUT_MS = 15000
 
 // نماد و منبع داده را عمداً ثابت نمی‌کنیم تا فهرست نمادها به یک بازار یا صرافی محدود نشود.
-// جست‌وجوی داخلی و جست‌وجوی سفارشی نماد طبق مستندات Bitycle فعال هستند.
+// دیالوگ استاندارد جست‌وجوی نماد طبق مستندات Bitycle فعال است.
 const widgetConfig = {
   id: WIDGET_ID,
   theme: 'chartmasters.top',

@@ -19,6 +19,7 @@ const widgetConfig = {
   auto_save_delay_ms: 10000,
   disabled_features: [],
   enabled_features: [
+    'show_search_dialog',
     'header_symbol_search',
     'allow_arbitrary_symbol_search_input',
     'symbol_search_hot_key',

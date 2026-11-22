@@ -116,6 +116,10 @@ export default function OAuthConsent() {
               <strong>{details.client?.name || 'یک برنامه خارجی'}</strong>
               <span className="oauth-client-url">{details.client?.uri || 'اتصال امن به حساب چارت مسترز'}</span>
             </div>
+            <div className="oauth-client-card">
+              <span className="oauth-eyebrow">آدرس بازگشت پس از تأیید دسترسی</span>
+              <span className="oauth-client-url">{details.redirect_uri || 'آدرس بازگشت از سوی سرویس احراز هویت مشخص نشده است.'}</span>
+            </div>
             <div className="oauth-scope-list">
               <strong>مجوزهای درخواستی</strong>
               {scopes.length ? scopes.map((scope) => (

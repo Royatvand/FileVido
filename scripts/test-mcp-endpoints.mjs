@@ -25,6 +25,9 @@ async function request(url, init = {}) {
     redirect: 'manual',
     signal: AbortSignal.timeout(15000),
   })
+  if ([301, 302, 303, 307, 308].includes(response.status)) {
+    throw new Error('The request was redirected before reaching the MCP API. This URL may be behind Vercel Deployment Protection; use a publicly reachable deployment or an authenticated Vercel access path.')
+  }
   return response
 }
 

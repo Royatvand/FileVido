@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuLogOut } from 'react-icons/lu'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuLogOut, LuLifeBuoy } from 'react-icons/lu'
 
 const DASHBOARD_NAVIGATION = [
   { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, color: 'mint', href: '/dashboard' },
@@ -8,6 +8,7 @@ const DASHBOARD_NAVIGATION = [
   { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, color: 'amber', href: '/dashboard/history' },
   { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, color: 'violet', href: '/dashboard/progress' },
   { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, color: 'cyan', href: '/dashboard/profile' },
+  { id: 'support', label: 'تیکت‌های پشتیبانی', icon: LuLifeBuoy, color: 'mint', href: '/dashboard/support' },
 ]
 
 // سایدبار مشترک همهٔ صفحه‌های داشبورد؛ در موبایل با دکمهٔ «منوی داشبورد» باز و بسته می‌شود

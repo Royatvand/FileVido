@@ -1279,3 +1279,56 @@ button, input, textarea, select { font-family: inherit; }
 .oauth-consent-actions button{width:100%;min-height:46px;cursor:pointer}
 .oauth-deny-button{min-height:44px;border:1px solid rgba(255,255,255,.13);border-radius:9px;color:#c5d1c8;background:rgba(255,255,255,.035);font:600 11px var(--cm-font)}
 .oauth-deny-button:disabled{opacity:.55;cursor:wait}
+
+
+/* User support tickets */
+.support-layout { display:grid; grid-template-columns:minmax(260px,.82fr) minmax(0,1.6fr); gap:18px; align-items:stretch; min-width:0; }
+.support-ticket-list-panel,.support-conversation-panel { min-width:0; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:linear-gradient(145deg,#111b17,#0c1310); }
+.support-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px; border-bottom:1px solid var(--line); }
+.support-panel-heading>div { display:grid; gap:4px; }
+.support-panel-heading strong { color:#eef7f0; font-size:13px; }
+.support-panel-heading small,.support-ticket-item small { color:#84938a; font-size:10px; }
+.support-new-button { display:inline-flex; align-items:center; gap:7px; min-height:34px; padding:0 11px; border:1px solid #8cf2b155; border-radius:8px; color:#a7f3c1; background:#8cf2b111; font:700 10px var(--cm-font); cursor:pointer; }
+.support-new-form { display:grid; gap:12px; padding:16px; border-bottom:1px solid var(--line); background:#ffffff03; }
+.support-new-form label,.support-reply-form { display:grid; gap:7px; color:#bfcec4; font-size:11px; }
+.support-new-form input,.support-new-form select,.support-new-form textarea,.support-reply-form textarea { width:100%; min-width:0; padding:11px 12px; border:1px solid #ffffff1b; border-radius:9px; outline:none; color:#edf5ef; background:#090f0c; font:12px var(--cm-font); resize:vertical; }
+.support-new-form input:focus,.support-new-form select:focus,.support-new-form textarea:focus,.support-reply-form textarea:focus { border-color:#8cf2b177; }
+.support-new-form button,.support-reply-form button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 16px; border:0; border-radius:8px; color:#08120c; background:#8cf2b1; font:700 11px var(--cm-font); cursor:pointer; }
+.support-new-form button:disabled,.support-reply-form button:disabled { opacity:.55; cursor:wait; }
+.support-ticket-items { display:grid; max-height:650px; overflow:auto; }
+.support-ticket-item { display:grid; gap:8px; width:100%; padding:15px 17px; border:0; border-bottom:1px solid #ffffff0c; text-align:right; background:transparent; cursor:pointer; }
+.support-ticket-item:hover,.support-ticket-item.active { background:#8cf2b10b; }
+.support-ticket-item.active { box-shadow:inset -3px 0 #8cf2b1; }
+.support-ticket-item-top { display:flex; align-items:flex-start; justify-content:space-between; gap:9px; }
+.support-ticket-item-top strong { min-width:0; color:#e9f2ec; font-size:11px; line-height:1.8; }
+.support-status { display:inline-flex; flex-shrink:0; align-items:center; padding:5px 8px; border:1px solid #ffffff17; border-radius:999px; color:#b9c7bd; background:#ffffff08; font:600 9px var(--cm-font); font-style:normal; white-space:nowrap; }
+.support-status.open { color:#ffd58a; border-color:#f5bd5a33; background:#f5bd5a10; }
+.support-status.answered { color:#9cebb8; border-color:#8cf2b144; background:#8cf2b111; }
+.support-status.closed { color:#a6b0aa; }
+.support-conversation-panel { display:flex; flex-direction:column; min-height:520px; }
+.support-conversation-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:20px; border-bottom:1px solid var(--line); }
+.support-conversation-heading h3 { margin:5px 0; color:#f0f7f2; font-size:15px; }
+.support-conversation-heading small,.support-kicker { color:#86968c; font-size:10px; }
+.support-kicker { color:#8cf2b1; }
+.support-messages { display:grid; align-content:start; gap:12px; flex:1; min-height:250px; max-height:560px; overflow:auto; padding:18px; }
+.support-message { max-width:min(88%,620px); padding:13px 15px; border:1px solid #ffffff12; border-radius:12px; background:#ffffff06; }
+.support-message.user { justify-self:start; border-top-right-radius:4px; }
+.support-message.admin { justify-self:end; border-color:#8cf2b126; border-top-left-radius:4px; background:#8cf2b10b; }
+.support-message-meta { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; color:#a9b9ae; font-size:9px; }
+.support-message-meta time { color:#728278; }
+.support-message p { margin:10px 0 0; color:#e2ebe5; font-size:11px; line-height:2; white-space:pre-wrap; overflow-wrap:anywhere; }
+.support-reply-form { display:grid; grid-template-columns:1fr auto; align-items:end; gap:10px; padding:15px 18px; border-top:1px solid var(--line); }
+.support-reply-form textarea { min-height:76px; }
+.support-reply-form button { min-width:112px; }
+.support-meeting-link { display:flex; align-items:center; gap:12px; margin:14px 18px 0; padding:13px 15px; border:1px solid #8cf2b144; border-radius:11px; color:#a8efbf; background:#8cf2b10d; }
+.support-meeting-link>span { display:grid; flex:1; gap:4px; }
+.support-meeting-link strong { font-size:11px; }
+.support-meeting-link small { color:#91a89a; font-size:9px; }
+.support-meeting-link b { font-size:10px; white-space:nowrap; }
+.support-empty-list,.support-conversation-empty { display:grid; justify-items:center; gap:9px; padding:34px 15px; color:#84958b; text-align:center; }
+.support-empty-list svg,.support-conversation-empty svg { width:26px; height:26px; color:#8cf2b1; }
+.support-empty-list strong,.support-conversation-empty strong { color:#dce9df; font-size:12px; }
+.support-empty-list span,.support-conversation-empty span { font-size:10px; line-height:1.9; }
+.support-closed-note { margin:14px 18px; padding:13px; border:1px solid #ffffff17; border-radius:9px; color:#aab7af; background:#ffffff06; font-size:10px; text-align:center; }
+@media (max-width:900px) { .support-layout { grid-template-columns:1fr; } .support-ticket-items { max-height:300px; } .support-conversation-panel { min-height:440px; } }
+@media (max-width:560px) { .support-conversation-heading { padding:15px; } .support-messages { padding:13px; } .support-message { max-width:96%; } .support-reply-form { grid-template-columns:1fr; padding:13px; } .support-reply-form button { width:100%; } .support-meeting-link { flex-wrap:wrap; margin-inline:12px; } .support-meeting-link b { width:100%; } }

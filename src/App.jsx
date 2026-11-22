@@ -12,6 +12,7 @@ import Indicators from './pages/Indicators'
 import IndicatorPage from './pages/IndicatorPage'
 import AdminLogin from './pages/AdminLogin'
 import GoogleLogin from './pages/GoogleLogin'
+import OAuthConsent from './pages/OAuthConsent'
 import UserDashboard from './pages/UserDashboard'
 import UserDashboardSection from './pages/UserDashboardSection'
 import AdminDashboard from './pages/AdminDashboard'
@@ -38,6 +39,7 @@ function App() {
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators'
   const isUserLogin = path === '/login'
+  const isOAuthConsent = path === '/oauth/consent'
   const isUserDashboard = path === '/dashboard'
   const userDashboardSection = path.match(/^\/dashboard\/(favorites|history|courses|progress|profile)$/)?.[1] || null
   const isAdminLogin = path === '/admin/login'
@@ -147,6 +149,7 @@ function App() {
   }
 
   if (isAdminLogin) return <><AdminLogin />{updateOverlay}</>
+  if (isOAuthConsent) return <><OAuthConsent />{updateOverlay}</>
   if (isUserLogin) return <><GoogleLogin />{updateOverlay}</>
   if (isUserDashboard || userDashboardSection) {
     return (

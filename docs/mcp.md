@@ -67,6 +67,16 @@ The current database stores one `user_video_progress` row per user and video. Th
 
 Setup instructions for the supported remote clients are in [MCP clients: Claude, Grok, and Gemini](./mcp-clients.md). ChatGPT is intentionally excluded from this integration scope.
 
+## Automated endpoint smoke test
+
+After a Preview deployment is ready, run the public, non-authenticated endpoint checks from a terminal:
+
+```bash
+MCP_BASE_URL=https://YOUR-PREVIEW-HOST npm run test:mcp
+```
+
+The test checks protected-resource metadata, its origin, CORS preflight for metadata and MCP, and the unauthenticated 401 discovery challenge. It does not replace interactive OAuth and per-user RLS tests in each AI client.
+
 ## Deployment and verification checklist
 
 1. Confirm the two existing Supabase environment variables are present in the Vercel project.

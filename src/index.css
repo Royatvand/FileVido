@@ -1263,3 +1263,19 @@ button, input, textarea, select { font-family: inherit; }
     flex-basis: 36px;
   }
 }
+
+.oauth-consent-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto 18px;border:1px solid rgba(140,242,177,.22);border-radius:16px;color:var(--accent);background:rgba(140,242,177,.07);font-size:25px}
+.oauth-client-card{display:flex;flex-direction:column;gap:8px;margin:22px 0;padding:18px;border:1px solid rgba(140,242,177,.18);border-radius:12px;background:rgba(140,242,177,.045);text-align:right}
+.oauth-eyebrow{color:#91a198;font-size:10px}
+.oauth-client-card strong{color:#f0f6f2;font-size:15px}
+.oauth-client-url{overflow-wrap:anywhere;color:#829188;font-size:10px;direction:ltr;text-align:right}
+.oauth-scope-list{display:flex;flex-direction:column;gap:12px;margin:20px 0;text-align:right}
+.oauth-scope-list>strong{color:#dce8df;font-size:12px}
+.oauth-scope-list p{color:#91a198;font-size:11px}
+.oauth-scope-item{display:flex;align-items:center;gap:10px;color:#b8c8bd;font-size:11px}
+.oauth-scope-item>span:first-child{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;color:var(--accent);background:rgba(140,242,177,.1)}
+.oauth-consent-note{margin:20px 0;color:#829188;font-size:10px;line-height:2;text-align:right}
+.oauth-consent-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.oauth-consent-actions button{width:100%;min-height:46px;cursor:pointer}
+.oauth-deny-button{min-height:44px;border:1px solid rgba(255,255,255,.13);border-radius:9px;color:#c5d1c8;background:rgba(255,255,255,.035);font:600 11px var(--cm-font)}
+.oauth-deny-button:disabled{opacity:.55;cursor:wait}

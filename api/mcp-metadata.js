@@ -38,8 +38,11 @@ export default function handler(request) {
     return jsonResponse({ error: 'Supabase URL is not configured.' }, 503)
   }
 
+  const requestOrigin = new URL(request.url).origin
+  const resourceUrl = new URL('/api/mcp', requestOrigin).toString()
+
   return jsonResponse({
-    resource: 'https://chartmasters.top/api/mcp',
+    resource: resourceUrl,
     authorization_servers: [`${supabaseUrl}/auth/v1`],
     scopes_supported: ['openid', 'email', 'profile'],
     bearer_methods_supported: ['header'],

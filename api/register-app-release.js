@@ -1,5 +1,6 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
-const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY
+import { getSupabaseAdminConfig, getSupabaseAdminConfigMessage } from '../server/supabaseAdmin.js'
+
+const SUPABASE_ADMIN = getSupabaseAdminConfig()
 
 function send(res, status, body) { res.status(status).json(body) }
 
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
   if (!process.env.RELEASE_TOKEN || req.headers['x-release-secret'] !== process.env.RELEASE_TOKEN) {
     return send(res, 401, { message: 'Unauthorized release callback' })
   }
-  if (!SUPABASE_URL || !SERVICE_ROLE) return send(res, 503, { message: 'Supabase server configuration is incomplete.' })
+  if (!SUPABASE_ADMIN.ok) return send(res, 503, { message: getSupabaseAdminConfigMessage(SUPABASE_ADMIN) })
 
   let body = req.body
   if (typeof body === 'string') { try { body = JSON.parse(body) } catch { body = {} } }
@@ -29,11 +30,10 @@ export default async function handler(req, res) {
     published_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }
-  const saved = await fetch(`${SUPABASE_URL}/rest/v1/app_versions?on_conflict=version_code`, {
+  const saved = await fetch(`${SUPABASE_ADMIN.url}/rest/v1/app_versions?on_conflict=version_code`, {
     method: 'POST',
     headers: {
-      apikey: SERVICE_ROLE,
-      Authorization: `Bearer ${SERVICE_ROLE}`,
+      ...SUPABASE_ADMIN.headers,
       'Content-Type': 'application/json',
       Prefer: 'resolution=merge-duplicates,return=representation',
     },

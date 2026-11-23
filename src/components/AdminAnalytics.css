@@ -70,3 +70,5 @@
   .analytics-secondary-metrics>div { gap:8px; padding:12px; }
   .analytics-secondary-metrics span { font-size:10px; }
 }
+
+.analytics-last-updated { display:block; margin-top:6px; color:var(--adm-muted); font-size:10px; line-height:1.8; }

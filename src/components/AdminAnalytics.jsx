@@ -165,7 +165,7 @@ function AdminAnalytics() {
               </button>
             ))}
           </div>
-          <button type="button" className="admin-secondary-button analytics-refresh" onClick={() => loadAnalytics({ refresh: true }) disabled={loading || refreshing}>
+          <button type="button" className="admin-secondary-button analytics-refresh" onClick={() => loadAnalytics({ refresh: true })} disabled={loading || refreshing}>
             <LuRefreshCw className={refreshing ? 'is-spinning' : ''} aria-hidden="true" />
             بروزرسانی
           </button>

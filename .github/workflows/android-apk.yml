@@ -35,19 +35,30 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
-      - name: Calculate next version
+      - name: Calculate release version
         id: version
         shell: bash
         run: |
           git fetch --tags --force
-          latest=$(git tag -l 'app-v[0-9]*' --sort=-v:refname | head -n 1)
-          if [[ -z "$latest" ]]; then latest="app-v1.0.0"; fi
-          current=${latest#app-v}
-          IFS='.' read -r major minor patch <<< "$current"
-          patch=$((patch + 1))
-          version_name="$major.$minor.$patch"
-          version_code=$(git tag -l 'app-v[0-9]*' | wc -l | tr -d ' ')
-          version_code=$((version_code + 1))
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == refs/tags/app-v* ]]; then
+            version_name="${GITHUB_REF_NAME#app-v}"
+            if [[ ! "$version_name" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Tag must use the app-vMAJOR.MINOR.PATCH format."
+              exit 1
+            fi
+            version_code=$(git tag -l 'app-v[0-9]*' | wc -l | tr -d ' ')
+          else
+            latest=$(git tag -l 'app-v[0-9]*' --sort=-v:refname | head -n 1)
+            if [[ -z "$latest" ]]; then latest="app-v1.0.0"; fi
+            current=${latest#app-v}
+            IFS='.' read -r major minor patch <<< "$current"
+            patch=$((patch + 1))
+            version_name="$major.$minor.$patch"
+            version_code=$(git tag -l 'app-v[0-9]*' | wc -l | tr -d ' ')
+            version_code=$((version_code + 1))
+          fi
+
           echo "name=$version_name" >> "$GITHUB_OUTPUT"
           echo "code=$version_code" >> "$GITHUB_OUTPUT"
           echo "tag=app-v$version_name" >> "$GITHUB_OUTPUT"
@@ -106,20 +117,24 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/app-v')
         uses: softprops/action-gh-release@v2
         with:
-          name: ChartMasters ${{ github.ref_name }}
+          name: ChartMasters v${{ steps.version.outputs.name }}
           generate_release_notes: true
           files: release/app-release.apk
 
       - name: Register release and notify users
-        if: github.event_name == 'workflow_dispatch'
         env:
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          CHANGELOG: ${{ inputs.changelog }}
-          IS_MANDATORY: ${{ inputs.is_mandatory }}
+          CHANGELOG: ${{ github.event_name == 'workflow_dispatch' && inputs.changelog || '' }}
+          IS_MANDATORY: ${{ github.event_name == 'workflow_dispatch' && inputs.is_mandatory || false }}
           VERSION_NAME: ${{ steps.version.outputs.name }}
           VERSION_CODE: ${{ steps.version.outputs.code }}
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
         run: |
+          if [[ -z "$CHANGELOG" ]]; then
+            CHANGELOG=$(git log -1 --pretty=%s "$GITHUB_SHA")
+          fi
+
           asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/app-release.apk"
           response_file="$RUNNER_TEMP/register-app-release.json"
           http_status=$(curl --location --max-redirs 5 --fail-with-body --silent --show-error \

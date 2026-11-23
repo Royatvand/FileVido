@@ -15,6 +15,7 @@ import GoogleLogin from './pages/GoogleLogin'
 import OAuthConsent from './pages/OAuthConsent'
 import UserDashboard from './pages/UserDashboard'
 import UserDashboardSection from './pages/UserDashboardSection'
+import UserSupportTickets from './pages/UserSupportTickets'
 import AdminDashboard from './pages/AdminDashboard'
 import { supabase } from './lib/supabase'
 import MarketChart from './components/MarketChart'
@@ -41,7 +42,7 @@ function App() {
   const isUserLogin = path === '/login'
   const isOAuthConsent = path === '/oauth/consent'
   const isUserDashboard = path === '/dashboard'
-  const userDashboardSection = path.match(/^\/dashboard\/(favorites|history|courses|progress|profile)$/)?.[1] || null
+  const userDashboardSection = path.match(/^\/dashboard\/(favorites|history|courses|progress|profile|support)$/)?.[1] || null
   const isAdminLogin = path === '/admin/login'
   const isAdmin = path === '/admin'
   const videoMatch = path.match(/^\/video\/([^/]+)$/)
@@ -156,7 +157,7 @@ function App() {
       <div className="app-shell">
         <Header />
         <main className="main-content">
-          {userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}
+          {userDashboardSection === 'support' ? <UserSupportTickets /> : userDashboardSection ? <UserDashboardSection section={userDashboardSection} /> : <UserDashboard />}
         </main>
         {updateOverlay}
       </div>

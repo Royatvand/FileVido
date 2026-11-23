@@ -441,6 +441,67 @@ export const userAuth = {
   },
 }
 
+
+async function userSupportRequest(path, options = {}) {
+  const session = await getValidUserSession()
+  if (!session?.access_token || !session?.user?.id) {
+    throw new Error('برای استفاده از پشتیبانی ابتدا وارد حساب کاربری شو.')
+  }
+  return request(path, options, session.access_token)
+}
+
+export const userSupport = {
+  async listTickets() {
+    return userSupportRequest('/rest/v1/support_tickets?select=id,subject,category,status,meeting_url,created_at,updated_at&order=updated_at.desc')
+  },
+  async listMessages(ticketId) {
+    return userSupportRequest(
+      '/rest/v1/support_ticket_messages?select=id,ticket_id,sender_id,sender_role,message,created_at&ticket_id=eq.' + encodeURIComponent(ticketId) + '&order=created_at.asc',
+    )
+  },
+  async createTicket({ subject, category, message }) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session?.user?.id) {
+      throw new Error('برای ثبت تیکت ابتدا وارد حساب کاربری شو.')
+    }
+    const rows = await request('/rest/v1/support_tickets', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({ user_id: session.user.id, subject, category }),
+    }, session.access_token)
+    const ticket = rows?.[0]
+    if (!ticket?.id) throw new Error('تیکت ثبت شد اما شناسه آن دریافت نشد.')
+    await request('/rest/v1/support_ticket_messages', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        ticket_id: ticket.id,
+        sender_id: session.user.id,
+        sender_role: 'user',
+        message,
+      }),
+    }, session.access_token)
+    return ticket
+  },
+  async reply(ticketId, message) {
+    const session = await getValidUserSession()
+    if (!session?.access_token || !session?.user?.id) {
+      throw new Error('برای ارسال پیام ابتدا وارد حساب کاربری شو.')
+    }
+    const rows = await request('/rest/v1/support_ticket_messages', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        ticket_id: ticketId,
+        sender_id: session.user.id,
+        sender_role: 'user',
+        message,
+      }),
+    }, session.access_token)
+    return rows?.[0] || null
+  },
+}
+
 export const supabase = {
   getSession,
   async getValidSession() {

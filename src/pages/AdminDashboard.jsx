@@ -5,8 +5,9 @@ import AdminBanners from '../components/AdminBanners'
 import AdminPlaylists from '../components/AdminPlaylists'
 import AdminIndicators from '../components/AdminIndicators'
 import AdminAppVersions from '../components/AdminAppVersions'
+import AdminSupportTickets from '../components/AdminSupportTickets'
 import { extractAparatId } from '../lib/aparat'
-import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers } from 'react-icons/lu'
+import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers, LuLifeBuoy } from 'react-icons/lu'
 
 const emptyForm = {
   title: '', slug: '', description: '', aparat_id: '', cover_url: '',
@@ -28,6 +29,9 @@ const ADMIN_NAV = [
   ] },
   { label: 'اپلیکیشن', items: [
     { id: 'app-versions', label: 'نسخه‌های اپ', Icon: LuSmartphone },
+  ] },
+  { label: 'پشتیبانی', items: [
+    { id: 'support-tickets', label: 'تیکت‌های پشتیبانی', Icon: LuLifeBuoy },
   ] },
 ]
 
@@ -234,8 +238,9 @@ function AdminDashboard() {
         : activeTab === 'banners' ? 'اسلایدر صفحه اصلی'
           : activeTab === 'playlists' ? 'مدیریت پلی‌لیست‌ها'
             : activeTab === 'indicators' ? 'اندیکاتورها و اسکریپت‌ها'
-              : activeTab === 'app-versions' ? 'نسخه‌های اپ اندروید'
-                : 'دسته‌بندی‌ها'
+               : activeTab === 'app-versions' ? 'نسخه‌های اپ اندروید'
+                : activeTab === 'support-tickets' ? 'تیکت‌های پشتیبانی'
+                  : 'دسته‌بندی‌ها'
 
   return (
     <main className="admin-page" dir="rtl">
@@ -336,6 +341,7 @@ function AdminDashboard() {
         {activeTab === 'banners' && <AdminBanners videos={videos} onNotice={setNotice} />}
         {activeTab === 'indicators' && <AdminIndicators onNotice={setNotice} />}
         {activeTab === 'app-versions' && <AdminAppVersions onNotice={setNotice} />}
+        {activeTab === 'support-tickets' && <AdminSupportTickets onNotice={setNotice} />}
 
         {activeTab === 'categories' && (
           <div className="admin-panel">

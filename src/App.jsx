@@ -29,6 +29,7 @@ import {
 } from './lib/appUpdate'
 import { useEffect, useState } from 'react'
 import { setPageSeo } from './lib/seo'
+import { trackPageView } from './lib/analytics'
 import { initNativeAuthListener } from './lib/nativeAuth'
 import './admin.css'
 
@@ -51,6 +52,8 @@ function App() {
   const indicatorSlug = indicatorMatch ? decodeURIComponent(indicatorMatch[1]) : null
 
   const [appUpdate, setAppUpdate] = useState(null)
+
+  useEffect(() => { trackPageView(path) }, [path])
 
   useEffect(() => {
     if (isHome) {

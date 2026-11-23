@@ -6,8 +6,9 @@ import AdminPlaylists from '../components/AdminPlaylists'
 import AdminIndicators from '../components/AdminIndicators'
 import AdminAppVersions from '../components/AdminAppVersions'
 import AdminSupportTickets from '../components/AdminSupportTickets'
+import AdminAnalytics from '../components/AdminAnalytics'
 import { extractAparatId } from '../lib/aparat'
-import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers, LuLifeBuoy } from 'react-icons/lu'
+import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers, LuLifeBuoy, LuChartNoAxesCombined } from 'react-icons/lu'
 
 const emptyForm = {
   title: '', slug: '', description: '', aparat_id: '', cover_url: '',
@@ -26,6 +27,9 @@ const ADMIN_NAV = [
   { label: 'سایت', items: [
     { id: 'banners', label: 'اسلایدر', Icon: LuImage },
     { id: 'indicators', label: 'اندیکاتورها', Icon: LuChartCandlestick },
+  ] },
+  { label: 'تحلیل و رشد', items: [
+    { id: 'analytics', label: 'آمار سایت', Icon: LuChartNoAxesCombined },
   ] },
   { label: 'اپلیکیشن', items: [
     { id: 'app-versions', label: 'نسخه‌های اپ', Icon: LuSmartphone },
@@ -240,7 +244,8 @@ function AdminDashboard() {
             : activeTab === 'indicators' ? 'اندیکاتورها و اسکریپت‌ها'
                : activeTab === 'app-versions' ? 'نسخه‌های اپ اندروید'
                 : activeTab === 'support-tickets' ? 'تیکت‌های پشتیبانی'
-                  : 'دسته‌بندی‌ها'
+                  : activeTab === 'analytics' ? 'آمار سایت'
+                    : 'دسته‌بندی‌ها'
 
   return (
     <main className="admin-page" dir="rtl">
@@ -342,6 +347,7 @@ function AdminDashboard() {
         {activeTab === 'indicators' && <AdminIndicators onNotice={setNotice} />}
         {activeTab === 'app-versions' && <AdminAppVersions onNotice={setNotice} />}
         {activeTab === 'support-tickets' && <AdminSupportTickets onNotice={setNotice} />}
+        {activeTab === 'analytics' && <AdminAnalytics />}
 
         {activeTab === 'categories' && (
           <div className="admin-panel">

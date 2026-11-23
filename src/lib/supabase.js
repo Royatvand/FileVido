@@ -19,6 +19,21 @@ function saveSession(session) {
   else localStorage.removeItem(SESSION_KEY)
 }
 
+
+// آپلود به Storage: خطای شبکه (Failed to fetch) یک بار دوباره امتحان می‌شود و پیام فارسی می‌دهد
+async function storageUpload(url, options, label) {
+  let lastError
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await fetch(url, options)
+    } catch (err) {
+      lastError = err
+      if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 800))
+    }
+  }
+  throw new Error(`${label} به سرور نرسید؛ اتصال اینترنت یا فیلترشکن را بررسی کن و دوباره امتحان کن.`, { cause: lastError })
+}
+
 async function request(path, options = {}, token) {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error('تنظیمات اتصال Supabase در محیط پروژه وارد نشده است.')
@@ -519,7 +534,7 @@ export const supabase = {
     const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[type]
 
     const path = `covers/${crypto.randomUUID()}.${extension}`
-    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/video-covers/${path}`, {
+    const response = await storageUpload(`${SUPABASE_URL}/storage/v1/object/video-covers/${path}`, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_KEY,
@@ -529,7 +544,7 @@ export const supabase = {
         'x-upsert': 'false',
       },
       body: blob,
-    })
+    }, 'آپلود تصویر کاور')
     const result = await response.json().catch(() => null)
     if (!response.ok) {
       throw new Error(result?.message || result?.error || 'آپلود تصویر انجام نشد. دسترسی Storage را بررسی کنید.')
@@ -607,7 +622,7 @@ export const supabase = {
     if (file.size > INDICATOR_MAX_BYTES) throw new Error('حجم فایل بیشتر از ۱۰ مگابایت است.')
 
     const path = `files/${crypto.randomUUID()}.${extension}`
-    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/indicator-files/${path}`, {
+    const response = await storageUpload(`${SUPABASE_URL}/storage/v1/object/indicator-files/${path}`, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_KEY,
@@ -617,7 +632,7 @@ export const supabase = {
         'x-upsert': 'false',
       },
       body: file,
-    })
+    }, 'آپلود فایل اندیکاتور')
     const result = await response.json().catch(() => null)
     if (!response.ok) {
       throw new Error(result?.message || result?.error || 'آپلود فایل انجام نشد. SQL فایل supabase/indicators.sql اجرا شده است؟')
@@ -641,7 +656,7 @@ export const supabase = {
     const { blob, type } = await compressImage(file)
     const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[type]
     const path = `images/${crypto.randomUUID()}.${extension}`
-    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/indicator-images/${path}`, {
+    const response = await storageUpload(`${SUPABASE_URL}/storage/v1/object/indicator-images/${path}`, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_KEY,
@@ -651,7 +666,7 @@ export const supabase = {
         'x-upsert': 'false',
       },
       body: blob,
-    })
+    }, 'آپلود تصویر گالری')
     const result = await response.json().catch(() => null)
     if (!response.ok) throw new Error(result?.message || result?.error || 'آپلود تصویر گالری انجام نشد؛ تنظیمات Storage را بررسی کن.')
     return path

@@ -151,7 +151,7 @@ function AdminAnalytics() {
 
       {error && <div className="admin-alert error">{error}</div>}
 
-      {loading ? <div className="admin-panel analytics-loading">در حال دریافت آمار واقعی سایت...</div> : (
+      {loading ? <div className="admin-panel analytics-loading">در حال دریافت آمار واقعی سایت...</div> : !data ? <div className="admin-panel analytics-loading">آمار هنوز قابل دریافت نیست. خطای بالا را بررسی کنید.</div> : (
         <>
           <div className="analytics-metrics-grid">
             <MetricCard Icon={LuEye} label="بازدید صفحات" value={totals.page_views} hint="تعداد کل صفحات مشاهده‌شده" />

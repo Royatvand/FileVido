@@ -1,0 +1,72 @@
+.admin-analytics { display:grid; gap:16px; }
+.analytics-toolbar { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:2px; }
+.analytics-toolbar>div:first-child { display:grid; gap:7px; }
+.analytics-eyebrow { color:var(--accent); font:700 10px Arial,sans-serif; letter-spacing:1.4px; }
+.analytics-toolbar p { margin:0; color:var(--adm-muted); font-size:13px; }
+.analytics-toolbar-actions { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
+.analytics-range { display:flex; padding:4px; border:1px solid var(--adm-line); border-radius:9px; background:var(--adm-surface); }
+.analytics-range button { min-height:32px; padding:0 12px; border:0; border-radius:6px; color:var(--adm-muted); background:transparent; font:12px var(--cm-font); cursor:pointer; }
+.analytics-range button.active { color:#07110b; background:var(--accent); font-weight:700; }
+.analytics-refresh { min-height:38px; gap:8px; font-size:12px; }
+.analytics-refresh svg { width:15px; height:15px; }
+.analytics-refresh:disabled { opacity:.55; cursor:wait; }
+.analytics-refresh .is-spinning { animation:analytics-spin 1s linear infinite; }
+@keyframes analytics-spin { to { transform:rotate(360deg); } }
+.analytics-metrics-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.analytics-metric { display:flex; align-items:flex-start; gap:13px; min-width:0; padding:18px; border:1px solid var(--adm-line); border-radius:var(--adm-radius); background:var(--adm-surface); }
+.analytics-metric-icon { display:grid; place-items:center; flex:none; width:39px; height:39px; border-radius:10px; color:var(--accent); background:color-mix(in srgb,var(--accent) 10%,transparent); }
+.analytics-metric-icon svg { width:19px; height:19px; }
+.analytics-metric.is-green .analytics-metric-icon { color:#9ae6b4; background:#9ae6b415; }
+.analytics-metric-copy { display:grid; gap:7px; min-width:0; }
+.analytics-metric-copy>span { color:var(--adm-muted); font-size:12px; }
+.analytics-metric-copy strong { overflow-wrap:anywhere; color:var(--adm-text); font:700 25px Arial,sans-serif; }
+.analytics-metric-copy small { color:var(--adm-muted); font-size:10px; line-height:1.8; }
+.analytics-secondary-metrics { display:flex; flex-wrap:wrap; gap:10px; }
+.analytics-secondary-metrics>div { display:flex; align-items:center; justify-content:space-between; gap:20px; flex:1 1 240px; padding:13px 16px; border:1px solid var(--adm-line); border-radius:10px; background:#ffffff03; }
+.analytics-secondary-metrics span { color:var(--adm-muted); font-size:11px; }
+.analytics-secondary-metrics strong { color:var(--adm-text); font:700 18px Arial,sans-serif; }
+.analytics-chart-panel { min-width:0; }
+.analytics-chart-panel>.admin-panel-heading>svg,.analytics-list-panel>.admin-panel-heading>svg { flex:none; width:19px; height:19px; color:var(--accent); }
+.analytics-chart-scroll { overflow-x:auto; padding:8px 2px 0; scrollbar-width:thin; }
+.analytics-chart { display:flex; align-items:stretch; gap:7px; min-width:650px; height:230px; padding:8px 2px 0; border-bottom:1px solid var(--adm-line); }
+.analytics-chart-column { display:flex; flex:1 0 0; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px; min-width:0; height:100%; }
+.analytics-chart-column>strong { min-height:12px; color:var(--adm-muted); font:10px Arial,sans-serif; }
+.analytics-chart-bar { width:min(100%,24px); min-height:2px; border-radius:5px 5px 0 0; background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 24%,transparent)); transition:height .25s ease; }
+.analytics-chart-column>small { width:100%; min-height:24px; color:var(--adm-muted); font-size:9px; text-align:center; white-space:nowrap; }
+.analytics-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.analytics-list-panel { min-width:0; }
+.analytics-bar-list { display:grid; gap:17px; padding-top:4px; }
+.analytics-bar-row { display:grid; gap:8px; min-width:0; }
+.analytics-bar-meta { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; }
+.analytics-bar-meta span { overflow:hidden; color:var(--adm-text); font-size:12px; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:right; }
+.analytics-bar-meta strong { flex:none; color:var(--adm-muted); font:12px Arial,sans-serif; }
+.analytics-bar-track { height:6px; overflow:hidden; border-radius:999px; background:#ffffff0d; }
+.analytics-bar-track span { display:block; height:100%; border-radius:inherit; background:var(--accent); }
+.analytics-empty,.analytics-loading { display:grid; place-items:center; min-height:120px; color:var(--adm-muted); font-size:12px; text-align:center; }
+.analytics-devices-panel { display:grid; gap:15px; }
+.analytics-device-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.analytics-device-item { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:10px; padding:13px; border:1px solid var(--adm-line); border-radius:10px; }
+.analytics-device-item svg { width:18px; height:18px; color:var(--accent); }
+.analytics-device-item span { color:var(--adm-muted); font-size:11px; }
+.analytics-device-item strong { grid-column:2; color:var(--adm-text); font:700 17px Arial,sans-serif; }
+.analytics-privacy-note { margin:0; color:var(--adm-muted); font-size:11px; line-height:2; }
+@media(max-width:1050px) { .analytics-metrics-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) {
+  .analytics-toolbar { align-items:stretch; flex-direction:column; }
+  .analytics-toolbar-actions { justify-content:space-between; }
+  .analytics-detail-grid { grid-template-columns:1fr; }
+  .analytics-device-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+  .analytics-metrics-grid { gap:8px; }
+  .analytics-metric { gap:9px; padding:12px; }
+  .analytics-metric-icon { width:32px; height:32px; }
+  .analytics-metric-icon svg { width:16px; height:16px; }
+  .analytics-metric-copy>span { font-size:10px; }
+  .analytics-metric-copy strong { font-size:21px; }
+  .analytics-metric-copy small { font-size:9px; }
+  .analytics-range button { padding:0 9px; font-size:11px; }
+  .analytics-refresh { padding:0 10px; }
+  .analytics-secondary-metrics>div { gap:8px; padding:12px; }
+  .analytics-secondary-metrics span { font-size:10px; }
+}

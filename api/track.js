@@ -86,7 +86,7 @@ export default async function handler(req, res) {
       headers: {
         ...SUPABASE_ADMIN.headers,
         'Content-Type': 'application/json',
-      }
+      },
       body: JSON.stringify({
         p_visitor_id: visitorId,
         p_session_id: sessionId,

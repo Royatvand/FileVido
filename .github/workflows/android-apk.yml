@@ -137,7 +137,7 @@ jobs:
 
           asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/app-release.apk"
           response_file="$RUNNER_TEMP/register-app-release.json"
-          http_status=$(curl --location --max-redirs 5 --fail-with-body --silent --show-error \
+          http_status=$(curl --location --max-redirs 5 --silent --show-error \
             --output "$response_file" --write-out "%{http_code}" \
             -X POST "https://www.chartmasters.top/api/register-app-release" \
             -H "Content-Type: application/json" \

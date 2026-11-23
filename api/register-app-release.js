@@ -42,7 +42,9 @@ export default async function handler(req, res) {
   const rows = await saved.json().catch(() => [])
   if (!saved.ok || !rows?.[0]?.id) {
     console.error('Unable to register app release', saved.status, JSON.stringify(rows).slice(0, 500))
-    return send(res, 502, { message: 'APK منتشر شد اما ثبت نسخه در Supabase ناموفق بود.' })
+    // PostgREST error details (status/code/message) are not secret and make failed registrations diagnosable from the CI log
+    const detail = { status: saved.status, code: rows?.code, message: String(rows?.message || rows?.error || '').slice(0, 300), hint: String(rows?.hint || '').slice(0, 200) }
+    return send(res, 502, { message: 'APK منتشر شد اما ثبت نسخه در Supabase ناموفق بود.', detail })
   }
 
   let notification = 'اعلان خودکار ارسال نشد.'

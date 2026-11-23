@@ -19,6 +19,14 @@ function safeMeetingUrl(value) {
   }
 }
 
+const CATEGORY_LABELS = {
+  general: 'سؤال عمومی',
+  chart: 'نمودار و نمادها',
+  technical: 'مشکل فنی سایت',
+  account: 'حساب کاربری',
+  content: 'ویدیو و محتوای آموزشی',
+}
+
 function AdminSupportTickets({ onNotice = () => {} }) {
   const [tickets, setTickets] = useState([])
   const [selectedId, setSelectedId] = useState('')
@@ -43,8 +51,6 @@ function AdminSupportTickets({ onNotice = () => {} }) {
         ? selectedId
         : rows?.[0]?.id || ''
     setSelectedId(id)
-    const active = (rows || []).find((item) => item.id === id)
-    setMeetingUrl(active?.meeting_url || '')
     return rows || []
   }, [selectedId])
 
@@ -81,13 +87,21 @@ function AdminSupportTickets({ onNotice = () => {} }) {
 
   useEffect(() => {
     let active = true
-    if (!selectedId) { setMessages([]); setMeetingUrl(''); return undefined }
-    setError('')
-    loadMessages(selectedId).catch((err) => { if (active) setError(err.message || 'دریافت پیام‌ها انجام نشد.') })
-    const ticket = tickets.find((item) => item.id === selectedId)
-    setMeetingUrl(ticket?.meeting_url || '')
+    Promise.resolve().then(async () => {
+      if (!selectedId) { setMessages([]); return }
+      setError('')
+      try { await loadMessages(selectedId) }
+      catch (err) { if (active) setError(err.message || 'دریافت پیام‌ها انجام نشد.') }
+    })
     return () => { active = false }
-  }, [selectedId, loadMessages, tickets])
+  }, [selectedId, loadMessages])
+
+  // Sync the meeting-link input only when the ticket changes or the saved value changes,
+  // so the 20s refresh never overwrites what the admin is typing.
+  const savedMeetingUrl = selectedTicket?.meeting_url || ''
+  useEffect(() => {
+    Promise.resolve().then(() => setMeetingUrl(savedMeetingUrl))
+  }, [selectedId, savedMeetingUrl])
 
   async function saveMeetingLink() {
     if (!selectedTicket) return
@@ -180,7 +194,7 @@ function AdminSupportTickets({ onNotice = () => {} }) {
                 <div><h2>{selectedTicket.subject}</h2><p>{selectedTicket.user_name || 'کاربر'} · {selectedTicket.user_email} · {formatDate(selectedTicket.created_at)}</p></div>
                 <i className={'support-status ' + selectedTicket.status}>{STATUS_LABELS[selectedTicket.status] || selectedTicket.status}</i>
               </header>
-              <div className="admin-support-category">موضوع: {selectedTicket.category}</div>
+              <div className="admin-support-category">موضوع: {CATEGORY_LABELS[selectedTicket.category] || selectedTicket.category}</div>
               <div className="admin-support-messages">
                 {messages.map((message) => (
                   <article className={'support-message ' + message.sender_role} key={message.id}>

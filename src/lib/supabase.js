@@ -531,6 +531,16 @@ export const supabase = {
     if (!session?.access_token) return null
     return request('/auth/v1/user', {}, session.access_token)
   },
+  async getSiteAnalytics(from, to) {
+    const session = await getValidSession()
+    if (!session?.access_token || session.user?.app_metadata?.role !== 'admin') {
+      throw new Error('فقط مدیر سایت اجازه مشاهده آمار را دارد.')
+    }
+    return request('/rest/v1/rpc/get_site_analytics', {
+      method: 'POST',
+      body: JSON.stringify({ p_from: from, p_to: to }),
+    }, session.access_token)
+  },
   async select(table, query = '', columns = '*') {
     const session = await getValidSession()
     return request(`/rest/v1/${table}?select=${columns}${query}`, {}, session?.access_token)

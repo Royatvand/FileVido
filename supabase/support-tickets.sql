@@ -30,6 +30,9 @@ create index if not exists support_tickets_user_updated_idx
 create index if not exists support_ticket_messages_ticket_created_idx
   on public.support_ticket_messages (ticket_id, created_at asc);
 
+create index if not exists support_ticket_messages_sender_idx
+  on public.support_ticket_messages (sender_id);
+
 alter table public.support_tickets enable row level security;
 alter table public.support_ticket_messages enable row level security;
 
@@ -89,7 +92,7 @@ begin
   end if;
 
   if new.sender_role = 'admin'
-     and (select auth.jwt() -> 'app_metadata' ->> 'role') is distinct from 'admin' then
+     and ((select auth.jwt()) -> 'app_metadata' ->> 'role') is distinct from 'admin' then
     raise exception 'Only admins can send admin replies';
   end if;
 
@@ -108,7 +111,7 @@ begin
       )
       or (
         new.sender_role = 'admin'
-        and (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+        and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
       )
     );
 
@@ -135,7 +138,7 @@ create policy "Users and admins read support tickets"
   to authenticated
   using (
     user_id = (select auth.uid())
-    or (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+    or ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
   );
 
 drop policy if exists "Authenticated users create own support tickets" on public.support_tickets;
@@ -149,8 +152,8 @@ drop policy if exists "Admins update support tickets" on public.support_tickets;
 create policy "Admins update support tickets"
   on public.support_tickets for update
   to authenticated
-  using ((select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
-  with check ((select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
+  using (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin')
+  with check (((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "Ticket owners and admins read messages" on public.support_ticket_messages;
 create policy "Ticket owners and admins read messages"
@@ -163,7 +166,7 @@ create policy "Ticket owners and admins read messages"
       where t.id = ticket_id
         and (
           t.user_id = (select auth.uid())
-          or (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+          or ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
         )
     )
   );
@@ -187,7 +190,7 @@ create policy "Users and admins add valid ticket messages"
       )
       or (
         sender_role = 'admin'
-        and (select auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+        and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
         and exists (
           select 1
           from public.support_tickets t

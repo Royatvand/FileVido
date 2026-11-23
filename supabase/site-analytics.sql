@@ -33,6 +33,7 @@ create table if not exists private.site_analytics_rate_limits (
   updated_at timestamptz not null default now()
 );
 revoke all on table private.site_analytics_rate_limits from public, anon, authenticated, service_role;
+alter table private.site_analytics_rate_limits enable row level security;
 
 create or replace function private.record_site_pageview(
   p_visitor_id uuid,

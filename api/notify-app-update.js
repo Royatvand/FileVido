@@ -12,8 +12,10 @@
  *   VITE_SUPABASE_PUBLISHABLE_KEY  (fallback; needs admin JWT)
  */
 
+import { getSupabaseAdminConfig } from '../server/supabaseAdmin.js'
+
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
-const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_ADMIN = getSupabaseAdminConfig()
 const PUBLISHABLE = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY
 
 function json(res, status, body) {
@@ -30,7 +32,7 @@ function getBearer(req) {
 
 /** Returns { user } for an admin, or { error: 'config' | 'session' | 'forbidden' }. */
 async function verifyAdmin(accessToken) {
-  const apikey = PUBLISHABLE || SERVICE_ROLE
+  const apikey = PUBLISHABLE || (SUPABASE_ADMIN.ok ? SUPABASE_ADMIN.key : null)
   if (!SUPABASE_URL || !apikey) return { error: 'config' }
   if (!accessToken) return { error: 'session' }
   let response
@@ -50,18 +52,20 @@ async function verifyAdmin(accessToken) {
 
 async function listFcmTokens(adminToken) {
   if (!SUPABASE_URL) return []
-  const key = SERVICE_ROLE || PUBLISHABLE
-  const auth = SERVICE_ROLE ? SERVICE_ROLE : adminToken
-  if (!key || !auth) return []
+
+  // Prefer the server-only secret key. New sb_secret_ keys use apikey only.
+  let headers
+  if (SUPABASE_ADMIN.ok) {
+    headers = SUPABASE_ADMIN.headers
+  } else if (PUBLISHABLE && adminToken) {
+    headers = { apikey: PUBLISHABLE, Authorization: `Bearer ${adminToken}` }
+  } else {
+    return []
+  }
 
   const response = await fetch(
     `${SUPABASE_URL}/rest/v1/fcm_tokens?select=id,token&platform=eq.android&order=last_seen_at.desc&limit=5000`,
-    {
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${auth}`,
-      },
-    },
+    { headers },
   )
   if (!response.ok) {
     console.error('Unable to read FCM tokens from Supabase', { status: response.status })

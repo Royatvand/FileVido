@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   LuActivity,
   LuChartNoAxesCombined,
@@ -94,24 +94,42 @@ function AdminAnalytics() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
+  const requestInFlight = useRef(false)
 
-  const loadAnalytics = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true)
-    else setLoading(true)
+  const loadAnalytics = useCallback(async ({ refresh = false, silent = false } = {}) => {
+    if (requestInFlight.current) return
+    requestInFlight.current = true
+
+    if (!silent) {
+      if (refresh) setRefreshing(true)
+      else setLoading(true)
+    }
     setError('')
     try {
       const dates = getRangeDates(range)
       const result = await supabase.getSiteAnalytics(dates.from, dates.to)
       setData(result)
+      setLastUpdatedAt(new Date())
     } catch (err) {
       setError(err?.message || 'دریافت آمار سایت انجام نشد.')
     } finally {
       setLoading(false)
-      setRefreshing(false)
+      if (!silent) setRefreshing(false)
+      requestInFlight.current = false
     }
   }, [range])
 
-  useEffect(() => { loadAnalytics() }, [loadAnalytics])
+  useEffect(() => {
+    loadAnalytics()
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadAnalytics({ refresh: true, silent: true })
+      }
+    }, 30000)
+
+    return () => window.clearInterval(intervalId)
+  }, [loadAnalytics])
 
   const daily = data?.daily || []
   const chartMax = Math.max(1, ...daily.map((item) => Number(item.views || 0)))
@@ -127,6 +145,11 @@ function AdminAnalytics() {
         <div>
           <span className="analytics-eyebrow">CHARTMASTERS / INSIGHTS</span>
           <p>نمای کلی عملکرد و رفتار بازدیدکنندگان سایت</p>
+          <small className="analytics-last-updated" role="status" aria-live="polite">
+            {lastUpdatedAt
+              ? `بروزرسانی خودکار هر ۳۰ ثانیه · آخرین دریافت: ${new Intl.DateTimeFormat('fa-IR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(lastUpdatedAt)}`
+              : 'در انتظار دریافت آمار...'}
+          </small>
         </div>
         <div className="analytics-toolbar-actions">
           <div className="analytics-range" aria-label="بازه زمانی آمار">
@@ -142,7 +165,7 @@ function AdminAnalytics() {
               </button>
             ))}
           </div>
-          <button type="button" className="admin-secondary-button analytics-refresh" onClick={() => loadAnalytics(true)} disabled={loading || refreshing}>
+          <button type="button" className="admin-secondary-button analytics-refresh" onClick={() => loadAnalytics({ refresh: true }) disabled={loading || refreshing}>
             <LuRefreshCw className={refreshing ? 'is-spinning' : ''} aria-hidden="true" />
             بروزرسانی
           </button>

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
+import { getSupabaseAdminConfig } from '../server/supabaseAdmin.js'
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
-const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_ADMIN = getSupabaseAdminConfig()
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const PRIVATE_PATH = /^\/(admin|login|oauth|dashboard)(\/|$)/i
 
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
   }
 
   if (!isAllowedOrigin(req)) return send(res, 403, { message: 'Forbidden origin' })
-  if (!SUPABASE_URL || !SERVICE_ROLE) return send(res, 503, { message: 'Analytics is not configured' })
+  if (!SUPABASE_ADMIN.ok) return send(res, 503, { message: 'Analytics server credentials are not configured correctly.' })
 
   const contentLength = Number(req.headers['content-length'] || 0)
   if (contentLength > 4096) return send(res, 413, { message: 'Payload too large' })
@@ -75,19 +75,18 @@ export default async function handler(req, res) {
 
   const ip = getClientIp(req)
   if (!ip) return send(res, 400, { message: 'Client address unavailable' })
-  const ipHash = createHash('sha256').update(SERVICE_ROLE + ':' + ip).digest('hex')
+  const ipHash = createHash('sha256').update(SUPABASE_ADMIN.key + ':' + ip).digest('hex')
 
   const rawReferrer = String(body.referrer_host || '').trim().toLowerCase()
   const referrerHost = /^[a-z0-9.-]{1,253}$/.test(rawReferrer) ? rawReferrer : ''
 
   try {
-    const upstream = await fetch(SUPABASE_URL + '/rest/v1/rpc/record_site_pageview', {
+    const upstream = await fetch(SUPABASE_ADMIN.url + '/rest/v1/rpc/record_site_pageview', {
       method: 'POST',
       headers: {
-        apikey: SERVICE_ROLE,
-        Authorization: 'Bearer ' + SERVICE_ROLE,
+        ...SUPABASE_ADMIN.headers,
         'Content-Type': 'application/json',
-      },
+      }
       body: JSON.stringify({
         p_visitor_id: visitorId,
         p_session_id: sessionId,

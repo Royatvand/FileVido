@@ -277,3 +277,6 @@ revoke all on function public.get_site_analytics(timestamptz, timestamptz)
   from public, anon, authenticated, service_role;
 grant execute on function public.get_site_analytics(timestamptz, timestamptz)
   to authenticated;
+
+-- Refresh PostgREST so the new RPCs are available immediately.
+notify pgrst, 'reload schema';

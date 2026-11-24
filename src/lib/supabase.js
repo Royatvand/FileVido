@@ -1,6 +1,6 @@
 import { compressImage } from './imageCompress'
 import { PLAYLIST_FILE_MAX_BYTES } from './playlistFiles'
-import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, getAllowedIndicatorExtensions, getIndicatorExtension } from './indicators'
+import { INDICATOR_MAX_BYTES, getAllowedIndicatorExtensions, getIndicatorExtension } from './indicators'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY

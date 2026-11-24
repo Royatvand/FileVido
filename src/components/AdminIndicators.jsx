@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import IconTextarea from './IconTextarea'
 import { supabase } from '../lib/supabase'
-import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, INDICATOR_PLATFORMS, formatFileSize, getIndicatorExtension, indicatorImageUrl } from '../lib/indicators'
+import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, INDICATOR_PLATFORMS, formatFileSize, getAllowedIndicatorExtensions, getIndicatorExtension, indicatorImageUrl } from '../lib/indicators'
 import PlatformIcon from './PlatformIcon'
 
 const emptyForm = { title: '', slug: '', description: '', content: '', platform: 'tradingview', version: '1.0', cover_url: '', status: 'draft' }
@@ -59,8 +59,12 @@ function AdminIndicators({ onNotice }) {
   function handleFile(event) {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!INDICATOR_EXTENSIONS.includes(getIndicatorExtension(file.name))) {
-      onNotice({ type: 'error', text: `فرمت فایل مجاز نیست. فرمت‌های مجاز: ${INDICATOR_EXTENSIONS.join('، ')}` })
+    const allowedExtensions = getAllowedIndicatorExtensions(form.platform)
+    if (!allowedExtensions.includes(getIndicatorExtension(file.name))) {
+      const message = form.platform === 'metatrader5'
+        ? 'برای MetaTrader 5 فقط فایل اجرایی EX5 مجاز است.'
+        : `فرمت فایل مجاز نیست. فرمت‌های مجاز: ${allowedExtensions.join('، ')}`
+      onNotice({ type: 'error', text: message })
       event.target.value = ''
       return
     }
@@ -173,6 +177,11 @@ function AdminIndicators({ onNotice }) {
       onNotice({ type: 'error', text: 'برای اندیکاتور جدید باید یک فایل انتخاب کنی.' })
       return
     }
+    const effectiveFileName = selectedFile?.name || editing?.file_name || ''
+    if (form.platform === 'metatrader5' && effectiveFileName && getIndicatorExtension(effectiveFileName) !== 'ex5') {
+      onNotice({ type: 'error', text: 'برای MetaTrader 5 فقط فایل اجرایی EX5 قابل انتشار است. فایل EX5 را انتخاب کن.' })
+      return
+    }
     setSaving(true)
     let uploadedPath = ''
     let savedIndicator = editing
@@ -196,7 +205,7 @@ function AdminIndicators({ onNotice }) {
       }
       if (selectedFile) {
         onNotice({ type: '', text: 'در حال آپلود فایل...' })
-        uploadedPath = await supabase.uploadIndicatorFile(selectedFile)
+        uploadedPath = await supabase.uploadIndicatorFile(selectedFile, form.platform)
         payload.file_path = uploadedPath
         payload.file_name = selectedFile.name
         payload.file_size = selectedFile.size
@@ -302,10 +311,10 @@ function AdminIndicators({ onNotice }) {
           <div className="admin-cover-field">
             <span>فایل اسکریپت {editing ? '(خالی = همان فایل فعلی)' : '*'}</span>
             <label className="admin-cover-picker">
-              <input type="file" accept={INDICATOR_EXTENSIONS.map((ext) => `.${ext}`).join(',')} onChange={handleFile} />
+              <input type="file" accept={getAllowedIndicatorExtensions(form.platform).map((ext) => `.${ext}`).join(',')} onChange={handleFile} />
               <span>＋ انتخاب فایل</span>
             </label>
-            <small>فرمت‌های مجاز: {INDICATOR_EXTENSIONS.join('، ')} — حداکثر ۱۰ مگابایت</small>
+            <small>{form.platform === 'metatrader5' ? 'برای MetaTrader 5 فقط فایل EX5 مجاز است.' : `فرمت‌های مجاز: ${INDICATOR_EXTENSIONS.join('، ')}`} — حداکثر ۱۰ مگابایت</small>
             {selectedFile && <small>انتخاب‌شده: {selectedFile.name} ({formatFileSize(selectedFile.size)})</small>}
             {!selectedFile && editing?.file_name && <small>فایل فعلی: {editing.file_name} ({formatFileSize(editing.file_size)})</small>}
           </div>

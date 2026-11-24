@@ -113,7 +113,7 @@ function UserDashboardSection({ section }) {
   const [name, setName] = useState('')
 
   useEffect(() => {
-    if (user) setName(user.user_metadata?.full_name || user.user_metadata?.name || '')
+    if (user) Promise.resolve().then(() => setName(user.user_metadata?.full_name || user.user_metadata?.name || ''))
   }, [user])
 
   async function removeFavorite(item) {
@@ -155,29 +155,16 @@ function UserDashboardSection({ section }) {
   const courses = data?.courses || []
   const stats = data?.stats || { viewedCount: 0, completedCount: 0, favoriteCount: 0, courseCount: 0 }
   const completion = stats.viewedCount ? Math.round(stats.completedCount / stats.viewedCount * 100) : 0
-  const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'کاربر چارت مسترز'
 
   return (
     <section className="user-dashboard" dir="rtl">
       <div className="user-dashboard-layout">
-        <UserDashboardSidebar active={section} onSignOut={signOut} />
+        <UserDashboardSidebar active={section} onSignOut={signOut} user={user} />
 
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">
-            <div><h1>{current.title}</h1></div>
-            <div className="user-dashboard-top-user">
-              {user.user_metadata?.avatar_url || user.user_metadata?.picture
-                ? <img className="user-dashboard-avatar" src={user.user_metadata.avatar_url || user.user_metadata.picture} alt="" referrerPolicy="no-referrer" />
-                : <div className="user-dashboard-avatar user-dashboard-avatar-fallback">{displayName.slice(0, 1)}</div>}
-              <div><strong>{displayName}</strong><span>{user.email}</span></div>
-            </div>
+            <div><h1>{current.title}</h1><p>{current.description}</p></div>
           </header>
-
-          <section className="user-dashboard-section-intro">
-            
-            <h2>{current.title}</h2>
-            <p>{current.description}</p>
-          </section>
 
           {error && <div className="user-dashboard-error" role="alert">{error}</div>}
           {notice && <div className="user-dashboard-notice" role="status">{notice}</div>}

@@ -1,44 +1,78 @@
-import { useState } from 'react'
-import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuLogOut, LuLifeBuoy } from 'react-icons/lu'
+import { useEffect, useState } from 'react'
+import { LuLayoutDashboard, LuBookOpen, LuHeart, LuHistory, LuTrendingUp, LuSettings, LuLogOut, LuLifeBuoy, LuMenu } from 'react-icons/lu'
+import '../user-dashboard.css'
 
 const DASHBOARD_NAVIGATION = [
-  { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, color: 'mint', href: '/dashboard' },
-  { id: 'courses', label: 'دوره‌های من', icon: LuBookOpen, color: 'blue', href: '/dashboard/courses' },
-  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: LuHeart, color: 'rose', href: '/dashboard/favorites' },
-  { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, color: 'amber', href: '/dashboard/history' },
-  { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, color: 'violet', href: '/dashboard/progress' },
-  { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, color: 'cyan', href: '/dashboard/profile' },
-  { id: 'support', label: 'تیکت‌های پشتیبانی', icon: LuLifeBuoy, color: 'mint', href: '/dashboard/support' },
+  { id: 'overview', label: 'نمای کلی', icon: LuLayoutDashboard, href: '/dashboard' },
+  { id: 'courses', label: 'دوره‌های من', icon: LuBookOpen, href: '/dashboard/courses' },
+  { id: 'favorites', label: 'علاقه‌مندی‌ها', icon: LuHeart, href: '/dashboard/favorites' },
+  { id: 'history', label: 'تاریخچه تماشا', icon: LuHistory, href: '/dashboard/history' },
+  { id: 'progress', label: 'پیشرفت یادگیری', icon: LuTrendingUp, href: '/dashboard/progress' },
+  { id: 'profile', label: 'تنظیمات پروفایل', icon: LuSettings, href: '/dashboard/profile' },
+  { id: 'support', label: 'تیکت‌های پشتیبانی', icon: LuLifeBuoy, href: '/dashboard/support' },
 ]
 
-// سایدبار مشترک همهٔ صفحه‌های داشبورد؛ در موبایل با دکمهٔ «منوی داشبورد» باز و بسته می‌شود
-// (دکمه فقط در موبایل دیده می‌شود و داخل grid قرار می‌گیرد)
-function UserDashboardSidebar({ active, onSignOut }) {
+// در موبایل چهار مقصد اصلی در نوار پایین هستند و بقیه از دکمهٔ «منو» باز می‌شوند.
+const MOBILE_PRIMARY = ['overview', 'courses', 'favorites', 'progress']
+
+function UserDashboardSidebar({ active, onSignOut, user }) {
   const [open, setOpen] = useState(false)
+  const metadata = user?.user_metadata || {}
+  const displayName = metadata.full_name || metadata.name || user?.email?.split('@')[0] || ''
+  const avatar = metadata.avatar_url || metadata.picture || ''
+
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = (event) => { if (event.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
+  const primaryItems = DASHBOARD_NAVIGATION.filter((item) => MOBILE_PRIMARY.includes(item.id))
+  const moreActive = !MOBILE_PRIMARY.includes(active)
+
   return (
     <>
-      <button className="user-dashboard-mobile-toggle" type="button" aria-expanded={open} aria-controls="user-dashboard-sidebar" onClick={() => setOpen((value) => !value)}>
-        <span aria-hidden="true">☰</span> منوی داشبورد
-      </button>
-      <aside id="user-dashboard-sidebar" className={'user-dashboard-sidebar ' + (open ? 'is-open' : '')}>
+      <aside id="user-dashboard-sidebar" className={'user-dashboard-sidebar ' + (open ? 'is-open' : '')} aria-label="منوی داشبورد">
         <a className="user-dashboard-side-brand" href="/dashboard">
           <span className="user-dashboard-brand-mark">CM</span>
-          <div><strong>CHARTMASTERS</strong><small>فضای یادگیری تو</small></div>
+          <strong>چارت مسترز</strong>
         </a>
-        <span className="user-dashboard-side-label">حساب کاربری</span>
         <nav className="user-dashboard-nav" aria-label="منوی داشبورد">
           {DASHBOARD_NAVIGATION.map((item) => (
             <a key={item.id} href={item.href} className={'user-dashboard-nav-link ' + (item.id === active ? 'active' : '')} aria-current={item.id === active ? 'page' : undefined} onClick={() => setOpen(false)}>
-              <span className={'user-dashboard-nav-icon icon-tone-' + item.color} aria-hidden="true"><item.icon /></span>
-              {item.label}
-              {item.id === active && <span className="user-dashboard-nav-indicator" />}
+              <item.icon aria-hidden="true" />
+              <span>{item.label}</span>
             </a>
           ))}
         </nav>
         <div className="user-dashboard-sidebar-bottom">
-          <button className="user-dashboard-sidebar-logout" type="button" onClick={onSignOut}><span className="user-dashboard-logout-icon"><LuLogOut /></span> خروج از حساب</button>
+          {user && (
+            <div className="user-dashboard-side-user">
+              {avatar
+                ? <img className="user-dashboard-avatar" src={avatar} alt="" referrerPolicy="no-referrer" />
+                : <span className="user-dashboard-avatar user-dashboard-avatar-fallback" aria-hidden="true">{displayName.slice(0, 1)}</span>}
+              <div><strong>{displayName}</strong><small dir="ltr">{user.email}</small></div>
+            </div>
+          )}
+          <button className="user-dashboard-sidebar-logout" type="button" onClick={onSignOut}><LuLogOut aria-hidden="true" /> <span>خروج از حساب</span></button>
         </div>
       </aside>
+
+      {open && <button type="button" className="user-dashboard-sheet-backdrop" aria-label="بستن منو" onClick={() => setOpen(false)} />}
+
+      <nav className="user-dashboard-bottom-nav" aria-label="ناوبری سریع">
+        {primaryItems.map((item) => (
+          <a key={item.id} href={item.href} className={item.id === active ? 'active' : ''} aria-current={item.id === active ? 'page' : undefined}>
+            <item.icon aria-hidden="true" />
+            <span>{item.label.replace('های من', 'ها').replace('پیشرفت یادگیری', 'پیشرفت')}</span>
+          </a>
+        ))}
+        <button type="button" className={moreActive || open ? 'active' : ''} aria-expanded={open} aria-controls="user-dashboard-sidebar" onClick={() => setOpen((value) => !value)}>
+          <LuMenu aria-hidden="true" />
+          <span>منو</span>
+        </button>
+      </nav>
     </>
   )
 }

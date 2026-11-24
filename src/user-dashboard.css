@@ -1,19 +1,20 @@
 /* ChartMasters user dashboard — design system v2
-   Direction from the ui-ux-pro-max skill: "Dark Mode (OLED)" — deep slate base, one green accent,
+   Direction from the ui-ux-pro-max skill: "Dark Mode (OLED)" — layout/spacing/contrast rules; colors follow the site theme,
    flat surfaces with hairline borders, 4.5:1+ contrast, visible focus, 44px touch targets,
    SVG icons only, reduced-motion respected. Loaded after index.css so it overrides the old rules. */
 
 .user-dashboard {
-  --ud-bg: #020617;
-  --ud-card: #0e1223;
-  --ud-card-2: #151a2d;
-  --ud-border: rgba(148, 163, 184, .16);
-  --ud-border-strong: rgba(148, 163, 184, .3);
-  --ud-text: #f8fafc;
-  --ud-muted: #94a3b8;
-  --ud-accent: #22c55e;
-  --ud-accent-soft: rgba(34, 197, 94, .12);
-  --ud-on-accent: #04130a;
+  /* colors follow the site theme (green default, coral optional) */
+  --ud-bg: var(--bg);
+  --ud-card: var(--panel);
+  --ud-card-2: color-mix(in srgb, var(--panel) 90%, #fff);
+  --ud-border: var(--line);
+  --ud-border-strong: rgba(255, 255, 255, .17);
+  --ud-text: #f0f5f2;
+  --ud-muted: #94a39b;
+  --ud-accent: var(--accent);
+  --ud-accent-soft: color-mix(in srgb, var(--accent) 13%, transparent);
+  --ud-on-accent: #07120b;
   --ud-danger: #ef4444;
   --ud-radius: 14px;
   --ud-radius-sm: 10px;
@@ -21,15 +22,7 @@
   padding: 28px 0 72px;
   color: var(--ud-text);
 }
-:root[data-theme="coral"] .user-dashboard {
-  --ud-accent: #ff7182;
-  --ud-accent-soft: rgba(255, 113, 130, .13);
-  --ud-on-accent: #2a0a10;
-}
 
-/* dark navy canvas behind the dashboard (the shell is green-black elsewhere) */
-.app-shell:has(.user-dashboard) { background: var(--ud-bg, #020617); }
-.app-shell:has(.user-dashboard) .site-header { background: rgba(2, 6, 23, .82); border-bottom-color: rgba(148, 163, 184, .14); }
 
 .user-dashboard-layout { grid-template-columns: 252px minmax(0, 1fr); gap: 28px; }
 
@@ -48,7 +41,7 @@
   transition: background .18s var(--ud-ease), color .18s var(--ud-ease);
 }
 .user-dashboard-nav-link svg { width: 19px; height: 19px; flex: none; }
-.user-dashboard-nav-link:hover { background: rgba(148, 163, 184, .08); color: var(--ud-text); }
+.user-dashboard-nav-link:hover { background: rgba(255, 255, 255, .08); color: var(--ud-text); }
 .user-dashboard-nav-link.active { background: var(--ud-accent-soft); color: var(--ud-text); font-weight: 700; }
 .user-dashboard-nav-link.active svg { color: var(--ud-accent); }
 .user-dashboard-nav-link.active::before { content: ""; position: absolute; inset-block: 10px; inset-inline-start: -12px; width: 3px; border-radius: 3px; background: var(--ud-accent); }
@@ -105,7 +98,7 @@
 .user-dashboard-continue-card .user-dashboard-latest-cover { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--ud-radius-sm); background: var(--ud-card-2); }
 .user-dashboard-continue-card .user-dashboard-latest-cover img { width: 100%; height: 100%; object-fit: cover; }
 .user-dashboard-continue-card .user-dashboard-latest-cover span {
-  position: absolute; inset: 0; display: grid; place-items: center; color: #fff; background: linear-gradient(0deg, rgba(2, 6, 23, .55), rgba(2, 6, 23, .1));
+  position: absolute; inset: 0; display: grid; place-items: center; color: #fff; background: linear-gradient(0deg, rgba(4, 8, 7, .55), rgba(4, 8, 7, .1));
   font-size: 0; opacity: .95; transition: background .2s var(--ud-ease);
 }
 .user-dashboard-continue-card .user-dashboard-latest-cover span svg { width: 44px; height: 44px; padding: 12px; border-radius: 50%; background: var(--ud-accent); color: var(--ud-on-accent); transition: transform .2s var(--ud-ease); }
@@ -128,7 +121,7 @@
   min-height: 0; padding: 18px 20px; border: 0; border-radius: 0; background: transparent; box-shadow: none; transition: background .18s var(--ud-ease);
 }
 .user-dashboard-stat-card + .user-dashboard-stat-card { border-inline-start: 1px solid var(--ud-border); }
-.user-dashboard-stat-card:hover { background: rgba(148, 163, 184, .05); transform: none; }
+.user-dashboard-stat-card:hover { background: rgba(255, 255, 255, .05); transform: none; }
 .user-dashboard-stat-card > svg { grid-area: icon; width: 40px; height: 40px; padding: 10px; border-radius: 11px; background: var(--ud-accent-soft); color: var(--ud-accent); }
 .user-dashboard-stat-card strong { grid-area: value; font-size: 26px; font-weight: 800; line-height: 1.3; font-variant-numeric: tabular-nums; }
 .user-dashboard-stat-card > span { grid-area: label; color: var(--ud-muted); font-size: 13px; }
@@ -139,7 +132,7 @@
 .user-dashboard-video-item, .user-dashboard-course-row {
   display: flex; align-items: center; gap: 14px; padding: 8px; border: 0; border-radius: var(--ud-radius-sm); background: transparent; transition: background .18s var(--ud-ease);
 }
-.user-dashboard-video-item:hover, .user-dashboard-course-row:hover { background: rgba(148, 163, 184, .08); }
+.user-dashboard-video-item:hover, .user-dashboard-course-row:hover { background: rgba(255, 255, 255, .08); }
 .user-dashboard-video-item img, .user-dashboard-course-row img { width: 92px; aspect-ratio: 16 / 10; flex: none; border-radius: 8px; object-fit: cover; background: var(--ud-card-2); }
 .user-dashboard-video-copy { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1; }
 .user-dashboard-video-copy strong { font-size: 14px; font-weight: 600; line-height: 1.7; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -147,13 +140,13 @@
 .user-dashboard-item-arrow { width: 28px; height: 28px; display: grid; place-items: center; flex: none; border: 0; background: none; color: var(--ud-muted); }
 .user-dashboard-item-arrow svg { width: 16px; height: 16px; }
 .user-dashboard-video-item:hover .user-dashboard-item-arrow { color: var(--ud-accent); }
-.user-dashboard-course-meter, .user-dashboard-progress-track, .learning-metric-track { display: block; height: 6px; border-radius: 999px; background: rgba(148, 163, 184, .18); overflow: hidden; }
+.user-dashboard-course-meter, .user-dashboard-progress-track, .learning-metric-track { display: block; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .18); overflow: hidden; }
 .user-dashboard-course-meter i, .user-dashboard-progress-track > *, .learning-metric-track > * { display: block; height: 100%; border-radius: inherit; background: var(--ud-accent); transition: width .5s var(--ud-ease); }
 .user-dashboard-compact-empty { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px dashed var(--ud-border-strong); border-radius: var(--ud-radius-sm); color: var(--ud-muted); font-size: 13px; line-height: 1.9; }
 .user-dashboard-compact-empty svg { width: 22px; height: 22px; flex: none; color: var(--ud-accent); }
 .user-dashboard-error, .user-dashboard-notice { margin: 0; padding: 12px 16px; border-radius: var(--ud-radius-sm); font-size: 14px; line-height: 1.8; }
 .user-dashboard-error { border: 1px solid rgba(239, 68, 68, .4); background: rgba(239, 68, 68, .1); color: #fecaca; }
-.user-dashboard-notice { border: 1px solid rgba(34, 197, 94, .35); background: var(--ud-accent-soft); color: #bbf7d0; }
+.user-dashboard-notice { border: 1px solid color-mix(in srgb, var(--ud-accent) 35%, transparent); background: var(--ud-accent-soft); color: #bbf7d0; }
 
 /* ---------- section pages (progress, courses, profile) ---------- */
 .learning-metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
@@ -175,7 +168,7 @@
 .user-dashboard input, .user-dashboard select, .user-dashboard textarea {
   min-height: 44px; border: 1px solid var(--ud-border-strong); border-radius: var(--ud-radius-sm); background: var(--ud-bg); color: var(--ud-text);
 }
-.user-dashboard input::placeholder, .user-dashboard textarea::placeholder { color: #64748b; }
+.user-dashboard input::placeholder, .user-dashboard textarea::placeholder { color: #6f7d76; }
 
 .user-dashboard-data-note { display: none; }
 
@@ -202,12 +195,12 @@
     transform: translateY(105%); visibility: hidden; transition: transform .26s var(--ud-ease), visibility 0s linear .26s;
   }
   .user-dashboard-sidebar.is-open { transform: none; visibility: visible; transition: transform .26s var(--ud-ease); }
-  .user-dashboard-sheet-backdrop { display: block; position: fixed; inset: 0; z-index: 55; border: 0; background: rgba(2, 6, 23, .7); cursor: default; }
+  .user-dashboard-sheet-backdrop { display: block; position: fixed; inset: 0; z-index: 55; border: 0; background: rgba(4, 8, 7, .72); cursor: default; }
   .user-dashboard-nav-link.active::before { display: none; }
 
   .user-dashboard-bottom-nav {
     display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; inset-inline: 0; bottom: 0; z-index: 70;
-    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--ud-border); background: rgba(14, 18, 35, .96); backdrop-filter: blur(14px);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--ud-border); background: color-mix(in srgb, var(--panel) 96%, transparent); backdrop-filter: blur(14px);
   }
   .user-dashboard-bottom-nav a, .user-dashboard-bottom-nav button {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border: 0; border-radius: var(--ud-radius-sm);
@@ -248,12 +241,12 @@
 .learning-metric-top { color: var(--ud-muted); font-size: 13px; }
 .learning-metric-bottom { color: var(--ud-muted); font-size: 12px; }
 .learning-metric-card > strong { color: var(--ud-text); font-size: 28px; letter-spacing: 0; }
-.learning-metric-track { width: 72px; height: 6px; background: rgba(148, 163, 184, .18); }
+.learning-metric-track { width: 72px; height: 6px; background: rgba(255, 255, 255, .18); }
 .learning-mini-bars b { opacity: .5; }
 
 /* heatmap uses the accent ramp and legible labels */
 .learning-heatmap-cell, .learning-heatmap-legend i { outline: 0; }
-.learning-heatmap-cell.level-0, .learning-heatmap-legend .level-0 { background: rgba(148, 163, 184, .13); }
+.learning-heatmap-cell.level-0, .learning-heatmap-legend .level-0 { background: rgba(255, 255, 255, .13); }
 .learning-heatmap-cell.level-1, .learning-heatmap-legend .level-1 { background: color-mix(in srgb, var(--ud-accent) 32%, transparent); }
 .learning-heatmap-cell.level-2, .learning-heatmap-legend .level-2 { background: color-mix(in srgb, var(--ud-accent) 55%, transparent); }
 .learning-heatmap-cell.level-3, .learning-heatmap-legend .level-3 { background: color-mix(in srgb, var(--ud-accent) 78%, transparent); }
@@ -261,20 +254,20 @@
 .learning-heatmap-months, .learning-heatmap-weekdays { color: var(--ud-muted); font-size: 11px; }
 .learning-activity-heading h2, .learning-activity-heading h3 { font-size: 16px; }
 .learning-activity-heading p, .learning-activity-totals small, .learning-activity-footer { color: var(--ud-muted); font-size: 12px; }
-.learning-heatmap-scroll { scrollbar-color: rgba(148, 163, 184, .35) transparent; }
+.learning-heatmap-scroll { scrollbar-color: rgba(255, 255, 255, .35) transparent; }
 
 /* course progress list */
 .user-dashboard-course-progress-item > div:first-child { margin-bottom: 8px; }
 .user-dashboard-course-progress-item strong { color: var(--ud-text); font-size: 14px; font-weight: 600; }
 .user-dashboard-course-progress-item span { color: var(--ud-muted); font-size: 12px; }
-.user-dashboard-progress-track { height: 6px; margin-top: 10px; background: rgba(148, 163, 184, .18); }
+.user-dashboard-progress-track { height: 6px; margin-top: 10px; background: rgba(255, 255, 255, .18); }
 .user-dashboard-progress-track span { background: var(--ud-accent); transition: width .5s var(--ud-ease); }
 
 /* video rows on section pages: no nested boxes */
 .user-dashboard-section-row, .user-dashboard-section-row .user-dashboard-video-item { border: 0; background: transparent; box-shadow: none; }
 .user-dashboard-section-row { padding: 0; border-radius: var(--ud-radius-sm); }
 .user-dashboard-section-row .user-dashboard-video-item { padding: 8px; }
-.user-dashboard-section-row:hover { background: rgba(148, 163, 184, .06); }
+.user-dashboard-section-row:hover { background: rgba(255, 255, 255, .06); }
 .user-dashboard-section-row + .user-dashboard-section-row { border-top: 1px solid var(--ud-border); border-radius: 0; }
 
 @media (max-width: 560px) {
@@ -295,7 +288,7 @@
 .user-font-card:hover { border-color: var(--ud-border-strong); }
 .user-font-card.is-selected, .user-font-card[aria-pressed="true"], .user-font-card.active { border-color: var(--ud-accent); background: var(--ud-accent-soft); }
 .user-device-item { border: 1px solid var(--ud-border); border-radius: var(--ud-radius-sm); background: var(--ud-bg); }
-.user-device-current-badge, .support-status { border-color: rgba(34, 197, 94, .4); background: var(--ud-accent-soft); color: var(--ud-accent); }
+.user-device-current-badge, .support-status { border-color: color-mix(in srgb, var(--ud-accent) 40%, transparent); background: var(--ud-accent-soft); color: var(--ud-accent); }
 .support-kicker { color: var(--ud-accent); }
 .support-ticket-item.active, .support-ticket-item.is-active { border-inline-start-color: var(--ud-accent); background: var(--ud-accent-soft); }
 .learning-activity-totals span { font-size: 12px; color: var(--ud-muted); }
@@ -303,3 +296,7 @@
 @media (max-width: 560px) {
   .user-dashboard-course-card > img { max-height: 140px; object-fit: cover; }
 }
+
+/* a legacy rule colored links inside the continue card with the accent; keep button text readable */
+.user-dashboard .user-dashboard-latest-copy .user-dashboard-primary-link,
+.user-dashboard .user-dashboard-continue-card .user-dashboard-primary-link { color: var(--ud-on-accent); font-size: 14px; }

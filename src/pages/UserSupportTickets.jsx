@@ -157,7 +157,6 @@ function UserSupportTickets() {
     window.location.replace('/')
   }
 
-  const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'کاربر'
 
   if (loading) return <div className="user-dashboard-loading" role="status"><span className="user-dashboard-spinner" aria-hidden="true" /></div>
   if (!user) return <div className="user-dashboard-loading" role="alert">{error || 'در حال انتقال به صفحه ورود...'}</div>
@@ -165,20 +164,11 @@ function UserSupportTickets() {
   return (
     <section className="user-dashboard support-dashboard" dir="rtl">
       <div className="user-dashboard-layout">
-        <UserDashboardSidebar active="support" onSignOut={signOut} />
+        <UserDashboardSidebar active="support" onSignOut={signOut} user={user} />
         <div className="user-dashboard-main">
           <header className="user-dashboard-topbar">
-            <div><h1>تیکت‌های پشتیبانی</h1></div>
-            <div className="user-dashboard-top-user">
-              <div className="user-dashboard-avatar user-dashboard-avatar-fallback">{displayName.slice(0, 1)}</div>
-              <div><strong>{displayName}</strong><span>{user.email}</span></div>
-            </div>
+            <div><h1>تیکت‌های پشتیبانی</h1><p>سؤال یا مشکلت را ثبت کن؛ پاسخ‌ها و لینک جلسه آنلاین در همین گفت‌وگو قرار می‌گیرد.</p></div>
           </header>
-
-          <section className="user-dashboard-section-intro">
-            <h2>ارتباط مستقیم با تیم پشتیبانی</h2>
-            <p>سؤال یا مشکلت را ثبت کن؛ پاسخ‌ها و لینک جلسه آنلاین در همین گفت‌وگو قرار می‌گیرد.</p>
-          </section>
 
           {error && <div className="user-dashboard-error" role="alert">{error}</div>}
           {notice && <div className="user-dashboard-notice" role="status">{notice}</div>}

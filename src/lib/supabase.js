@@ -1,6 +1,6 @@
 import { compressImage } from './imageCompress'
 import { PLAYLIST_FILE_MAX_BYTES } from './playlistFiles'
-import { INDICATOR_EXTENSIONS, INDICATOR_MAX_BYTES, getIndicatorExtension } from './indicators'
+import { INDICATOR_MAX_BYTES, getAllowedIndicatorExtensions, getIndicatorExtension } from './indicators'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -685,11 +685,17 @@ export const supabase = {
       throw new Error(result?.message || result?.error || 'حذف فایل PDF از Storage انجام نشد.')
     }
   },
-  async uploadIndicatorFile(file) {
+  async uploadIndicatorFile(file, platform) {
     const session = await getValidSession()
     if (!session?.access_token) throw new Error('برای آپلود فایل باید دوباره وارد حساب مدیر شوید.')
     const extension = getIndicatorExtension(file.name)
-    if (!INDICATOR_EXTENSIONS.includes(extension)) throw new Error(`فرمت فایل پشتیبانی نمی‌شود. فرمت‌های مجاز: ${INDICATOR_EXTENSIONS.join('، ')}`)
+    const allowedExtensions = getAllowedIndicatorExtensions(platform)
+    if (!allowedExtensions.includes(extension)) {
+      const message = platform === 'metatrader5'
+        ? 'برای MetaTrader 5 فقط فایل اجرایی EX5 مجاز است.'
+        : `فرمت فایل پشتیبانی نمی‌شود. فرمت‌های مجاز: ${allowedExtensions.join('، ')}`
+      throw new Error(message)
+    }
     if (file.size > INDICATOR_MAX_BYTES) throw new Error('حجم فایل بیشتر از ۱۰ مگابایت است.')
 
     const path = `files/${crypto.randomUUID()}.${extension}`

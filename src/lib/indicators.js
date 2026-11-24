@@ -3,13 +3,17 @@
 export const INDICATOR_PLATFORMS = {
   tradingview: { label: 'TradingView', help: 'فایل یا کد Pine Script را در Pine Editor تریدینگ‌ویو باز کن و روی «Add to chart» بزن.' },
   metatrader4: { label: 'MetaTrader 4', help: 'فایل را در پوشهٔ MQL4 مسیر File ← Open Data Folder قرار بده (Indicators یا Experts) و متاتریدر را ری‌استارت کن.' },
-  metatrader5: { label: 'MetaTrader 5', help: 'فایل را در پوشهٔ MQL5 مسیر File ← Open Data Folder قرار بده (Indicators یا Experts) و متاتریدر را ری‌استارت کن.' },
+  metatrader5: { label: 'MetaTrader 5', help: 'فایل EX5 را در پوشهٔ MQL5/Indicators قرار بده و از Navigator → Indicators به نمودار اضافه کن.' },
   other: { label: 'سایر پلتفرم‌ها', help: 'راهنمای نصب این فایل را در توضیحات همین صفحه ببین.' },
 }
 
-// فقط فرمت‌هایی که اجرای مستقیم در مرورگر ندارند (بدون html/js/svg)
+// فرمت‌های عمومی قابل آپلود؛ برای MetaTrader 5 فقط فایل اجرایی EX5 مجاز است.
 export const INDICATOR_EXTENSIONS = ['pine', 'txt', 'mq4', 'mq5', 'ex4', 'ex5', 'zip', 'rar', '7z', 'cs', 'algo']
 export const INDICATOR_MAX_BYTES = 10 * 1024 * 1024
+
+export function getAllowedIndicatorExtensions(platform) {
+  return platform === 'metatrader5' ? ['ex5'] : INDICATOR_EXTENSIONS
+}
 
 export function getIndicatorExtension(fileName = '') {
   const parts = String(fileName).toLowerCase().split('.')

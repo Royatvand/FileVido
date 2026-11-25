@@ -32,7 +32,9 @@ const widgetConfig = {
     enabled_features: [],
   },
   symbol_modal: {
-    kind: ['forex', 'tehran_cgf', 'car', 'tehran_stock'],
+    // فیلتر نمادها بر اساس بازار و منابعی که کاربر درخواست کرده است.
+    kind: ['crypto', 'forex', 'tehran_cgf', 'car', 'tehran_stock'],
+    source: ['binance_spot', 'OANDA', 'wingo_vip'],
   },
 }
 

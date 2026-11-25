@@ -186,7 +186,7 @@ function IndicatorPage({ slug }) {
 
   // NotFound خودش <main> دارد؛ پس بیرون از <main> این صفحه رندر می‌شود تا main تو در تو نشود
   if (state === 'missing') return <NotFound />
-  if (state === 'loading') return <main className="main-content"><section className="indicators-page"><div className="indicators-empty" aria-busy="true">در حال بارگذاری...</div></section></main>
+  if (state === 'loading') return <main className="main-content"><div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری اندیکاتور"><span className="user-dashboard-spinner" aria-hidden="true" /></div></main>
   if (state === 'error') {
     return <main className="main-content"><section className="indicators-page"><div className="indicators-empty">بارگذاری انجام نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><a className="secondary-button" href="/indicators">بازگشت به اندیکاتورها</a></section></main>
   }

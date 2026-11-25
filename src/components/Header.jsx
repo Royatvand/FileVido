@@ -10,6 +10,7 @@ function Header() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isAbout = path === '/about'
   const isChart = path === '/chart'
+  const isRoadmap = path === '/roadmap'
   const isIndicators = path === '/indicators' || path.startsWith('/indicator/')
   const isVideos = path === '/videos' || path.startsWith('/video/')
 
@@ -40,11 +41,11 @@ function Header() {
         </a>
 
         <nav className={`main-nav ${menuOpen ? 'open' : ''}`} id="main-nav" aria-label="منوی اصلی">
-          <a className={`nav-link ${!isAbout && !isVideos && !isChart && !isIndicators ? 'active' : ''}`} href="/">خانه</a>
+          <a className={`nav-link ${!isAbout && !isVideos && !isChart && !isIndicators && !isRoadmap ? 'active' : ''}`} href="/">خانه</a>
           <a className={`nav-link ${isVideos ? 'active' : ''}`} href="/videos">ویدیوها</a>
           <a className={`nav-link ${isChart ? 'active' : ''}`} href="/chart">نمودار</a>
           <a className={`nav-link ${isIndicators ? 'active' : ''}`} href="/indicators">اندیکاتورها</a>
-          <a className="nav-link" href="/#categories">دسته‌بندی‌ها</a>
+          <a className={`nav-link ${isRoadmap ? 'active' : ''}`} href="/roadmap">مسیر یادگیری</a>
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>
 

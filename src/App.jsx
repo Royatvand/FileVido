@@ -28,6 +28,7 @@ import {
   onAppResume,
 } from './lib/appUpdate'
 import { useEffect, useState } from 'react'
+import Roadmap from './pages/Roadmap'
 import { setPageSeo } from './lib/seo'
 import { trackPageView } from './lib/analytics'
 import { initNativeAuthListener } from './lib/nativeAuth'
@@ -39,6 +40,7 @@ function App() {
   const isAbout = path === '/about'
   const isVideos = path === '/videos'
   const isChart = path === '/chart'
+  const isRoadmap = path === '/roadmap'
   const isIndicators = path === '/indicators'
   const isUserLogin = path === '/login'
   const isOAuthConsent = path === '/oauth/consent'
@@ -80,6 +82,12 @@ function App() {
         description: 'دانلود اندیکاتورها و اسکریپت‌های آماده برای تریدینگ‌ویو (Pine Script) و متاتریدر ۴ و ۵ همراه با آموزش نصب و استفاده به زبان فارسی.',
         path: '/indicators',
       })
+    } else if (isRoadmap) {
+      setPageSeo({
+        title: 'مسیر یادگیری ترید ICT و SMC و پرایس اکشن | چارت مسترز',
+        description: 'نقشه راه مرحله‌به‌مرحله یادگیری ترید؛ سبک ICT، SMC یا پرایس اکشن را انتخاب کن و مسیر را با اسکرول دنبال کن.',
+        path: '/roadmap',
+      })
     } else if (isAbout) {
       setPageSeo({
         title: 'درباره چارت مسترز | آموزش بازارهای مالی با زیرنویس فارسی',
@@ -87,7 +95,7 @@ function App() {
         path: '/about',
       })
     }
-  }, [path, isHome, isVideos, isChart, isIndicators, isAbout])
+  }, [path, isHome, isVideos, isChart, isIndicators, isRoadmap, isAbout])
 
   // Android-only: finish Google sign-in when the system browser returns through the deep link.
   useEffect(() => {
@@ -225,7 +233,7 @@ function App() {
         <main className="main-content"><Indicators /></main>
       ) : indicatorSlug ? (
         <IndicatorPage slug={indicatorSlug} />
-      ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
+      ) : isRoadmap ? <Roadmap /> : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
       {!isChart && <Footer />}
       {updateOverlay}
     </div>

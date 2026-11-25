@@ -6,6 +6,8 @@ import PlatformIcon from '../components/PlatformIcon'
 import { setPageSeo } from '../lib/seo'
 import RichText from '../components/RichText'
 import SimilarIndicators from '../components/SimilarIndicators'
+import ShareDialog from '../components/ShareDialog'
+import { LuShare2 } from 'react-icons/lu'
 import './Indicators.css'
 
 const INSTALL_GUIDES = {
@@ -153,6 +155,7 @@ function IndicatorPage({ slug }) {
   const [state, setState] = useState('loading') // loading | ready | missing | error
   const [galleryImages, setGalleryImages] = useState([])
   const [lightboxImage, setLightboxImage] = useState(null)
+  const [shareOpen, setShareOpen] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -183,7 +186,7 @@ function IndicatorPage({ slug }) {
 
   // NotFound خودش <main> دارد؛ پس بیرون از <main> این صفحه رندر می‌شود تا main تو در تو نشود
   if (state === 'missing') return <NotFound />
-  if (state === 'loading') return <main className="main-content"><section className="indicators-page"><div className="indicators-empty" aria-busy="true">در حال بارگذاری...</div></section></main>
+  if (state === 'loading') return <main className="main-content"><div className="user-dashboard-loading" role="status" aria-label="در حال بارگذاری اندیکاتور"><span className="user-dashboard-spinner" aria-hidden="true" /></div></main>
   if (state === 'error') {
     return <main className="main-content"><section className="indicators-page"><div className="indicators-empty">بارگذاری انجام نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><a className="secondary-button" href="/indicators">بازگشت به اندیکاتورها</a></section></main>
   }
@@ -206,11 +209,17 @@ function IndicatorPage({ slug }) {
             {indicator.file_size > 0 && <span>{formatFileSize(indicator.file_size)}</span>}
             {indicator.download_count > 0 && <span>{indicator.download_count.toLocaleString('en-US')} دانلود</span>}
           </div>
-          {downloadUrl ? (
-            <a className="primary-button indicator-download" href={downloadUrl} download={indicator.file_name || true} onClick={() => supabase.countIndicatorDownload(indicator.slug)}>
-              دانلود فایل <span aria-hidden="true">↓</span>
-            </a>
-          ) : <span className="indicators-empty">فایل این مورد هنوز بارگذاری نشده است.</span>}
+          <div className="indicator-actions">
+            {downloadUrl ? (
+              <a className="primary-button indicator-download" href={downloadUrl} download={indicator.file_name || true} onClick={() => supabase.countIndicatorDownload(indicator.slug)}>
+                دانلود فایل <span aria-hidden="true">↓</span>
+              </a>
+            ) : <span className="indicators-empty">فایل این مورد هنوز بارگذاری نشده است.</span>}
+            <button type="button" className="indicator-share-button" onClick={() => setShareOpen(true)} aria-haspopup="dialog">
+              <LuShare2 aria-hidden="true" />
+              <span>اشتراک‌گذاری</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -246,6 +255,13 @@ function IndicatorPage({ slug }) {
       <p className="indicators-note">این اسکریپت فقط برای آموزش و تحلیل است و توصیهٔ مالی یا سیگنال خرید و فروش نیست؛ پیش از استفاده روی حساب واقعی، آن را روی دمو بسنج.</p>
 
       <SimilarIndicators current={indicator} />
+      <ShareDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={indicator.title}
+        path={`/indicator/${encodeURIComponent(indicator.slug)}`}
+        kind="indicator"
+      />
       {lightboxImage && (
         <div className="indicator-lightbox" role="dialog" aria-modal="true" aria-label="نمایش تصویر اندیکاتور" onClick={() => setLightboxImage(null)}>
           <button type="button" className="indicator-lightbox-close" onClick={() => setLightboxImage(null)} aria-label="بستن تصویر">×</button>

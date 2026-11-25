@@ -9,11 +9,14 @@ function BrandIcon({ type }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm2.1-7.7-.9.9c-.7.6-1.2 1.1-1.2 2.3h-2c0-1.8.7-2.7 1.6-3.5l1.1-1a1.7 1.7 0 1 0-2.9-1.2h-2a3.7 3.7 0 1 1 6.3 2.5Z"/></svg>
 }
 
-function ShareDialog({ open, onClose, title, path }) {
+function ShareDialog({ open, onClose, title, path, kind = 'video' }) {
   const [copied, setCopied] = useState(false)
   const [shareError, setShareError] = useState('')
   const url = typeof window !== 'undefined' ? new URL(path, window.location.origin).toString() : path
-  const message = title ? `${title} — چارت مسترز` : 'مشاهده آموزش در چارت مسترز'
+  const isIndicator = kind === 'indicator'
+  const contentTypeLabel = isIndicator ? 'اندیکاتور' : 'آموزش'
+  const subjectLabel = isIndicator ? 'این اندیکاتور' : 'این آموزش'
+  const message = title ? `${title} — چارت مسترز` : (isIndicator ? 'مشاهده اندیکاتور در چارت مسترز' : 'مشاهده آموزش در چارت مسترز')
 
   useEffect(() => {
     if (!open) return undefined
@@ -72,8 +75,8 @@ function ShareDialog({ open, onClose, title, path }) {
     <div className="share-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
       <section className="share-dialog" role="dialog" aria-modal="true" aria-labelledby="share-dialog-title">
         <div className="share-dialog-topline"><span className="share-dialog-mark">CM</span><button type="button" className="share-dialog-close" onClick={onClose} aria-label="بستن پنجره">×</button></div>
-        <div className="share-dialog-heading"><span>هم‌رسانی دانش</span><h2 id="share-dialog-title">این آموزش رو به اشتراک بذار</h2><p>دوستات هم می‌تونن از این آموزش استفاده کنن.</p></div>
-        <div className="share-dialog-video"><span className="share-dialog-video-icon">▶</span><div><strong>{title}</strong><small>آموزش در چارت مسترز</small></div></div>
+        <div className="share-dialog-heading"><span>{isIndicator ? 'معرفی ابزار' : 'هم‌رسانی دانش'}</span><h2 id="share-dialog-title">{subjectLabel} رو به اشتراک بذار</h2><p>{isIndicator ? 'این ابزار را با دوستان معامله‌گرت به اشتراک بگذار.' : 'دوستات هم می‌تونن از این آموزش استفاده کنن.'}</p></div>
+        <div className="share-dialog-video"><span className="share-dialog-video-icon">{isIndicator ? 'ƒ(x)' : '▶'}</span><div><strong>{title}</strong><small>{isIndicator ? 'اندیکاتور در چارت مسترز' : 'آموزش در چارت مسترز'}</small></div></div>
         <div className="share-dialog-options">
           {options.map((option) => <a key={option.type} className={`share-dialog-option share-dialog-option--${option.type}`} href={option.href} target={option.type === 'sms' ? undefined : '_blank'} rel="noreferrer" onClick={onClose}><span className="share-dialog-option-icon"><BrandIcon type={option.type} /></span><span className="share-dialog-option-copy"><strong>{option.label}</strong><small>{option.detail}</small></span><span className="share-dialog-option-arrow">←</span></a>)}
         </div>
@@ -81,7 +84,7 @@ function ShareDialog({ open, onClose, title, path }) {
         <div className="share-dialog-link-label">یا لینک مستقیم آموزش</div>
         <div className="share-dialog-link-row"><span dir="ltr">{url}</span><button type="button" onClick={copyLink}><BrandIcon type="copy" />{copied ? 'کپی شد' : 'کپی لینک'}</button></div>
         {shareError && <p className="share-dialog-error" role="alert">{shareError}</p>}
-        <p className="share-dialog-footnote">لینک مستقیم ویدیو؛ قابل ارسال در هر پیام‌رسان دیگری</p>
+        <p className="share-dialog-footnote">لینک مستقیم {contentTypeLabel}؛ قابل ارسال در هر پیام‌رسان دیگری</p>
       </section>
     </div>
   )

@@ -209,7 +209,7 @@ function VideosSection({ archive = false }) {
           {singleItems.length > 0 && (
             <div className="videos-block">
               <h3 className="videos-block-title">ویدیوهای تکی <small>{singleItems.length} ویدیو</small></h3>
-              <div className="videos-grid">
+              <div className={`videos-grid ${!archive ? 'home-single-videos-grid' : ''}`}>
                 {singleItems.map((item) => <VideoCard key={item.key} video={item.video} />)}
               </div>
             </div>

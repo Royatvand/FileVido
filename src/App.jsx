@@ -9,6 +9,7 @@ import AnimatedText from './components/animated/AnimatedText'
 import VideoPage from './pages/VideoPage'
 import Chart from './pages/Chart'
 import Indicators from './pages/Indicators'
+import PropFirms from './pages/PropFirms'
 import IndicatorPage from './pages/IndicatorPage'
 import AdminLogin from './pages/AdminLogin'
 import GoogleLogin from './pages/GoogleLogin'
@@ -40,6 +41,7 @@ function App() {
   const isVideos = path === '/videos'
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators'
+  const isPropFirms = path === '/prop-firms'
   const isUserLogin = path === '/login'
   const isOAuthConsent = path === '/oauth/consent'
   const isUserDashboard = path === '/dashboard'
@@ -80,6 +82,12 @@ function App() {
         description: 'دانلود اندیکاتورها و اسکریپت‌های آماده برای تریدینگ‌ویو (Pine Script) و متاتریدر ۴ و ۵ همراه با آموزش نصب و استفاده به زبان فارسی.',
         path: '/indicators',
       })
+    } else if (isPropFirms) {
+      setPageSeo({
+        title: 'بهترین پراپ فرم ماه | آرشیو انتخاب‌های چارت مسترز',
+        description: 'انتخاب ماهانه چارت مسترز از پراپ‌فرم‌های ایرانی؛ مشاهده برنده هر ماه، معیارهای انتخاب و آرشیو سال‌های گذشته.',
+        path: '/prop-firms',
+      })
     } else if (isAbout) {
       setPageSeo({
         title: 'درباره چارت مسترز | آموزش بازارهای مالی با زیرنویس فارسی',
@@ -87,7 +95,7 @@ function App() {
         path: '/about',
       })
     }
-  }, [path, isHome, isVideos, isChart, isIndicators, isAbout])
+  }, [path, isHome, isVideos, isChart, isIndicators, isPropFirms, isAbout])
 
   // Android-only: finish Google sign-in when the system browser returns through the deep link.
   useEffect(() => {
@@ -223,6 +231,8 @@ function App() {
         </main>
       ) : isIndicators ? (
         <main className="main-content"><Indicators /></main>
+      ) : isPropFirms ? (
+        <PropFirms />
       ) : indicatorSlug ? (
         <IndicatorPage slug={indicatorSlug} />
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}

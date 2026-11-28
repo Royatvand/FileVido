@@ -1,4 +1,4 @@
-import { FaHome, FaVideo, FaLayerGroup, FaInfoCircle } from 'react-icons/fa'
+import { FaHome, FaVideo, FaLayerGroup, FaInfoCircle, FaTrophy } from 'react-icons/fa'
 import { socialLinks } from '../config/social'
 import AnimatedText from './animated/AnimatedText'
 
@@ -75,7 +75,7 @@ function Footer() {
           <span className="footer-heading">دسترسی سریع</span>
           <a href="/"><FaHome aria-hidden="true" />صفحه اصلی</a>
           <a href="/videos"><FaVideo aria-hidden="true" />ویدیوهای آموزشی</a>
-          <a href="/prop-firms">🏆 بهترین پراپ فرم ماه</a>
+          <a href="/prop-firms"><FaTrophy aria-hidden="true" />بهترین پراپ فرم ماه</a>
           <a href="/#categories"><FaLayerGroup aria-hidden="true" />دسته‌بندی‌ها</a>
           <a href="/about"><FaInfoCircle aria-hidden="true" />درباره ما</a>
         </div>

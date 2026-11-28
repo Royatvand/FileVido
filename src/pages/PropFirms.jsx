@@ -9,6 +9,7 @@ import {
   LuTrophy,
 } from 'react-icons/lu'
 import { supabase } from '../lib/supabase'
+import { socialLinks } from '../config/social'
 import '../prop-firms.css'
 
 const MONTHS = [
@@ -510,6 +511,42 @@ function PropFirms() {
           <LuShieldCheck aria-hidden="true" />
           <p>این رتبه‌بندی، ارزیابی تحریریه چارت مسترز است. جایگاه‌ها و امتیازها بر اساس اطلاعاتی نمایش داده می‌شوند که مدیریت ثبت و منتشر کرده است؛ رتبه‌بندی به‌تنهایی تضمین‌کننده عملکرد یا اعتبار یک شرکت نیست.</p>
         </aside>
+
+        <section className="prop-telegram-invite" aria-labelledby="prop-telegram-title" dir="rtl">
+          <div className="prop-telegram-copy">
+            <span className="prop-telegram-eyebrow"><i /> پیشنهاد ویژه برای تریدرها</span>
+            <h2 id="prop-telegram-title">کد تخفیف پراپ‌فرم‌ها رو از دست نده!</h2>
+            <p>
+              کدهای تخفیف و پیشنهادهای ویژه پراپ‌فرم‌ها رو در کانال تلگرام چارت مسترز منتشر می‌کنیم.
+              عضو شو تا از کدهای جدید و فرصت‌های تخفیف باخبر بشی.
+            </p>
+            <div className="prop-telegram-benefits">
+              <span>کدهای تخفیف</span>
+              <span>پیشنهادهای ویژه</span>
+              <span>اطلاع‌رسانی کدهای جدید</span>
+            </div>
+            <a
+              className="prop-telegram-button"
+              href={socialLinks.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              مشاهده کدهای تخفیف در تلگرام
+              <span aria-hidden="true">↗</span>
+            </a>
+            <small>قبل از استفاده، تاریخ اعتبار و شرایط هر کد رو بررسی کن.</small>
+          </div>
+          <div className="prop-telegram-art" aria-hidden="true">
+            <span className="prop-telegram-orbit orbit-one" />
+            <span className="prop-telegram-orbit orbit-two" />
+            <span className="prop-telegram-icon">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="m21.7 4.2-3.3 15.5c-.2 1.1-.9 1.4-1.8.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.2L6.1 13.2l-4.9-1.5c-1.1-.3-1.1-1.1.2-1.6L20.6 3c.9-.3 1.7.2 1.1 1.2Z" />
+              </svg>
+            </span>
+            <span className="prop-telegram-floating-tag">PROMO CODES</span>
+          </div>
+        </section>
       </div>
     </main>
   )

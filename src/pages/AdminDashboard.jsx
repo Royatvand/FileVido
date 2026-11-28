@@ -7,8 +7,9 @@ import AdminIndicators from '../components/AdminIndicators'
 import AdminAppVersions from '../components/AdminAppVersions'
 import AdminSupportTickets from '../components/AdminSupportTickets'
 import AdminAnalytics from '../components/AdminAnalytics'
+import AdminPropFirms from '../components/AdminPropFirms'
 import { extractAparatId } from '../lib/aparat'
-import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers, LuLifeBuoy, LuChartNoAxesCombined } from 'react-icons/lu'
+import { LuVideo, LuCirclePlus, LuFolderTree, LuListVideo, LuImage, LuChartCandlestick, LuSmartphone, LuExternalLink, LuLogOut, LuFilm, LuCircleCheck, LuPencilLine, LuLayers, LuLifeBuoy, LuChartNoAxesCombined, LuTrophy } from 'react-icons/lu'
 
 const emptyForm = {
   title: '', slug: '', description: '', aparat_id: '', cover_url: '',
@@ -27,6 +28,7 @@ const ADMIN_NAV = [
   { label: 'سایت', items: [
     { id: 'banners', label: 'اسلایدر', Icon: LuImage },
     { id: 'indicators', label: 'اندیکاتورها', Icon: LuChartCandlestick },
+    { id: 'prop-firms', label: 'پراپ فرم‌ها', Icon: LuTrophy },
   ] },
   { label: 'تحلیل و رشد', items: [
     { id: 'analytics', label: 'آمار سایت', Icon: LuChartNoAxesCombined },
@@ -244,6 +246,7 @@ function AdminDashboard() {
             : activeTab === 'indicators' ? 'اندیکاتورها و اسکریپت‌ها'
                : activeTab === 'app-versions' ? 'نسخه‌های اپ اندروید'
                 : activeTab === 'support-tickets' ? 'تیکت‌های پشتیبانی'
+                  : activeTab === 'prop-firms' ? 'مدیریت پراپ فرم‌ها'
                   : activeTab === 'analytics' ? 'آمار سایت'
                     : 'دسته‌بندی‌ها'
 
@@ -345,6 +348,7 @@ function AdminDashboard() {
         {activeTab === 'playlists' && <AdminPlaylists onNotice={setNotice} />}
         {activeTab === 'banners' && <AdminBanners videos={videos} onNotice={setNotice} />}
         {activeTab === 'indicators' && <AdminIndicators onNotice={setNotice} />}
+        {activeTab === 'prop-firms' && <AdminPropFirms onNotice={setNotice} />}
         {activeTab === 'app-versions' && <AdminAppVersions onNotice={setNotice} />}
         {activeTab === 'support-tickets' && <AdminSupportTickets onNotice={setNotice} />}
         {activeTab === 'analytics' && <AdminAnalytics />}

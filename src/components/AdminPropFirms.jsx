@@ -28,6 +28,7 @@ const EMPTY_AWARD = {
 
 function getJalaliDate() {
   const parts = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn', {
+    timeZone: 'Asia/Tehran',
     year: 'numeric',
     month: 'numeric',
   }).formatToParts(new Date())

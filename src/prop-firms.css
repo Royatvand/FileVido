@@ -636,3 +636,11 @@
   .prop-ranking-empty-copy strong, .prop-ranking-empty-copy span { font-size: 9px; }
   .prop-empty-ranking { align-items: flex-start; padding: 15px; }
 }
+
+
+/* Keep prop-firm logos transparent instead of placing them on white tiles. */
+.prop-ranking-logo,
+.prop-award-logo {
+  border-color: transparent;
+  background: transparent;
+}

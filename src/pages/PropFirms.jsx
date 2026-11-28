@@ -59,6 +59,7 @@ function PropFirms() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [sharing, setSharing] = useState(false)
+  const [displayMode, setDisplayMode] = useState('list')
 
   useEffect(() => {
     let active = true
@@ -145,7 +146,7 @@ function PropFirms() {
     }
   }
 
-  function renderLeaderboard(items) {
+  function renderLeaderboard(items, mode) {
     if (!items.length) {
       return (
         <div className="prop-empty-ranking">
@@ -159,11 +160,65 @@ function PropFirms() {
     }
 
     const rankedItems = new Map(items.map((item) => [Number(item.rank_position || 1), item]))
+    const chartSlots = Array.from({ length: RANK_LIMIT }, (_, index) => ({
+      rank: index + 1,
+      item: rankedItems.get(index + 1) || null,
+    }))
+
+    if (mode === 'chart') {
+      return (
+        <div className="prop-ranking-chart" dir="rtl">
+          <div className="prop-chart-caption">
+            <strong>نمودار جایگاه پراپ‌فرم‌ها</strong>
+            <span>ستون بلندتر یعنی رتبه بهتر؛ این نمودار امتیاز عملکرد را نمایش نمی‌دهد.</span>
+          </div>
+          <div className="prop-chart-plot">
+            <div className="prop-chart-gridlines" aria-hidden="true">
+              <span>۱</span>
+              <span>۵</span>
+              <span>۱۰</span>
+            </div>
+            <div className="prop-chart-columns">
+              {chartSlots.map(({ rank, item }) => {
+                const barHeight = item ? Math.round(((RANK_LIMIT + 1 - rank) / RANK_LIMIT) * 100) : 5
+                return (
+                  <article
+                    className={'prop-chart-column' + (rank === 1 ? ' is-first' : '') + (!item ? ' is-empty' : '')}
+                    key={'chart-' + rank}
+                  >
+                    <div className="prop-chart-company">
+                      {item ? (
+                        <FirmLogo src={item.firm_logo_snapshot} name={item.firm_name_snapshot} />
+                      ) : (
+                        <span className="prop-chart-empty-logo" aria-hidden="true">—</span>
+                      )}
+                      <strong>{item ? item.firm_name_snapshot : 'ثبت نشده'}</strong>
+                    </div>
+                    <div className="prop-chart-bar-area">
+                      <div className="prop-chart-bar" style={{ height: barHeight + '%' }}>
+                        <span>{faNumber(rank)}</span>
+                      </div>
+                    </div>
+                    <div className="prop-chart-column-footer">
+                      <span>رتبه {faNumber(rank)}</span>
+                      {item?.firm_website_snapshot && (
+                        <a href={item.firm_website_snapshot} target="_blank" rel="noreferrer" aria-label={'وب‌سایت ' + item.firm_name_snapshot}>
+                          <LuExternalLink aria-hidden="true" />
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="prop-ranking-list">
-        {Array.from({ length: RANK_LIMIT }, (_, index) => {
-          const rank = index + 1
-          const item = rankedItems.get(rank)
+        {chartSlots.map(({ rank, item }) => {
           if (!item) {
             return (
               <div className="prop-ranking-row is-empty" key={'empty-' + rank}>
@@ -237,6 +292,24 @@ function PropFirms() {
               <p>جایگاه ۱ تا ۱۰ پراپ‌فرم‌های منتخب این ماه</p>
             </div>
             <div className="prop-leaderboard-actions">
+              <div className="prop-view-switcher" role="group" aria-label="نحوه نمایش رتبه‌بندی">
+                <button
+                  type="button"
+                  className={displayMode === 'list' ? 'active' : ''}
+                  onClick={() => setDisplayMode('list')}
+                  aria-pressed={displayMode === 'list'}
+                >
+                  فهرست
+                </button>
+                <button
+                  type="button"
+                  className={displayMode === 'chart' ? 'active' : ''}
+                  onClick={() => setDisplayMode('chart')}
+                  aria-pressed={displayMode === 'chart'}
+                >
+                  نمودار
+                </button>
+              </div>
               <span className={isCurrentMonth ? 'prop-live-tag' : 'prop-archive-tag'}>
                 {isCurrentMonth ? <><i /> ماه جاری</> : 'آرشیو ماهانه'}
               </span>
@@ -249,7 +322,7 @@ function PropFirms() {
             <div className="prop-loading"><span className="prop-spinner" /> در حال دریافت رتبه‌بندی...</div>
           ) : error ? (
             <div className="prop-inline-error">{error}</div>
-          ) : renderLeaderboard(selectedRankings)}
+          ) : renderLeaderboard(selectedRankings, displayMode)}
         </section>
 
         <section className="prop-history-section" aria-labelledby="prop-history-title">

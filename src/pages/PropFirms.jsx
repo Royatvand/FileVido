@@ -4,7 +4,6 @@ import {
   LuArrowRight,
   LuAward,
   LuCalendarDays,
-  LuCheck,
   LuExternalLink,
   LuShare2,
   LuShieldCheck,

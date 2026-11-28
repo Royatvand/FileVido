@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   LuArrowLeft,
   LuArrowRight,
-  LuAward,
   LuCalendarDays,
   LuExternalLink,
   LuShare2,
@@ -16,23 +15,16 @@ const MONTHS = [
   'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
   'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند',
 ]
-
-const CRITERIA = [
-  ['law_transparency', 'شفافیت قوانین'],
-  ['support_quality', 'کیفیت پشتیبانی'],
-  ['payout_reliability', 'شفافیت پرداخت‌ها'],
-  ['user_experience', 'تجربه کاربران'],
-]
+const RANK_LIMIT = 10
 
 function getJalaliDate() {
   const parts = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn', {
     timeZone: 'Asia/Tehran',
     year: 'numeric',
     month: 'numeric',
-    day: 'numeric',
   }).formatToParts(new Date())
   const value = (type) => Number(parts.find((part) => part.type === type)?.value || 0)
-  return { year: value('year'), month: value('month'), day: value('day') }
+  return { year: value('year'), month: value('month') }
 }
 
 function readInitialSelection() {
@@ -46,13 +38,13 @@ function readInitialSelection() {
   }
 }
 
-function formatScore(value) {
+function faNumber(value) {
   return new Intl.NumberFormat('fa-IR').format(value)
 }
 
-function AwardLogo({ src, name, large = false }) {
+function FirmLogo({ src, name }) {
   return (
-    <div className={large ? 'prop-award-logo prop-award-logo-large' : 'prop-award-logo'}>
+    <div className="prop-ranking-logo">
       {src ? <img src={src} alt={'لوگوی ' + name} loading="lazy" /> : <LuTrophy aria-hidden="true" />}
     </div>
   )
@@ -61,7 +53,7 @@ function AwardLogo({ src, name, large = false }) {
 function PropFirms() {
   const currentDate = useMemo(getJalaliDate, [])
   const initialSelection = useMemo(readInitialSelection, [])
-  const [awards, setAwards] = useState([])
+  const [rankings, setRankings] = useState([])
   const [selectedYear, setSelectedYear] = useState(initialSelection.year)
   const [selectedMonth, setSelectedMonth] = useState(initialSelection.month)
   const [loading, setLoading] = useState(true)
@@ -70,39 +62,44 @@ function PropFirms() {
 
   useEffect(() => {
     let active = true
-    async function loadAwards() {
+    async function loadRankings() {
       setLoading(true)
       setError('')
       try {
         const rows = await supabase.select(
           'monthly_prop_awards',
-          '&status=eq.published&order=jalali_year.desc,jalali_month.desc',
-          'id,jalali_year,jalali_month,firm_name_snapshot,firm_logo_snapshot,firm_website_snapshot,description,selection_reason,overall_score,criteria_scores,published_at',
+          '&status=eq.published&order=jalali_year.desc,jalali_month.desc,rank_position.asc',
+          'id,jalali_year,jalali_month,rank_position,firm_name_snapshot,firm_logo_snapshot,firm_website_snapshot,description,selection_reason,overall_score,published_at',
         )
-        if (active) setAwards(rows || [])
+        if (active) setRankings(rows || [])
       } catch (loadError) {
-        if (active) setError(loadError.message || 'دریافت آرشیو برندگان انجام نشد.')
+        if (active) setError(loadError.message || 'دریافت رتبه‌بندی پراپ‌فرم‌ها انجام نشد.')
       } finally {
         if (active) setLoading(false)
       }
     }
-    loadAwards()
+    loadRankings()
     return () => { active = false }
   }, [])
 
-  const awardsByMonth = useMemo(() => {
+  const rankingsByMonth = useMemo(() => {
     const map = new Map()
-    awards.forEach((award) => map.set(award.jalali_year + '-' + award.jalali_month, award))
+    rankings.forEach((item) => {
+      const key = item.jalali_year + '-' + item.jalali_month
+      if (!map.has(key)) map.set(key, [])
+      map.get(key).push(item)
+    })
+    map.forEach((items) => items.sort((a, b) => Number(a.rank_position || 1) - Number(b.rank_position || 1)))
     return map
-  }, [awards])
+  }, [rankings])
 
-  const currentAward = awardsByMonth.get(currentDate.year + '-' + currentDate.month) || null
-  const selectedAward = awardsByMonth.get(selectedYear + '-' + selectedMonth) || null
-  const earliestYear = awards.length
-    ? Math.min(currentDate.year, ...awards.map((award) => award.jalali_year))
+  const selectedRankings = rankingsByMonth.get(selectedYear + '-' + selectedMonth) || []
+  const earliestYear = rankings.length
+    ? Math.min(currentDate.year, ...rankings.map((item) => Number(item.jalali_year)))
     : currentDate.year
   const canGoPrevious = selectedYear > earliestYear
   const canGoNext = selectedYear < currentDate.year
+  const isCurrentMonth = selectedYear === currentDate.year && selectedMonth === currentDate.month
 
   function updateSelection(year, month) {
     setSelectedYear(year)
@@ -119,18 +116,22 @@ function PropFirms() {
     updateSelection(nextYear, selectedMonth)
   }
 
-  async function shareAward(award, year, month) {
+  async function shareLeaderboard(items, year, month) {
     const url = new URL('/prop-firms', window.location.origin)
     url.searchParams.set('year', String(year))
     url.searchParams.set('month', String(month))
-    const title = 'بهترین پراپ فرم ' + MONTHS[month - 1] + ' ' + year
-    const text = award
-      ? title + ': ' + award.firm_name_snapshot + ' | انتخاب چارت مسترز'
-      : title + ' | چارت مسترز'
+    const title = 'رتبه‌بندی پراپ‌فرم‌ها · ' + MONTHS[month - 1] + ' ' + faNumber(year)
+    const orderedNames = items
+      .slice()
+      .sort((a, b) => Number(a.rank_position || 1) - Number(b.rank_position || 1))
+      .map((item) => faNumber(item.rank_position || 1) + '. ' + item.firm_name_snapshot)
+    const shareText = orderedNames.length
+      ? title + '\n' + orderedNames.join('\n') + '\nچارت مسترز'
+      : title + ' | هنوز رتبه‌ای منتشر نشده است'
     setSharing(true)
     try {
       if (navigator.share) {
-        await navigator.share({ title, text, url: url.toString() })
+        await navigator.share({ title, text: shareText, url: url.toString() })
       } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url.toString())
         window.alert('لینک این ماه کپی شد.')
@@ -138,81 +139,76 @@ function PropFirms() {
         window.prompt('لینک این ماه:', url.toString())
       }
     } catch (shareError) {
-      if (shareError?.name !== 'AbortError') {
-        window.prompt('لینک این ماه:', url.toString())
-      }
+      if (shareError?.name !== 'AbortError') window.prompt('لینک این ماه:', url.toString())
     } finally {
       setSharing(false)
     }
   }
 
-  function renderAwardDetails(award, year, month, isCurrent = false) {
-    if (!award) {
+  function renderLeaderboard(items) {
+    if (!items.length) {
       return (
-        <div className="prop-empty-award">
+        <div className="prop-empty-ranking">
           <span className="prop-empty-icon"><LuCalendarDays aria-hidden="true" /></span>
           <div>
-            <strong>{isCurrent ? 'برنده این ماه هنوز معرفی نشده است' : 'برای این ماه برنده‌ای ثبت نشده است'}</strong>
-            <p>به‌محض انتشار انتخاب چارت مسترز، اطلاعات اینجا نمایش داده می‌شود.</p>
+            <strong>رتبه‌بندی این ماه هنوز منتشر نشده است</strong>
+            <p>پس از ثبت و انتشار فهرست ماهانه توسط مدیریت چارت مسترز، رتبه‌های ۱ تا ۱۰ در این بخش قرار می‌گیرند.</p>
           </div>
         </div>
       )
     }
 
-    const criteria = CRITERIA.filter(([key]) => {
-      const score = award.criteria_scores?.[key]
-      return score !== null && score !== undefined && score !== ''
-    })
-
+    const rankedItems = new Map(items.map((item) => [Number(item.rank_position || 1), item]))
     return (
-      <div className="prop-award-details">
-        <div className="prop-award-details-brand">
-          <AwardLogo src={award.firm_logo_snapshot} name={award.firm_name_snapshot} large />
-          <div className="prop-award-details-copy">
-            <span className="prop-award-kicker">{MONTHS[month - 1]} {formatScore(year)}</span>
-            <h3>{award.firm_name_snapshot}</h3>
-            <span className="prop-award-caption">انتخاب چارت مسترز</span>
-          </div>
-          {award.overall_score !== null && award.overall_score !== undefined && (
-            <div className="prop-score">
-              <strong>{formatScore(award.overall_score)}</strong>
-              <span>از ۱۰۰</span>
-            </div>
-          )}
-        </div>
-
-        {award.description && <p className="prop-award-description">{award.description}</p>}
-        {award.selection_reason && (
-          <div className="prop-reason">
-            <span><LuShieldCheck aria-hidden="true" /> دلیل انتخاب</span>
-            <p>{award.selection_reason}</p>
-          </div>
-        )}
-
-        {criteria.length > 0 && (
-          <div className="prop-criteria">
-            <h4>معیارهای ارزیابی ثبت‌شده</h4>
-            <div className="prop-criteria-grid">
-              {criteria.map(([key, label]) => (
-                <div className="prop-criterion" key={key}>
-                  <span>{label}</span>
-                  <strong>{formatScore(award.criteria_scores[key])}<small>/۱۰۰</small></strong>
+      <div className="prop-ranking-list">
+        {Array.from({ length: RANK_LIMIT }, (_, index) => {
+          const rank = index + 1
+          const item = rankedItems.get(rank)
+          if (!item) {
+            return (
+              <div className="prop-ranking-row is-empty" key={'empty-' + rank}>
+                <span className="prop-ranking-number">{faNumber(rank)}</span>
+                <div className="prop-ranking-empty-copy">
+                  <strong>رتبه {faNumber(rank)}</strong>
+                  <span>هنوز ثبت نشده</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
+            )
+          }
 
-        <div className="prop-award-actions">
-          {award.firm_website_snapshot && (
-            <a href={award.firm_website_snapshot} target="_blank" rel="noreferrer">
-              وب‌سایت پراپ فرم <LuExternalLink aria-hidden="true" />
-            </a>
-          )}
-          <button type="button" onClick={() => shareAward(award, year, month)} disabled={sharing}>
-            <LuShare2 aria-hidden="true" /> اشتراک‌گذاری این ماه
-          </button>
-        </div>
+          return (
+            <article className={'prop-ranking-row' + (rank === 1 ? ' rank-first' : '')} key={item.id}>
+              <div className="prop-ranking-number" aria-label={'رتبه ' + faNumber(rank)}>
+                {rank === 1 ? <LuTrophy aria-hidden="true" /> : faNumber(rank)}
+              </div>
+              <div className="prop-ranking-company">
+                <FirmLogo src={item.firm_logo_snapshot} name={item.firm_name_snapshot} />
+                <div className="prop-ranking-company-copy">
+                  <strong>{item.firm_name_snapshot}</strong>
+                  <span>{item.description || item.selection_reason || '—'}</span>
+                </div>
+              </div>
+              {item.overall_score !== null && item.overall_score !== undefined ? (
+                <div className="prop-ranking-score">
+                  <strong>{faNumber(item.overall_score)}</strong>
+                  <span>امتیاز از ۱۰۰</span>
+                </div>
+              ) : (
+                <div className="prop-ranking-score score-empty"><span>امتیاز ثبت نشده</span></div>
+              )}
+              {item.firm_website_snapshot ? (
+                <a className="prop-ranking-website" href={item.firm_website_snapshot} target="_blank" rel="noreferrer">
+                  وب‌سایت رسمی <LuExternalLink aria-hidden="true" />
+                </a>
+              ) : (
+                <span className="prop-ranking-website is-disabled">وب‌سایت ثبت نشده</span>
+              )}
+              {item.selection_reason && (
+                <p className="prop-ranking-reason"><LuShieldCheck aria-hidden="true" /> {item.selection_reason}</p>
+              )}
+            </article>
+          )
+        })}
       </div>
     )
   }
@@ -222,9 +218,9 @@ function PropFirms() {
       <div className="prop-shell">
         <section className="prop-intro">
           <div className="prop-intro-copy">
-            <span className="prop-eyebrow"><i /> انتخاب ماهانه چارت مسترز</span>
-            <h1>بهترین پراپ فرم <span>ماه</span></h1>
-            <p>مرور انتخاب‌های ماهانه پراپ‌فرم‌های ایرانی؛ همراه با دلیل انتخاب و آرشیو سال‌های گذشته.</p>
+            <span className="prop-eyebrow"><i /> رتبه‌بندی ماهانه چارت مسترز</span>
+            <h1>۱۰ پراپ‌فرم برتر <span>هر ماه</span></h1>
+            <p>رتبه‌بندی ماهانه پراپ‌فرم‌های ایرانی؛ از جایگاه اول تا دهم، همراه با امتیاز و توضیحات هر شرکت.</p>
           </div>
           <div className="prop-intro-mark" aria-hidden="true">
             <span className="prop-mark-ring prop-mark-ring-one" />
@@ -233,58 +229,39 @@ function PropFirms() {
           </div>
         </section>
 
-        <section className="prop-current-section" aria-labelledby="prop-current-title">
-          <div className="prop-section-heading">
+        <section className="prop-leaderboard-section" aria-labelledby="prop-leaderboard-title">
+          <div className="prop-leaderboard-heading">
             <div>
-              <span>انتخاب ماه جاری</span>
-              <h2 id="prop-current-title">{MONTHS[currentDate.month - 1]} {formatScore(currentDate.year)}</h2>
+              <span className="prop-section-kicker">{isCurrentMonth ? 'رتبه‌بندی ماه جاری' : 'آرشیو رتبه‌بندی'}</span>
+              <h2 id="prop-leaderboard-title">{MONTHS[selectedMonth - 1]} {faNumber(selectedYear)}</h2>
+              <p>جایگاه ۱ تا ۱۰ پراپ‌فرم‌های منتخب این ماه</p>
             </div>
-            <span className="prop-live-tag"><i /> آخرین انتخاب</span>
+            <div className="prop-leaderboard-actions">
+              <span className={isCurrentMonth ? 'prop-live-tag' : 'prop-archive-tag'}>
+                {isCurrentMonth ? <><i /> ماه جاری</> : 'آرشیو ماهانه'}
+              </span>
+              <button type="button" className="prop-share-link" onClick={() => shareLeaderboard(selectedRankings, selectedYear, selectedMonth)} disabled={sharing}>
+                <LuShare2 aria-hidden="true" /> اشتراک‌گذاری
+              </button>
+            </div>
           </div>
           {loading ? (
-            <div className="prop-loading"><span className="prop-spinner" /> در حال دریافت اطلاعات...</div>
+            <div className="prop-loading"><span className="prop-spinner" /> در حال دریافت رتبه‌بندی...</div>
           ) : error ? (
             <div className="prop-inline-error">{error}</div>
-          ) : currentAward ? (
-            <div className="prop-current-card">
-              <div className="prop-current-glow" />
-              <div className="prop-current-brand">
-                <AwardLogo src={currentAward.firm_logo_snapshot} name={currentAward.firm_name_snapshot} large />
-                <div>
-                  <span className="prop-winner-label"><LuAward aria-hidden="true" /> برنده این ماه</span>
-                  <h3>{currentAward.firm_name_snapshot}</h3>
-                  <p>انتخاب چارت مسترز برای {MONTHS[currentDate.month - 1]} {formatScore(currentDate.year)}</p>
-                </div>
-              </div>
-              <div className="prop-current-side">
-                {currentAward.overall_score !== null && currentAward.overall_score !== undefined ? (
-                  <div className="prop-current-score"><strong>{formatScore(currentAward.overall_score)}</strong><span>امتیاز از ۱۰۰</span></div>
-                ) : (
-                  <span className="prop-current-honour"><LuShieldCheck aria-hidden="true" /> انتخاب تحریریه</span>
-                )}
-                <button type="button" onClick={() => updateSelection(currentDate.year, currentDate.month)}>
-                  مشاهده جزئیات <LuArrowLeft aria-hidden="true" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="prop-current-empty">
-              <span><LuTrophy aria-hidden="true" /></span>
-              <div><strong>هنوز برنده این ماه معرفی نشده</strong><p>به‌زودی انتخاب ماه جاری در همین بخش منتشر می‌شود.</p></div>
-            </div>
-          )}
+          ) : renderLeaderboard(selectedRankings)}
         </section>
 
         <section className="prop-history-section" aria-labelledby="prop-history-title">
           <div className="prop-history-heading">
             <div>
-              <span className="prop-section-kicker">آرشیو انتخاب‌ها</span>
-              <h2 id="prop-history-title">مسیر برندگان ماهانه</h2>
-              <p>سال را عوض کن و روی هر ماه بزن تا برنده و جزئیات آن را ببینی.</p>
+              <span className="prop-section-kicker">آرشیو ماه‌ها</span>
+              <h2 id="prop-history-title">رتبه‌بندی ماه‌های گذشته</h2>
+              <p>ماه موردنظر را انتخاب کن تا جدول ۱۰ جایگاه آن را ببینی.</p>
             </div>
             <div className="prop-year-switcher" aria-label="انتخاب سال">
               <button type="button" onClick={() => moveYear(-1)} disabled={!canGoPrevious} aria-label="سال قبل"><LuArrowRight /></button>
-              <strong>{formatScore(selectedYear)}</strong>
+              <strong>{faNumber(selectedYear)}</strong>
               <button type="button" onClick={() => moveYear(1)} disabled={!canGoNext} aria-label="سال بعد"><LuArrowLeft /></button>
             </div>
           </div>
@@ -297,63 +274,39 @@ function PropFirms() {
             <div className="prop-month-grid">
               {MONTHS.map((monthName, index) => {
                 const month = index + 1
-                const award = awardsByMonth.get(selectedYear + '-' + month) || null
+                const monthRankings = rankingsByMonth.get(selectedYear + '-' + month) || []
                 const isSelected = selectedMonth === month
                 const isCurrent = selectedYear === currentDate.year && month === currentDate.month
                 return (
                   <button
                     type="button"
                     key={monthName}
-                    className={'prop-month-card' + (isSelected ? ' selected' : '') + (award ? ' has-award' : '') + (isCurrent ? ' current' : '')}
+                    className={'prop-month-card' + (isSelected ? ' selected' : '') + (monthRankings.length ? ' has-award' : '') + (isCurrent ? ' current' : '')}
                     onClick={() => updateSelection(selectedYear, month)}
                     aria-pressed={isSelected}
                   >
                     <span className="prop-month-top">
                       <span>{monthName}</span>
-                      {award ? <LuTrophy aria-label="برنده منتشرشده" /> : <span className="prop-month-empty-dot" />}
+                      {monthRankings.length ? <LuTrophy aria-label="رتبه‌بندی منتشرشده" /> : <span className="prop-month-empty-dot" />}
                     </span>
-                    <span className="prop-month-logo">
-                      {award?.firm_logo_snapshot ? (
-                        <img src={award.firm_logo_snapshot} alt="" loading="lazy" />
-                      ) : (
-                        <LuAward aria-hidden="true" />
-                      )}
-                    </span>
-                    <strong>{award ? award.firm_name_snapshot : 'بدون انتخاب'}</strong>
-                    <small>{award ? 'مشاهده برنده' : 'هنوز معرفی نشده'}</small>
+                    <span className="prop-month-logo">{monthRankings.length ? faNumber(monthRankings.length) + ' / ۱۰' : <LuCalendarDays aria-hidden="true" />}</span>
+                    <strong>{monthRankings.length ? 'فهرست منتشرشده' : 'بدون رتبه‌بندی'}</strong>
+                    <small>{monthRankings.length ? faNumber(monthRankings.length) + ' رتبه ثبت شده' : 'هنوز منتشر نشده'}</small>
                   </button>
                 )
               })}
             </div>
           )}
-
           <div className="prop-history-legend">
-            <span><i className="awarded" /> برنده منتشرشده</span>
-            <span><i className="pending" /> بدون انتخاب</span>
+            <span><i className="awarded" /> دارای رتبه‌بندی منتشرشده</span>
+            <span><i className="pending" /> بدون رتبه‌بندی</span>
             <span><i className="selected" /> ماه انتخاب‌شده</span>
           </div>
         </section>
 
-        <section className="prop-details-section" aria-labelledby="prop-details-title">
-          <div className="prop-details-heading">
-            <div>
-              <span className="prop-section-kicker">جزئیات آرشیو</span>
-              <h2 id="prop-details-title">{MONTHS[selectedMonth - 1]} {formatScore(selectedYear)}</h2>
-            </div>
-            <button type="button" className="prop-share-link" onClick={() => shareAward(selectedAward, selectedYear, selectedMonth)} disabled={sharing}>
-              <LuShare2 aria-hidden="true" /> اشتراک‌گذاری
-            </button>
-          </div>
-          {loading ? (
-            <div className="prop-loading"><span className="prop-spinner" /> در حال دریافت جزئیات...</div>
-          ) : error ? (
-            <div className="prop-inline-error">{error}</div>
-          ) : renderAwardDetails(selectedAward, selectedYear, selectedMonth)}
-        </section>
-
         <aside className="prop-editorial-note">
           <LuShieldCheck aria-hidden="true" />
-          <p>این بخش، انتخاب تحریریه چارت مسترز است. معیارها و توضیحات فقط بر اساس اطلاعات ثبت‌شده و منتشرشده نمایش داده می‌شوند؛ معرفی ماهانه به‌تنهایی تضمین‌کننده عملکرد یا اعتبار یک شرکت نیست.</p>
+          <p>این رتبه‌بندی، ارزیابی تحریریه چارت مسترز است. جایگاه‌ها و امتیازها بر اساس اطلاعاتی نمایش داده می‌شوند که مدیریت ثبت و منتشر کرده است؛ رتبه‌بندی به‌تنهایی تضمین‌کننده عملکرد یا اعتبار یک شرکت نیست.</p>
         </aside>
       </div>
     </main>

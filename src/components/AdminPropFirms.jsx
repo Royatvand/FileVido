@@ -19,6 +19,7 @@ const EMPTY_AWARD = {
   prop_firm_id: '',
   jalali_year: '',
   jalali_month: '',
+  rank_position: '1',
   description: '',
   selection_reason: '',
   overall_score: '',
@@ -68,7 +69,7 @@ function AdminPropFirms({ onNotice }) {
       try {
         const [firmRows, awardRows] = await Promise.all([
           supabase.select('prop_firms', '&order=created_at.desc'),
-          supabase.select('monthly_prop_awards', '&order=jalali_year.desc,jalali_month.desc'),
+          supabase.select('monthly_prop_awards', '&order=jalali_year.desc,jalali_month.desc,rank_position.asc'),
         ])
         if (!active) return
         setFirms(firmRows || [])
@@ -201,6 +202,7 @@ function AdminPropFirms({ onNotice }) {
       prop_firm_id: award.prop_firm_id || '',
       jalali_year: String(award.jalali_year),
       jalali_month: String(award.jalali_month),
+      rank_position: String(award.rank_position || 1),
       description: award.description || '',
       selection_reason: award.selection_reason || '',
       overall_score: award.overall_score === null || award.overall_score === undefined ? '' : String(award.overall_score),
@@ -229,6 +231,24 @@ function AdminPropFirms({ onNotice }) {
       const month = Number(awardForm.jalali_month)
       if (!Number.isInteger(year) || year < 1300 || year > 1600) throw new Error('سال شمسی معتبر نیست.')
       if (!Number.isInteger(month) || month < 1 || month > 12) throw new Error('ماه شمسی معتبر نیست.')
+      const rankPosition = Number(awardForm.rank_position)
+      if (!Number.isInteger(rankPosition) || rankPosition < 1 || rankPosition > 10) {
+        throw new Error('جایگاه رتبه‌بندی باید بین ۱ تا ۱۰ باشد.')
+      }
+      const duplicateRank = awards.find((item) =>
+        item.id !== editingAwardId
+        && Number(item.jalali_year) === year
+        && Number(item.jalali_month) === month
+        && Number(item.rank_position || 1) === rankPosition,
+      )
+      if (duplicateRank) throw new Error('رتبه ' + faNumber(rankPosition) + ' این ماه قبلاً به یک پراپ فرم دیگر اختصاص داده شده است.')
+      const duplicateFirm = awards.find((item) =>
+        item.id !== editingAwardId
+        && Number(item.jalali_year) === year
+        && Number(item.jalali_month) === month
+        && item.prop_firm_id === firm.id,
+      )
+      if (duplicateFirm) throw new Error('این پراپ فرم برای این ماه قبلاً در جدول رتبه‌بندی ثبت شده است.')
 
       const overallScore = awardForm.overall_score === '' ? null : Number(awardForm.overall_score)
       if (overallScore !== null && (!Number.isFinite(overallScore) || overallScore < 0 || overallScore > 100)) {
@@ -250,6 +270,7 @@ function AdminPropFirms({ onNotice }) {
         prop_firm_id: firm.id,
         jalali_year: year,
         jalali_month: month,
+        rank_position: rankPosition,
         firm_name_snapshot: firm.name,
         firm_logo_snapshot: firm.logo_url,
         firm_website_snapshot: firm.website_url || '',
@@ -265,14 +286,14 @@ function AdminPropFirms({ onNotice }) {
       if (editingAwardId) await supabase.update('monthly_prop_awards', editingAwardId, payload)
       else await supabase.insert('monthly_prop_awards', payload)
 
-      onNotice({ type: 'success', text: nextStatus === 'published' ? 'برنده ماه منتشر شد.' : 'پیش‌نویس برنده ذخیره شد.' })
+      onNotice({ type: 'success', text: nextStatus === 'published' ? 'رتبه پراپ فرم منتشر شد.' : 'پیش‌نویس رتبه ذخیره شد.' })
       resetAwardForm()
       reload()
     } catch (error) {
-      const duplicate = /monthly_prop_awards_year_month_key|monthly_prop_awards.*unique|duplicate key/i.test(error.message || '')
+      const duplicate = /monthly_prop_awards.*unique|duplicate key/i.test(error.message || '')
       onNotice({
         type: 'error',
-        text: duplicate ? 'برای این ماه قبلاً یک برنده ثبت شده است؛ همان مورد را ویرایش کن.' : error.message,
+        text: duplicate ? 'این رتبه یا پراپ فرم برای ماه انتخاب‌شده قبلاً ثبت شده است.' : error.message,
       })
     } finally {
       setSaving(false)
@@ -281,10 +302,10 @@ function AdminPropFirms({ onNotice }) {
 
   async function deleteAward(award) {
     const label = MONTHS[award.jalali_month - 1] + ' ' + award.jalali_year
-    if (!window.confirm('انتخاب ثبت‌شده برای «' + label + '» حذف شود؟')) return
+    if (!window.confirm('رتبه ثبت‌شده برای «' + label + '» حذف شود؟')) return
     try {
       await supabase.remove('monthly_prop_awards', award.id)
-      onNotice({ type: 'success', text: 'انتخاب ماهانه حذف شد.' })
+      onNotice({ type: 'success', text: 'رتبه ماهانه حذف شد.' })
       reload()
     } catch (error) {
       onNotice({ type: 'error', text: error.message })
@@ -297,11 +318,11 @@ function AdminPropFirms({ onNotice }) {
         <div>
           <span className="prop-admin-kicker">مدیریت محتوای سایت</span>
           <h2>پراپ فرم‌های ایرانی</h2>
-          <p>شرکت‌ها را ثبت کن و برای هر ماه برنده انتخاب و منتشر کن.</p>
+          <p>فهرست ۱۰ پراپ‌فرم برتر هر ماه را رتبه‌بندی و منتشر کن.</p>
         </div>
         <div className="prop-admin-counts">
           <span><LuBuilding2 /> {faNumber(firms.length)} شرکت</span>
-          <span><LuTrophy /> {faNumber(awards.filter((award) => award.status === 'published').length)} برنده منتشرشده</span>
+          <span><LuTrophy /> {faNumber(awards.filter((award) => award.status === 'published').length)} رتبه منتشرشده</span>
         </div>
       </div>
 
@@ -310,7 +331,7 @@ function AdminPropFirms({ onNotice }) {
           <LuBuilding2 /> مدیریت شرکت‌ها
         </button>
         <button type="button" role="tab" aria-selected={tab === 'awards'} className={tab === 'awards' ? 'active' : ''} onClick={() => { setTab('awards'); resetFirmForm() }}>
-          <LuTrophy /> برندگان ماهانه
+          <LuTrophy /> رتبه‌بندی ماهانه
         </button>
       </div>
 
@@ -381,14 +402,14 @@ function AdminPropFirms({ onNotice }) {
       ) : (
         <div className="prop-admin-content">
           <div className="prop-admin-toolbar">
-            <div><strong>آرشیو برندگان</strong><small>برای هر ماه فقط یک برنده اصلی ثبت می‌شود.</small></div>
-            <button type="button" className="admin-primary-button compact" onClick={() => { resetAwardForm(); setAwardFormOpen(true) }} disabled={activeFirms.length === 0}><LuPlus /> انتخاب برنده ماه</button>
+            <div><strong>جدول رتبه‌بندی ماهانه</strong><small>برای هر ماه تا ۱۰ پراپ‌فرم را از رتبه ۱ تا ۱۰ ثبت کن.</small></div>
+            <button type="button" className="admin-primary-button compact" onClick={() => { resetAwardForm(); setAwardFormOpen(true) }} disabled={activeFirms.length === 0}><LuPlus /> ثبت رتبه جدید</button>
           </div>
 
           {awardFormOpen && (
             <form className="admin-panel prop-admin-form" onSubmit={handleAwardSubmit}>
               <div className="admin-panel-heading">
-                <div><h2>{editingAwardId ? 'ویرایش انتخاب ماهانه' : 'ثبت برنده ماه'}</h2><p>سال، ماه و پراپ فرم منتخب را تعیین کن.</p></div>
+                <div><h2>{editingAwardId ? 'ویرایش رتبه ماهانه' : 'ثبت رتبه ماهانه'}</h2><p>ماه، جایگاه و پراپ‌فرم موردنظر را انتخاب کن.</p></div>
                 <button type="button" className="prop-icon-button" onClick={resetAwardForm} aria-label="بستن فرم"><LuX /></button>
               </div>
               <div className="admin-form-grid">
@@ -400,7 +421,12 @@ function AdminPropFirms({ onNotice }) {
                     {MONTHS.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
                   </select>
                 </label>
-                <label className="full">پراپ فرم برنده *
+                <label>جایگاه در رتبه‌بندی *
+                  <select value={awardForm.rank_position} onChange={(event) => setAwardForm((form) => ({ ...form, rank_position: event.target.value }))} required>
+                    {Array.from({ length: 10 }, (_, index) => index + 1).map((rank) => <option key={rank} value={rank}>رتبه {faNumber(rank)}</option>)}
+                  </select>
+                </label>
+                <label className="full">پراپ فرم *
                   <select value={awardForm.prop_firm_id} onChange={(event) => setAwardForm((form) => ({ ...form, prop_firm_id: event.target.value }))} required>
                     <option value="">انتخاب شرکت</option>
                     {firms.filter((firm) => firm.is_active || firm.id === awardForm.prop_firm_id).map((firm) => <option key={firm.id} value={firm.id}>{firm.name}{firm.is_active ? '' : ' (غیرفعال)'}</option>)}
@@ -416,10 +442,10 @@ function AdminPropFirms({ onNotice }) {
                   </select>
                 </label>
                 <label className="full">توضیح کوتاه
-                  <textarea rows={3} value={awardForm.description} onChange={(event) => setAwardForm((form) => ({ ...form, description: event.target.value }))} placeholder="متن کوتاه برای کارت برنده..." />
+                  <textarea rows={3} value={awardForm.description} onChange={(event) => setAwardForm((form) => ({ ...form, description: event.target.value }))} placeholder="توضیح این پراپ‌فرم در رتبه‌بندی این ماه..." />
                 </label>
-                <label className="full">دلیل انتخاب
-                  <textarea rows={4} value={awardForm.selection_reason} onChange={(event) => setAwardForm((form) => ({ ...form, selection_reason: event.target.value }))} placeholder="توضیح بده چرا این پراپ فرم انتخاب شده است..." />
+                <label className="full">دلیل این رتبه
+                  <textarea rows={4} value={awardForm.selection_reason} onChange={(event) => setAwardForm((form) => ({ ...form, selection_reason: event.target.value }))} placeholder="توضیح بده چرا این پراپ‌فرم در این جایگاه قرار گرفته است..." />
                 </label>
               </div>
 
@@ -449,15 +475,16 @@ function AdminPropFirms({ onNotice }) {
           )}
 
           {awards.length === 0 ? (
-            <div className="admin-empty">هنوز برنده‌ای ثبت نشده است. اولین انتخاب ماهانه را انجام بده.</div>
+            <div className="admin-empty">هنوز رتبه‌ای ثبت نشده است. اولین جایگاه جدول ماهانه را اضافه کن.</div>
           ) : (
             <div className="admin-table-wrap">
               <table className="admin-table">
-                <thead><tr><th>ماه</th><th>برنده</th><th>امتیاز</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+                <thead><tr><th>ماه</th><th>رتبه</th><th>پراپ فرم</th><th>امتیاز</th><th>وضعیت</th><th>عملیات</th></tr></thead>
                 <tbody>
                   {awards.map((award) => (
                     <tr key={award.id}>
                       <td>{MONTHS[award.jalali_month - 1]} {faNumber(award.jalali_year)}</td>
+                      <td><strong className="prop-admin-rank-badge">#{faNumber(award.rank_position || 1)}</strong></td>
                       <td><div className="admin-video-cell prop-firm-table-cell"><img src={award.firm_logo_snapshot} alt="" /><span><strong>{award.firm_name_snapshot}</strong><small>{award.selection_reason || award.description || '—'}</small></span></div></td>
                       <td>{award.overall_score === null || award.overall_score === undefined ? '—' : faNumber(award.overall_score) + ' / ۱۰۰'}</td>
                       <td><span className={'admin-status ' + (award.status === 'published' ? 'published' : 'draft')}>{award.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</span></td>

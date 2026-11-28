@@ -236,7 +236,7 @@ function App() {
       ) : indicatorSlug ? (
         <IndicatorPage slug={indicatorSlug} />
       ) : isAbout ? <About /> : videoId ? <VideoPage videoId={videoId} /> : <NotFound />}
-      {!isChart && <Footer />}
+      {!isChart && !isPropFirms && <Footer />}
       {updateOverlay}
     </div>
   )

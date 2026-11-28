@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { LuBuilding2, LuCheck, LuImagePlus, LuPencil, LuPlus, LuPower, LuSave, LuTrophy, LuUpload, LuX } from 'react-icons/lu'
+import { LuBuilding2, LuImagePlus, LuPlus, LuSave, LuTrophy, LuUpload, LuX } from 'react-icons/lu'
 import { supabase } from '../lib/supabase'
 
 const MONTHS = [

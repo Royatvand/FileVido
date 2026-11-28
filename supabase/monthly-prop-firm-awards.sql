@@ -54,12 +54,6 @@ create policy "Public reads active prop firms and admins read all"
     or ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
   );
 
-drop policy if exists "Admins manage prop firms" on public.prop_firms;
-create policy "Admins manage prop firms"
-  on public.prop_firms for all to authenticated
-  using ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin')
-  with check ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');
-
 drop policy if exists "Public reads published monthly awards and admins read all" on public.monthly_prop_awards;
 create policy "Public reads published monthly awards and admins read all"
   on public.monthly_prop_awards for select to anon, authenticated
@@ -68,11 +62,45 @@ create policy "Public reads published monthly awards and admins read all"
     or ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
   );
 
-drop policy if exists "Admins manage monthly prop awards" on public.monthly_prop_awards;
-create policy "Admins manage monthly prop awards"
-  on public.monthly_prop_awards for all to authenticated
+grant select on public.prop_firms, public.monthly_prop_awards to anon, authenticated;
+grant insert, update, delete on public.prop_firms, public.monthly_prop_awards to authenticated;
+
+
+-- Write access is granted through explicit admin-only policies. Keeping SELECT
+-- separate avoids overlapping permissive SELECT policies for signed-in admins.
+-- Separate write policies avoid overlapping permissive SELECT policies.
+drop policy if exists "Admins manage prop firms" on public.prop_firms;
+drop policy if exists "Admins insert prop firms" on public.prop_firms;
+drop policy if exists "Admins update prop firms" on public.prop_firms;
+drop policy if exists "Admins delete prop firms" on public.prop_firms;
+
+create policy "Admins insert prop firms"
+  on public.prop_firms for insert to authenticated
+  with check ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');
+
+create policy "Admins update prop firms"
+  on public.prop_firms for update to authenticated
   using ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin')
   with check ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');
 
-grant select on public.prop_firms, public.monthly_prop_awards to anon, authenticated;
-grant insert, update, delete on public.prop_firms, public.monthly_prop_awards to authenticated;
+create policy "Admins delete prop firms"
+  on public.prop_firms for delete to authenticated
+  using ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');
+
+drop policy if exists "Admins manage monthly prop awards" on public.monthly_prop_awards;
+drop policy if exists "Admins insert monthly prop awards" on public.monthly_prop_awards;
+drop policy if exists "Admins update monthly prop awards" on public.monthly_prop_awards;
+drop policy if exists "Admins delete monthly prop awards" on public.monthly_prop_awards;
+
+create policy "Admins insert monthly prop awards"
+  on public.monthly_prop_awards for insert to authenticated
+  with check ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');
+
+create policy "Admins update monthly prop awards"
+  on public.monthly_prop_awards for update to authenticated
+  using ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin')
+  with check ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');
+
+create policy "Admins delete monthly prop awards"
+  on public.monthly_prop_awards for delete to authenticated
+  using ((select auth.jwt()) -> 'app_metadata' ->> 'role' = 'admin');

@@ -45,7 +45,7 @@ function Header() {
           <a className={`nav-link ${isVideos ? 'active' : ''}`} href="/videos">ویدیوها</a>
           <a className={`nav-link ${isChart ? 'active' : ''}`} href="/chart">نمودار</a>
           <a className={`nav-link ${isIndicators ? 'active' : ''}`} href="/indicators">اندیکاتورها</a>
-          <a className={`nav-link ${isPropFirms ? 'active' : ''} href="/prop-firms">پراپ فرم‌ها</a>
+          <a className={`nav-link ${isPropFirms ? 'active' : ''}`} href="/prop-firms">پراپ فرم‌ها</a>
           <a className="nav-link" href="/#categories">دسته‌بندی‌ها</a>
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>

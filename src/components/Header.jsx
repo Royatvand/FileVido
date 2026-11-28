@@ -11,6 +11,7 @@ function Header() {
   const isAbout = path === '/about'
   const isChart = path === '/chart'
   const isIndicators = path === '/indicators' || path.startsWith('/indicator/')
+  const isPropFirms = path === '/prop-firms'
   const isVideos = path === '/videos' || path.startsWith('/video/')
 
   useEffect(() => {
@@ -40,10 +41,11 @@ function Header() {
         </a>
 
         <nav className={`main-nav ${menuOpen ? 'open' : ''}`} id="main-nav" aria-label="منوی اصلی">
-          <a className={`nav-link ${!isAbout && !isVideos && !isChart && !isIndicators ? 'active' : ''}`} href="/">خانه</a>
+          <a className={`nav-link ${!isAbout && !isVideos && !isChart && !isIndicators && !isPropFirms ? 'active' : ''}`} href="/">خانه</a>
           <a className={`nav-link ${isVideos ? 'active' : ''}`} href="/videos">ویدیوها</a>
           <a className={`nav-link ${isChart ? 'active' : ''}`} href="/chart">نمودار</a>
           <a className={`nav-link ${isIndicators ? 'active' : ''}`} href="/indicators">اندیکاتورها</a>
+          <a className={`nav-link ${isPropFirms ? 'active' : ''} href="/prop-firms">پراپ فرم‌ها</a>
           <a className="nav-link" href="/#categories">دسته‌بندی‌ها</a>
           <a className={`nav-link ${isAbout ? 'active' : ''}`} href="/about">درباره ما</a>
         </nav>

@@ -724,6 +724,39 @@ export const supabase = {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
     }).catch(() => {})
   },
+  async uploadPropFirmLogo(file) {
+    const session = await getValidSession()
+    if (!session?.access_token || session.user?.app_metadata?.role !== 'admin') {
+      throw new Error('برای آپلود لوگوی پراپ فرم باید با حساب مدیر وارد شوید.')
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      throw new Error('فقط تصویر JPG، PNG یا WEBP قابل آپلود است.')
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('حجم لوگو باید حداکثر ۵ مگابایت باشد.')
+    }
+
+    const { blob, type } = await compressImage(file)
+    const extension = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[type]
+    const path = `prop-firms/${crypto.randomUUID()}.${extension}`
+    const response = await storageUpload(`${SUPABASE_URL}/storage/v1/object/video-covers/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': type,
+        'Cache-Control': 'max-age=31536000',
+        'x-upsert': 'false',
+      },
+      body: blob,
+    }, 'آپلود لوگوی پراپ فرم')
+    const result = await response.json().catch(() => null)
+    if (!response.ok) {
+      throw new Error(result?.message || result?.error || 'آپلود لوگو انجام نشد. دسترسی Storage را بررسی کنید.')
+    }
+
+    return `${SUPABASE_URL}/storage/v1/object/public/video-covers/${path}`
+  },
   async uploadIndicatorImage(file) {
     const session = await getValidSession()
     if (!session?.access_token) throw new Error('برای آپلود تصاویر باید دوباره وارد حساب مدیر شوید.')

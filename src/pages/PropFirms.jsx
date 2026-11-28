@@ -26,6 +26,7 @@ const CRITERIA = [
 
 function getJalaliDate() {
   const parts = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn', {
+    timeZone: 'Asia/Tehran',
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
@@ -40,7 +41,7 @@ function readInitialSelection() {
   const year = Number(params.get('year'))
   const month = Number(params.get('month'))
   return {
-    year: year >= 1300 && year <= 1600 ? year : date.year,
+    year: year >= 1300 && year <= date.year ? year : date.year,
     month: month >= 1 && month <= 12 ? month : date.month,
   }
 }

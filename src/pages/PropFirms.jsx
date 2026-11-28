@@ -15,6 +15,16 @@ const MONTHS = [
   'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
   'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند',
 ]
+const GREGORIAN_MONTH_RANGES = [
+  'Mar–Apr', 'Apr–May', 'May–Jun', 'Jun–Jul',
+  'Jul–Aug', 'Aug–Sep', 'Sep–Oct', 'Oct–Nov',
+  'Nov–Dec', 'Dec–Jan', 'Jan–Feb', 'Feb–Mar',
+]
+const CHART_COLORS = [
+  '#62d997', '#62b7e8', '#e7b65c', '#bd91f2',
+  '#ed8798', '#75c6bb', '#e58b51', '#9ca9f8',
+  '#c4d96c', '#db91d0',
+]
 const RANK_LIMIT = 10
 
 function getJalaliDate() {
@@ -147,7 +157,9 @@ function PropFirms() {
   }
 
   function renderLeaderboard(items, mode) {
-    if (!items.length) {
+    const yearlyRankings = rankings.filter((item) => Number(item.jalali_year) === selectedYear)
+
+    if (!items.length && (mode !== 'line' || !yearlyRankings.length)) {
       return (
         <div className="prop-empty-ranking">
           <span className="prop-empty-icon"><LuCalendarDays aria-hidden="true" /></span>
@@ -155,6 +167,113 @@ function PropFirms() {
             <strong>رتبه‌بندی این ماه هنوز منتشر نشده است</strong>
             <p>پس از ثبت و انتشار فهرست ماهانه توسط مدیریت چارت مسترز، رتبه‌های ۱ تا ۱۰ در این بخش قرار می‌گیرند.</p>
           </div>
+        </div>
+      )
+    }
+
+    if (mode === 'line') {
+      const firmNames = [...new Set(yearlyRankings.map((item) => item.firm_name_snapshot))]
+      const chartLeft = 72
+      const chartRight = 970
+      const chartTop = 28
+      const chartBottom = 282
+      const xForMonth = (month) => chartRight - ((month - 1) / 11) * (chartRight - chartLeft)
+      const yForRank = (rank) => chartTop + ((rank - 1) / (RANK_LIMIT - 1)) * (chartBottom - chartTop)
+      const series = firmNames.map((name, index) => {
+        const points = yearlyRankings
+          .filter((item) => item.firm_name_snapshot === name)
+          .map((item) => ({
+            month: Number(item.jalali_month),
+            rank: Number(item.rank_position || 1),
+          }))
+          .sort((a, b) => a.month - b.month)
+        const segments = points.slice(1).map((point, pointIndex) => {
+          const previous = points[pointIndex]
+          if (point.month !== previous.month + 1) return null
+          return 'M ' + xForMonth(previous.month) + ' ' + yForRank(previous.rank)
+            + ' L ' + xForMonth(point.month) + ' ' + yForRank(point.rank)
+        }).filter(Boolean)
+        return {
+          name,
+          points,
+          color: CHART_COLORS[index % CHART_COLORS.length],
+          path: segments.join(' '),
+        }
+      })
+      const hasConnectedTrend = series.some((item) => item.path)
+
+      return (
+        <div className="prop-line-chart" dir="rtl">
+          <div className="prop-line-chart-caption">
+            <div>
+              <strong>روند تغییر رتبه پراپ‌فرم‌ها در سال {faNumber(selectedYear)}</strong>
+              <span>محور عمودی: جایگاه رتبه؛ هرچه نقطه بالاتر باشد، رتبه بهتر است.</span>
+            </div>
+            {!hasConnectedTrend && (
+              <span className="prop-line-chart-note">برای تشکیل خط روند، رتبه هر شرکت باید در دست‌کم دو ماه پیاپی ثبت شده باشد.</span>
+            )}
+          </div>
+          <div className="prop-line-chart-scroll">
+            <svg className="prop-line-chart-svg" viewBox="0 0 1040 382" role="img" aria-label={'نمودار خطی تغییر رتبه پراپ‌فرم‌ها در سال ' + faNumber(selectedYear)}>
+              { [1, 3, 5, 7, 10].map((rank) => (
+                <g key={'rank-grid-' + rank}>
+                  <line x1={chartLeft} x2={chartRight} y1={yForRank(rank)} y2={yForRank(rank)} className="prop-line-grid" />
+                  <text x="48" y={yForRank(rank) + 4} className="prop-line-y-label" textAnchor="middle">{faNumber(rank)}</text>
+                </g>
+              ))}
+              <line x1={chartLeft} x2={chartRight} y1={chartBottom} y2={chartBottom} className="prop-line-axis" />
+              {MONTHS.map((monthName, index) => {
+                const month = index + 1
+                const x = xForMonth(month)
+                return (
+                  <g key={'month-axis-' + month}>
+                    <line x1={x} x2={x} y1={chartTop} y2={chartBottom} className="prop-line-month-grid" />
+                    <text x={x} y="310" className="prop-line-month-fa" textAnchor="middle">{monthName}</text>
+                    <text x={x} y="329" className="prop-line-month-en" textAnchor="middle">{GREGORIAN_MONTH_RANGES[index]}</text>
+                  </g>
+                )
+              })}
+              {series.map((item) => (
+                <g key={'line-series-' + item.name}>
+                  {item.path && (
+                    <path
+                      d={item.path}
+                      fill="none"
+                      stroke={item.color}
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="prop-line-series-path"
+                    />
+                  )}
+                  {item.points.map((point) => (
+                    <circle
+                      key={item.name + '-' + point.month}
+                      cx={xForMonth(point.month)}
+                      cy={yForRank(point.rank)}
+                      r="5"
+                      fill={item.color}
+                      stroke="#102019"
+                      strokeWidth="2"
+                    >
+                      <title>{item.name} · {MONTHS[point.month - 1]} · رتبه {faNumber(point.rank)}</title>
+                    </circle>
+                  ))}
+                </g>
+              ))}
+            </svg>
+          </div>
+          <div className="prop-line-chart-legend">
+            {series.map((item) => (
+              <span key={'legend-' + item.name}>
+                <i style={{ background: item.color }} />
+                {item.name}
+              </span>
+            ))}
+          </div>
+          {!yearlyRankings.length && (
+            <div className="prop-line-chart-empty">برای این سال هنوز رتبه ماهانه‌ای منتشر نشده است.</div>
+          )}
         </div>
       )
     }
@@ -267,7 +386,6 @@ function PropFirms() {
       </div>
     )
   }
-
   return (
     <main className="prop-page" dir="rtl">
       <div className="prop-shell">
@@ -288,7 +406,7 @@ function PropFirms() {
           <div className="prop-leaderboard-heading">
             <div>
               <span className="prop-section-kicker">{isCurrentMonth ? 'رتبه‌بندی ماه جاری' : 'آرشیو رتبه‌بندی'}</span>
-              <h2 id="prop-leaderboard-title">{MONTHS[selectedMonth - 1]} {faNumber(selectedYear)}</h2>
+              <h2 id="prop-leaderboard-title">{MONTHS[selectedMonth - 1]} / {GREGORIAN_MONTH_RANGES[selectedMonth - 1]} {faNumber(selectedYear)}</h2>
               <p>جایگاه ۱ تا ۱۰ پراپ‌فرم‌های منتخب این ماه</p>
             </div>
             <div className="prop-leaderboard-actions">
@@ -307,7 +425,15 @@ function PropFirms() {
                   onClick={() => setDisplayMode('chart')}
                   aria-pressed={displayMode === 'chart'}
                 >
-                  نمودار
+                  ستونی
+                </button>
+                <button
+                  type="button"
+                  className={displayMode === 'line' ? 'active' : ''}
+                  onClick={() => setDisplayMode('line')}
+                  aria-pressed={displayMode === 'line'}
+                >
+                  خطی
                 </button>
               </div>
               <span className={isCurrentMonth ? 'prop-live-tag' : 'prop-archive-tag'}>
@@ -359,7 +485,10 @@ function PropFirms() {
                     aria-pressed={isSelected}
                   >
                     <span className="prop-month-top">
-                      <span>{monthName}</span>
+                      <span className="prop-month-label">
+                        <strong>{monthName}</strong>
+                        <small>{GREGORIAN_MONTH_RANGES[index]}</small>
+                      </span>
                       {monthRankings.length ? <LuTrophy aria-label="رتبه‌بندی منتشرشده" /> : <span className="prop-month-empty-dot" />}
                     </span>
                     <span className="prop-month-logo">{monthRankings.length ? faNumber(monthRankings.length) + ' / ۱۰' : <LuCalendarDays aria-hidden="true" />}</span>
